@@ -1,0 +1,41 @@
+{
+    "name": "voltimax/chat",
+    "description": "AI-powered chat widget for Shopware 6 storefronts with Server B AI integration",
+    "type": "shopware-platform-plugin",
+    "license": "MIT",
+    "version": "2.0.0",
+    "authors": [
+        {
+            "name": "Meet Joshi",
+            "email": "imeetjoshi@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Voltimax\\Chat\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Voltimax\\Chat\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "shopware/core": "~6.6.0",
+        "shopware/storefront": "~6.6.0",
+        "lcobucci/jwt": "^5.0"
+    },
+    "extra": {
+        "shopware-plugin-class": "Voltimax\\Chat\\VoltimaxChat",
+        "copyright": "(c) Meet Joshi",
+        "label": {
+            "de-DE": "VoltimaxChat - KI-Chat Widget",
+            "en-GB": "VoltimaxChat - AI Chat Widget"
+        },
+        "description": {
+            "de-DE": "KI-gestuetztes Chat-Widget fuer Shopware 6 Storefronts. Beantwortet Kundenanfragen zu Bestellungen, Produkten und mehr mittels KI.",
+            "en-GB": "AI-powered chat widget for Shopware 6 storefronts. Handles customer queries about orders, products, and more using AI."
+        }
+    }
+}
