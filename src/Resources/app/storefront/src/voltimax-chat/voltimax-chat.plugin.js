@@ -1694,8 +1694,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 var row = document.createElement('div');
                 row.className = 'voltimax-chat-ai-row';
 
-                var avatarEl = document.createElement('div');
-                avatarEl = this._buildAvatarEl();
+                var avatarEl = this._buildAvatarEl();
 
                 var rowBody = document.createElement('div');
                 rowBody.className = 'voltimax-chat-ai-row__body';
@@ -1891,8 +1890,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             const row = document.createElement('div');
             row.className = 'voltimax-chat-ai-row';
 
-            const avatarEl = document.createElement('div');
-            avatarEl = this._buildAvatarEl();
+            const avatarEl = this._buildAvatarEl();
 
             const rowBody = document.createElement('div');
             rowBody.className = 'voltimax-chat-ai-row__body';
@@ -2059,8 +2057,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             row.className = 'voltimax-chat-ai-row';
             this._streamingRow = row;
 
-            const avatarEl = document.createElement('div');
-            avatarEl = this._buildAvatarEl();
+            const avatarEl = this._buildAvatarEl();
 
             const rowBody = document.createElement('div');
             rowBody.className = 'voltimax-chat-ai-row__body';
