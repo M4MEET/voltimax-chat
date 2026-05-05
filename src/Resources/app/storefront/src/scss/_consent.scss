@@ -78,17 +78,18 @@
         height: 52px;
         margin: 0 auto 8px;
         border-radius: 50%;
-        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        background: linear-gradient(135deg, var(--vtx-primary-start, #4338CA), var(--vtx-primary-end, #D4A04A));
         display: flex;
         align-items: center;
         justify-content: center;
         color: #fff;
-        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        box-shadow: 0 4px 16px $vtx-shadow-color;
+        overflow: hidden;
 
         &-name {
             font-size: 13px;
             font-weight: 700;
-            color: #6366f1;
+            color: var(--vtx-primary, #F3B664);
             text-align: center;
             margin-bottom: 4px;
             letter-spacing: 0.5px;

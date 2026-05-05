@@ -32,51 +32,45 @@
             </options>
             <defaultValue>bottom-right</defaultValue>
         </input-field>
-    </card>
-
-    <!-- Card 2: Sales Channel -->
-    <card>
-        <title>Sales Channel</title>
-        <title lang="de-DE">Verkaufskanal</title>
 
         <component name="sw-entity-single-select">
             <name>salesChannelId</name>
             <label>Sales channel for CMS sync</label>
             <label lang="de-DE">Verkaufskanal für CMS-Synchronisierung</label>
             <entity>sales_channel</entity>
-            <helpText>Only CMS pages, categories, and products from this sales channel will be synced to the knowledge base. Leave empty to sync all.</helpText>
-            <helpText lang="de-DE">Nur CMS-Seiten, Kategorien und Produkte aus diesem Verkaufskanal werden in die Wissensdatenbank synchronisiert. Leer lassen, um alle zu synchronisieren.</helpText>
+            <helpText>Only CMS pages from this sales channel will be synced to the knowledge base.</helpText>
+            <helpText lang="de-DE">Nur CMS-Seiten aus diesem Verkaufskanal werden in die Wissensdatenbank synchronisiert.</helpText>
         </component>
     </card>
 
-    <!-- Card 3: Server B Connection -->
+    <!-- Card 2: Server B Connection -->
     <card>
-        <title>Server B Connection</title>
-        <title lang="de-DE">Server-B-Verbindung</title>
+        <title>AI Server Connection</title>
+        <title lang="de-DE">KI-Server-Verbindung</title>
 
         <input-field type="url">
             <name>serverBUrl</name>
-            <label>Server B URL</label>
-            <label lang="de-DE">Server-B-URL</label>
-            <placeholder>https://chat-server.example.com</placeholder>
-            <helpText>The base URL of the Server B chat backend.</helpText>
-            <helpText lang="de-DE">Die Basis-URL des Server-B-Chat-Backends.</helpText>
+            <label>AI Server URL</label>
+            <label lang="de-DE">KI-Server-URL</label>
+            <placeholder>https://chat.voltimax.de</placeholder>
+            <helpText>The base URL of the AI chat backend (Server B).</helpText>
+            <helpText lang="de-DE">Die Basis-URL des KI-Chat-Backends (Server B).</helpText>
         </input-field>
 
         <input-field type="password">
             <name>sharedApiKey</name>
             <label>API Key</label>
             <label lang="de-DE">API-Schlüssel</label>
-            <helpText>API key used to authenticate requests to Server B.</helpText>
-            <helpText lang="de-DE">API-Schlüssel zur Authentifizierung von Anfragen an Server B.</helpText>
+            <helpText>Shared API key for authentication between Shopware and the AI server.</helpText>
+            <helpText lang="de-DE">Gemeinsamer API-Schlüssel zur Authentifizierung zwischen Shopware und dem KI-Server.</helpText>
         </input-field>
 
         <input-field type="password">
             <name>jwtSecret</name>
             <label>JWT Secret</label>
             <label lang="de-DE">JWT-Geheimnis</label>
-            <helpText>Secret key used to sign JWT tokens.</helpText>
-            <helpText lang="de-DE">Geheimschlüssel zum Signieren von JWT-Tokens.</helpText>
+            <helpText>Must match the JWT secret configured in the AI server's config.yaml.</helpText>
+            <helpText lang="de-DE">Muss mit dem JWT-Geheimnis in der config.yaml des KI-Servers übereinstimmen.</helpText>
         </input-field>
 
         <input-field type="int">
@@ -84,29 +78,38 @@
             <label>JWT TTL (minutes)</label>
             <label lang="de-DE">JWT-Gültigkeit (Minuten)</label>
             <defaultValue>30</defaultValue>
-            <helpText>How long a JWT token remains valid in minutes.</helpText>
-            <helpText lang="de-DE">Wie lange ein JWT-Token in Minuten gültig bleibt.</helpText>
         </input-field>
     </card>
 
-    <!-- Card 3: Appearance -->
+    <!-- Card 3: Appearance & Colors -->
     <card>
         <title>Appearance</title>
         <title lang="de-DE">Erscheinungsbild</title>
 
         <input-field type="colorpicker">
             <name>primaryColor</name>
-            <label>Primary color</label>
-            <label lang="de-DE">Primärfarbe</label>
-            <defaultValue>#4F46E5</defaultValue>
-            <helpText>Main accent color for the chat widget.</helpText>
-            <helpText lang="de-DE">Hauptakzentfarbe für das Chat-Widget.</helpText>
+            <label>Primary color (gradient start)</label>
+            <label lang="de-DE">Primärfarbe (Verlauf-Start)</label>
+            <defaultValue>#4338CA</defaultValue>
+            <helpText>Main color for header, bubble, and user messages. This is the start of the gradient.</helpText>
+            <helpText lang="de-DE">Hauptfarbe für Header, Bubble und Nutzernachrichten. Dies ist der Anfang des Farbverlaufs.</helpText>
+        </input-field>
+
+        <input-field type="colorpicker">
+            <name>secondaryColor</name>
+            <label>Secondary color (gradient end)</label>
+            <label lang="de-DE">Sekundärfarbe (Verlauf-Ende)</label>
+            <defaultValue>#D4A04A</defaultValue>
+            <helpText>End color for the gradient on header, bubble, and avatar. Leave empty for auto-computed gradient.</helpText>
+            <helpText lang="de-DE">Endfarbe für den Verlauf auf Header, Bubble und Avatar. Leer lassen für automatisch berechneten Verlauf.</helpText>
         </input-field>
 
         <component name="sw-media-field">
             <name>logoMediaId</name>
-            <label>Logo</label>
-            <label lang="de-DE">Logo</label>
+            <label>Groot Avatar / Logo</label>
+            <label lang="de-DE">Groot-Avatar / Logo</label>
+            <helpText>Custom avatar image for the chat assistant. Shown on home screen and in messages.</helpText>
+            <helpText lang="de-DE">Benutzerdefiniertes Avatar-Bild für den Chat-Assistenten. Wird auf der Startseite und in Nachrichten angezeigt.</helpText>
         </component>
 
         <input-field type="text">
@@ -120,7 +123,7 @@
             <name>welcomeMessage</name>
             <label>Welcome message</label>
             <label lang="de-DE">Willkommensnachricht</label>
-            <defaultValue>Hallo! Wie kann ich Ihnen helfen?</defaultValue>
+            <defaultValue>Hallo! Wie kann ich dir helfen?</defaultValue>
         </input-field>
 
         <input-field type="single-select">
@@ -147,42 +150,6 @@
             <defaultValue>light</defaultValue>
         </input-field>
 
-        <input-field type="single-select">
-            <name>fontFamily</name>
-            <label>Font family</label>
-            <label lang="de-DE">Schriftfamilie</label>
-            <options>
-                <option>
-                    <id>system</id>
-                    <name>System default</name>
-                    <name lang="de-DE">Systemstandard</name>
-                </option>
-                <option>
-                    <id>inter</id>
-                    <name>Inter</name>
-                </option>
-                <option>
-                    <id>roboto</id>
-                    <name>Roboto</name>
-                </option>
-            </options>
-            <defaultValue>system</defaultValue>
-        </input-field>
-
-        <input-field type="int">
-            <name>bubbleSize</name>
-            <label>Bubble size (px)</label>
-            <label lang="de-DE">Bubble-Größe (px)</label>
-            <defaultValue>60</defaultValue>
-        </input-field>
-
-        <input-field type="bool">
-            <name>animationsEnabled</name>
-            <label>Enable animations</label>
-            <label lang="de-DE">Animationen aktivieren</label>
-            <defaultValue>true</defaultValue>
-        </input-field>
-
         <input-field type="textarea">
             <name>customCss</name>
             <label>Custom CSS</label>
@@ -192,179 +159,86 @@
         </input-field>
     </card>
 
-    <!-- Card 4: Consent / GDPR -->
+    <!-- Card 4: Privacy & Consent -->
     <card>
-        <title>Consent / GDPR</title>
-        <title lang="de-DE">Einwilligung / DSGVO</title>
-
-        <input-field type="textarea">
-            <name>consentText</name>
-            <label>Consent text</label>
-            <label lang="de-DE">Einwilligungstext</label>
-            <defaultValue>Mit der Nutzung des Chats stimmen Sie der Verarbeitung Ihrer personenbezogenen Daten gemäß unserer Datenschutzerklärung zu.</defaultValue>
-            <helpText>GDPR consent text displayed to users before they can start chatting.</helpText>
-            <helpText lang="de-DE">DSGVO-Einwilligungstext, der Nutzern angezeigt wird, bevor sie chatten können.</helpText>
-        </input-field>
+        <title>Privacy</title>
+        <title lang="de-DE">Datenschutz</title>
 
         <input-field type="url">
             <name>privacyPolicyUrl</name>
             <label>Privacy policy URL</label>
             <label lang="de-DE">Datenschutzerklärung-URL</label>
-            <placeholder>https://example.com/datenschutz</placeholder>
-            <helpText>Link to your privacy policy page.</helpText>
-            <helpText lang="de-DE">Link zu Ihrer Datenschutzerklärungsseite.</helpText>
+            <placeholder>https://voltimax.de/datenschutz</placeholder>
         </input-field>
 
-        <input-field type="text">
-            <name>consentCheckboxLabel</name>
-            <label>Consent checkbox label</label>
-            <label lang="de-DE">Beschriftung der Einwilligungs-Checkbox</label>
-            <defaultValue>Ich stimme der Datenschutzerklärung zu</defaultValue>
-        </input-field>
-    </card>
-
-    <!-- Card 5: Verification -->
-    <card>
-        <title>Verification</title>
-        <title lang="de-DE">Verifizierung</title>
-
-        <input-field type="bool">
-            <name>requireOrderNumber</name>
-            <label>Require order number for verification</label>
-            <label lang="de-DE">Bestellnummer zur Verifizierung erforderlich</label>
-            <defaultValue>false</defaultValue>
-            <helpText>When enabled, users must provide a valid order number to start a chat session.</helpText>
-            <helpText lang="de-DE">Wenn aktiviert, müssen Nutzer eine gültige Bestellnummer angeben, um eine Chat-Sitzung zu starten.</helpText>
-        </input-field>
-
-        <input-field type="bool">
-            <name>strictValidation</name>
-            <label>Strict validation</label>
-            <label lang="de-DE">Strenge Validierung</label>
-            <defaultValue>false</defaultValue>
-            <helpText>When enabled, order number must exactly match a record in the database.</helpText>
-            <helpText lang="de-DE">Wenn aktiviert, muss die Bestellnummer exakt mit einem Datenbankdatensatz übereinstimmen.</helpText>
+        <input-field type="url">
+            <name>contactFormUrl</name>
+            <label>Contact form URL (fallback)</label>
+            <label lang="de-DE">Kontaktformular-URL (Fallback)</label>
+            <placeholder>https://voltimax.de/kontakt</placeholder>
+            <helpText>URL to redirect users when they request human support outside the chat.</helpText>
+            <helpText lang="de-DE">URL zur Weiterleitung an den Support außerhalb des Chats.</helpText>
         </input-field>
     </card>
 
-    <!-- Card 6: Shopware API Scope -->
+    <!-- Card 5: API Scope -->
     <card>
-        <title>Shopware API Scope</title>
-        <title lang="de-DE">Shopware-API-Bereich</title>
+        <title>API Scope</title>
+        <title lang="de-DE">API-Bereich</title>
 
         <input-field type="bool">
             <name>scopeOrders</name>
-            <label>Expose orders data</label>
-            <label lang="de-DE">Bestelldaten freigeben</label>
+            <label>Orders</label>
+            <label lang="de-DE">Bestellungen</label>
             <defaultValue>true</defaultValue>
         </input-field>
 
         <input-field type="bool">
             <name>scopeProducts</name>
-            <label>Expose products data</label>
-            <label lang="de-DE">Produktdaten freigeben</label>
+            <label>Products</label>
+            <label lang="de-DE">Produkte</label>
             <defaultValue>true</defaultValue>
         </input-field>
 
         <input-field type="bool">
             <name>scopeCustomers</name>
-            <label>Expose customer data</label>
-            <label lang="de-DE">Kundendaten freigeben</label>
+            <label>Customers</label>
+            <label lang="de-DE">Kunden</label>
             <defaultValue>true</defaultValue>
         </input-field>
 
         <input-field type="bool">
             <name>scopeReturns</name>
-            <label>Expose returns data</label>
-            <label lang="de-DE">Rückgabedaten freigeben</label>
+            <label>Returns</label>
+            <label lang="de-DE">Retouren</label>
+            <defaultValue>true</defaultValue>
+        </input-field>
+
+        <input-field type="bool">
+            <name>scopeCms</name>
+            <label>CMS pages</label>
+            <label lang="de-DE">CMS-Seiten</label>
             <defaultValue>true</defaultValue>
         </input-field>
 
         <input-field type="bool">
             <name>scopeB2bQuotes</name>
-            <label>Expose B2B quotes data</label>
-            <label lang="de-DE">B2B-Angebotsdaten freigeben</label>
-            <defaultValue>false</defaultValue>
-        </input-field>
-
-        <input-field type="bool">
-            <name>scopeCms</name>
-            <label>Expose CMS data</label>
-            <label lang="de-DE">CMS-Daten freigeben</label>
-            <defaultValue>true</defaultValue>
-        </input-field>
-
-        <input-field type="bool">
-            <name>scopeWishlist</name>
-            <label>Expose wishlist data</label>
-            <label lang="de-DE">Wunschliste-Daten freigeben</label>
-            <defaultValue>false</defaultValue>
-        </input-field>
-
-        <input-field type="bool">
-            <name>scopePayments</name>
-            <label>Expose payments data</label>
-            <label lang="de-DE">Zahlungsdaten freigeben</label>
+            <label>B2B quotes</label>
+            <label lang="de-DE">B2B-Angebote</label>
             <defaultValue>false</defaultValue>
         </input-field>
     </card>
 
-    <!-- Card 7: Sounds -->
-    <card>
-        <title>Sounds</title>
-        <title lang="de-DE">Töne</title>
-
-        <input-field type="bool">
-            <name>soundIncoming</name>
-            <label>Play sound for incoming messages</label>
-            <label lang="de-DE">Ton bei eingehenden Nachrichten abspielen</label>
-            <defaultValue>true</defaultValue>
-        </input-field>
-
-        <input-field type="bool">
-            <name>soundOutgoing</name>
-            <label>Play sound for outgoing messages</label>
-            <label lang="de-DE">Ton bei ausgehenden Nachrichten abspielen</label>
-            <defaultValue>false</defaultValue>
-        </input-field>
-    </card>
-
-    <!-- Card 8: Escalation -->
-    <card>
-        <title>Escalation</title>
-        <title lang="de-DE">Eskalation</title>
-
-        <input-field type="url">
-            <name>contactFormUrl</name>
-            <label>Contact form URL</label>
-            <label lang="de-DE">Kontaktformular-URL</label>
-            <placeholder>https://example.com/kontakt</placeholder>
-            <helpText>URL to redirect users when they need human support.</helpText>
-            <helpText lang="de-DE">URL zur Weiterleitung von Nutzern, die menschliche Unterstützung benötigen.</helpText>
-        </input-field>
-
-        <input-field type="bool">
-            <name>aiEscalationEnabled</name>
-            <label>Enable AI escalation</label>
-            <label lang="de-DE">KI-Eskalation aktivieren</label>
-            <defaultValue>true</defaultValue>
-            <helpText>Allow the AI to automatically suggest escalation to a human agent.</helpText>
-            <helpText lang="de-DE">Der KI erlauben, automatisch die Eskalation zu einem menschlichen Agenten vorzuschlagen.</helpText>
-        </input-field>
-    </card>
-
-    <!-- Card 9: Rate Limiting -->
+    <!-- Card 6: Rate Limiting -->
     <card>
         <title>Rate Limiting</title>
         <title lang="de-DE">Ratenbegrenzung</title>
 
         <input-field type="int">
             <name>rateLimitPerMinute</name>
-            <label>Max requests per minute (general)</label>
-            <label lang="de-DE">Max. Anfragen pro Minute (allgemein)</label>
+            <label>Max requests per minute</label>
+            <label lang="de-DE">Max. Anfragen pro Minute</label>
             <defaultValue>30</defaultValue>
-            <helpText>Maximum number of chat API requests allowed per minute per visitor.</helpText>
-            <helpText lang="de-DE">Maximale Anzahl von Chat-API-Anfragen pro Minute und Besucher.</helpText>
         </input-field>
 
         <input-field type="int">
@@ -372,12 +246,10 @@
             <label>Max verification requests per minute</label>
             <label lang="de-DE">Max. Verifizierungsanfragen pro Minute</label>
             <defaultValue>5</defaultValue>
-            <helpText>Maximum number of order verification requests allowed per minute per visitor.</helpText>
-            <helpText lang="de-DE">Maximale Anzahl von Bestellverifizierungsanfragen pro Minute und Besucher.</helpText>
         </input-field>
     </card>
 
-    <!-- Card 10: Development Mode -->
+    <!-- Card 7: Development Mode -->
     <card>
         <title>Development Mode</title>
         <title lang="de-DE">Entwicklungsmodus</title>
@@ -387,17 +259,15 @@
             <label>Enable development mode</label>
             <label lang="de-DE">Entwicklungsmodus aktivieren</label>
             <defaultValue>false</defaultValue>
-            <helpText>When enabled, the chat widget is only visible to the IP addresses listed below. All other visitors will not see the widget.</helpText>
-            <helpText lang="de-DE">Wenn aktiviert, ist das Chat-Widget nur f\u00fcr die unten aufgef\u00fchrten IP-Adressen sichtbar. Alle anderen Besucher sehen das Widget nicht.</helpText>
+            <helpText>Widget only visible to allowed IPs below.</helpText>
+            <helpText lang="de-DE">Widget nur für die unten erlaubten IPs sichtbar.</helpText>
         </input-field>
 
         <input-field type="textarea">
             <name>devModeAllowedIps</name>
-            <label>Allowed IP addresses (comma-separated)</label>
-            <label lang="de-DE">Erlaubte IP-Adressen (kommagetrennt)</label>
-            <placeholder>e.g. 192.168.1.100, 10.0.0.1</placeholder>
-            <helpText>Only these IPs will see the chat widget when development mode is active. Your current IP is shown in the Shopware admin under Settings > System > Shop.</helpText>
-            <helpText lang="de-DE">Nur diese IPs sehen das Chat-Widget, wenn der Entwicklungsmodus aktiv ist.</helpText>
+            <label>Allowed IPs (comma-separated)</label>
+            <label lang="de-DE">Erlaubte IPs (kommagetrennt)</label>
+            <placeholder>192.168.1.100, 10.0.0.1</placeholder>
         </input-field>
     </card>
 

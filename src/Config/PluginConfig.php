@@ -152,6 +152,11 @@ class PluginConfig
         return (int) ($this->get('rateLimitVerifyPerMinute', $salesChannelId) ?? 5);
     }
 
+    public function getSecondaryColor(?string $salesChannelId = null): ?string
+    {
+        return $this->get('secondaryColor', $salesChannelId);
+    }
+
     public function isDevModeEnabled(?string $salesChannelId = null): bool
     {
         return (bool) $this->get('devModeEnabled', $salesChannelId);

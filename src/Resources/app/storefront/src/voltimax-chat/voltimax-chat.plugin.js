@@ -152,6 +152,17 @@ export default class VoltimaxChatPlugin extends Plugin {
         return el;
     }
 
+    _shiftColor(hex, amount) {
+        // Lighten and shift a hex color for gradient effects
+        var r = parseInt(hex.slice(1, 3), 16);
+        var g = parseInt(hex.slice(3, 5), 16);
+        var b = parseInt(hex.slice(5, 7), 16);
+        r = Math.min(255, r + amount);
+        g = Math.min(255, g + amount / 2);
+        b = Math.min(255, b + amount * 1.5);
+        return '#' + [r, g, b].map(function(v) { return Math.round(v).toString(16).padStart(2, '0'); }).join('');
+    }
+
     _generateChatId() {
         const bytes = new Uint8Array(4);
         (window.crypto || window.msCrypto).getRandomValues(bytes);
@@ -393,6 +404,11 @@ export default class VoltimaxChatPlugin extends Plugin {
         widget = document.createElement('div');
         widget.className = 'voltimax-chat-widget voltimax-chat-widget--' + this.config.widgetPosition;
         widget.style.setProperty('--vtx-primary', this.config.primaryColor);
+        var _pc = this.config.primaryColor || '#4338CA';
+        widget.style.setProperty('--vtx-primary-start', _pc);
+        // Secondary gradient color — configurable or auto-computed
+        var _secondary = this.config.secondaryColor || this._shiftColor(_pc, 30);
+        widget.style.setProperty('--vtx-primary-end', _secondary);
 
         this._applyTheme(this.config.themeMode || 'light');
 
@@ -2093,10 +2109,9 @@ export default class VoltimaxChatPlugin extends Plugin {
         const typing = document.createElement('div');
         typing.className = 'voltimax-chat-typing';
 
-        // Avatar
-        const avatarEl = document.createElement('div');
+        // Avatar — use uploaded logo or SVG fallback
+        const avatarEl = this._buildAvatarEl();
         avatarEl.className = 'voltimax-chat-typing__avatar';
-        avatarEl.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><path d="M12 8v4"/><path d="M8 12c0 0-1 4 0 7 .5 1.5 2 3 4 3s3.5-1.5 4-3c1-3 0-7 0-7"/><path d="M9 14c-2-1-4 0-4 2"/><path d="M15 14c2-1 4 0 4 2"/></svg>';
         typing.appendChild(avatarEl);
 
         // Bubble with text + dots

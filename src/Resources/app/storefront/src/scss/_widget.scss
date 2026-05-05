@@ -26,8 +26,8 @@
         border: none;
         background: linear-gradient(
             135deg,
-            var(--vtx-primary, #4f46e5) 0%,
-            color-mix(in srgb, var(--vtx-primary, #4f46e5) 70%, #7c3aed 30%) 100%
+            var(--vtx-primary-start, #4338CA) 0%,
+            var(--vtx-primary-end, #D4A04A) 100%
         );
         color: #fff;
         cursor: pointer;
@@ -140,8 +140,8 @@
         height: $vtx-header-height;
         background: linear-gradient(
             135deg,
-            var(--vtx-primary, #4f46e5) 0%,
-            color-mix(in srgb, var(--vtx-primary, #4f46e5) 60%, #7c3aed 40%) 100%
+            var(--vtx-primary-start, #4338CA) 0%,
+            var(--vtx-primary-end, #D4A04A) 100%
         );
         flex-shrink: 0;
         position: relative;
