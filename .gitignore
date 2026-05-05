@@ -1,0 +1,26 @@
+# macOS
+.DS_Store
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Test artifacts
+.phpunit.result.cache
+.playwright-mcp/
+
+# Screenshots (dev only)
+*.png
+
+# Developer memory/notes
+.remember/
+CLAUDE.md
+chat-widget-snapshot.yml
+verification-snapshot.yml
+
+# Node
+node_modules/
+
+# Composer
+vendor/
