@@ -1,0 +1,35 @@
+{% sw_extends '@Storefront/storefront/base.html.twig' %}
+
+{% block base_body_script %}
+    {{ parent() }}
+
+    {% if config('VoltimaxChat.config.pluginEnabled') %}
+        {# Development mode: only show widget for allowed IPs #}
+        {% set devMode = config('VoltimaxChat.config.devModeEnabled') %}
+        {% set allowedIps = config('VoltimaxChat.config.devModeAllowedIps') %}
+        {% set clientIp = app.request.clientIp %}
+        {% set showWidget = true %}
+
+        {% if devMode and allowedIps %}
+            {% set ipList = allowedIps|split(',') %}
+            {% set showWidget = false %}
+            {% for ip in ipList %}
+                {% if ip|trim == clientIp %}
+                    {% set showWidget = true %}
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+        {% if showWidget %}
+        <div id="voltimax-chat-root"
+             data-voltimax-chat="true"
+             data-voltimax-chat-options='{{ {
+                 configUrl:  path('voltimax.chat.config'),
+                 consentUrl: path('voltimax.chat.consent'),
+                 verifyUrl:  path('voltimax.chat.verify')
+             }|json_encode|raw }}'
+             style="display: none;">
+        </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}
