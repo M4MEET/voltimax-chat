@@ -1,0 +1,40 @@
+{
+    "VoltimaxChat": {
+        "widget": {
+            "title": "Chat Support",
+            "openChat": "Chat oeffnen",
+            "closeChat": "Chat schliessen",
+            "minimize": "Minimieren"
+        },
+        "consent": {
+            "continue": "Weiter",
+            "privacyLink": "Datenschutzrichtlinie"
+        },
+        "verify": {
+            "name": "Name",
+            "email": "E-Mail",
+            "orderNumber": "Bestellnummer",
+            "submit": "Verifizieren",
+            "required": "Pflichtfeld"
+        },
+        "chat": {
+            "placeholder": "Nachricht eingeben...",
+            "send": "Senden",
+            "typing": "KI denkt nach..."
+        },
+        "topics": {
+            "orders": "Bestellungen",
+            "ordersDesc": "Lieferstatus, Retouren",
+            "products": "Produkte",
+            "productsDesc": "Produktfragen, Verfuegbarkeit",
+            "account": "Mein Konto",
+            "accountDesc": "Zahlungen, Adressen",
+            "contact": "Kontakt",
+            "contactDesc": "Support kontaktieren"
+        },
+        "escalation": {
+            "notHelpful": "Nicht hilfreich",
+            "contactSupport": "Support kontaktieren"
+        }
+    }
+}
