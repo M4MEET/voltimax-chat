@@ -1,0 +1,10 @@
+monolog:
+    channels:
+        - voltimax_chat
+    handlers:
+        voltimax_chat_file:
+            type: rotating_file
+            path: '%kernel.logs_dir%/voltimax_chat_%kernel.environment%.log'
+            level: info
+            channels: ['voltimax_chat']
+            max_files: 14

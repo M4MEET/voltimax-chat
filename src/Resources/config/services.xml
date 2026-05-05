@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<container xmlns="http://symfony.com/schema/dic/services"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://symfony.com/schema/dic/services
+                               http://symfony.com/schema/dic/services/services-1.0.xsd">
+    <services>
+        <defaults autowire="true" autoconfigure="true"/>
+
+        <!-- Logger -->
+        <service id="monolog.logger.voltimax_chat" class="Monolog\Logger">
+            <argument>voltimax_chat</argument>
+            <tag name="monolog.logger" channel="voltimax_chat"/>
+        </service>
+
+        <!-- Config Helper -->
+        <service id="Voltimax\Chat\Config\PluginConfig">
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <!-- JWT Token Service -->
+        <service id="Voltimax\Chat\Service\JwtTokenService">
+            <argument type="service" id="Voltimax\Chat\Config\PluginConfig"/>
+        </service>
+
+        <!-- Security -->
+        <!-- Key is validated against a Shopware Integration (Settings → Integrations).
+             Create an Integration in the admin, copy its Access Key to Server B's config. -->
+        <service id="Voltimax\Chat\Security\ApiKeyAuthenticator">
+            <argument type="service" id="integration.repository"/>
+        </service>
+
+        <!-- Rate Limiter -->
+        <service id="Voltimax\Chat\Service\RateLimiterService">
+            <argument type="service" id="cache.object"/>
+        </service>
+
+        <service id="Voltimax\Chat\Security\RateLimitMiddleware">
+            <argument type="service" id="Voltimax\Chat\Service\RateLimiterService"/>
+            <argument type="service" id="Voltimax\Chat\Config\PluginConfig"/>
+            <argument type="service" id="cache.object"/>
+            <tag name="kernel.event_subscriber"/>
+        </service>
+
+
+        <!-- Controllers -->
+        <service id="Voltimax\Chat\Controller\Api\VerificationController" public="true">
+            <argument type="service" id="Voltimax\Chat\Config\PluginConfig"/>
+            <argument type="service" id="Voltimax\Chat\Service\JwtTokenService"/>
+            <argument type="service" id="Voltimax\Chat\Security\RateLimitMiddleware"/>
+            <argument type="service" id="customer.repository"/>
+            <argument type="service" id="order.repository"/>
+            <argument type="service" id="Doctrine\DBAL\Connection"/>
+        </service>
+
+        <service id="Voltimax\Chat\Controller\Storefront\ChatWidgetController" public="true">
+            <argument type="service" id="Voltimax\Chat\Config\PluginConfig"/>
+            <argument type="service" id="Voltimax\Chat\Security\RateLimitMiddleware"/>
+            <argument type="service" id="media.repository"/>
+        </service>
+
+        <service id="Voltimax\Chat\Controller\Api\DataProviderController" public="true">
+            <argument type="service" id="Voltimax\Chat\Config\PluginConfig"/>
+            <argument type="service" id="Voltimax\Chat\Security\ApiKeyAuthenticator"/>
+            <argument type="service" id="Voltimax\Chat\Service\CustomerDataService"/>
+            <argument type="service" id="Voltimax\Chat\Service\OrderDataService"/>
+            <argument type="service" id="Voltimax\Chat\Service\ProductDataService"/>
+            <argument type="service" id="Voltimax\Chat\Service\CmsDataService"/>
+            <argument type="service" id="Voltimax\Chat\Service\B2bDataService"/>
+        </service>
+
+        <!-- Data Services -->
+        <service id="Voltimax\Chat\Service\CustomerDataService">
+            <argument type="service" id="customer.repository"/>
+        </service>
+
+        <service id="Voltimax\Chat\Service\OrderDataService">
+            <argument type="service" id="order.repository"/>
+        </service>
+
+        <service id="Voltimax\Chat\Service\ProductDataService">
+            <argument type="service" id="product.repository"/>
+        </service>
+
+        <service id="Voltimax\Chat\Service\CmsDataService">
+            <argument type="service" id="cms_page.repository"/>
+            <argument type="service" id="category.repository"/>
+            <argument type="service" id="sales_channel.repository"/>
+            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+        </service>
+
+        <service id="Voltimax\Chat\Service\B2bDataService">
+            <argument type="service" id="customer.repository"/>
+            <argument type="service" id="order.repository"/>
+        </service>
+
+    </services>
+</container>
