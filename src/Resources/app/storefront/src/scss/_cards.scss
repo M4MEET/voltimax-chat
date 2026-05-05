@@ -79,11 +79,11 @@
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 5px 10px;
-    border: 1px solid rgba(0,0,0,0.08);
-    border-radius: 16px;
+    padding: 3px 8px;
+    border: 1px solid rgba(0,0,0,0.06);
+    border-radius: 12px;
     background: #f8f9ff;
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -109,7 +109,7 @@
 .vtx-home__suggestions {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
+    gap: 4px;
     justify-content: center;
 }
 

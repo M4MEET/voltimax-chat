@@ -723,10 +723,14 @@ export default class VoltimaxChatPlugin extends Plugin {
         const defaultSuggestions = [
             '\uD83D\uDCE6 Bestellstatus',
             '\uD83D\uDD0B Produktsuche',
+            '\uD83D\uDE97 Fahrzeug-Batterie',
             '\u21A9\uFE0F Retoure',
-            '\uD83D\uDE9A Versand & Lieferung',
+            '\uD83D\uDE9A Versand',
             '\uD83E\uDDFE Rechnung',
+            '\u267B\uFE0F Batteriepfand',
             '\uD83C\uDFAB Ticket-Status',
+            '\uD83D\uDCC4 R\u00fcckgaberecht',
+            '\uD83D\uDCAC Support',
         ];
         this._renderHomeSuggestions(suggestionsContainer, defaultSuggestions, mainInput, doFreeText);
         container.appendChild(suggestionsContainer);
