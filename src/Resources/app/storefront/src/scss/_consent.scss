@@ -1,0 +1,431 @@
+// ── Mixins (must be defined before use) ──────────────────────────────────────
+
+@mixin vtx-input {
+    width: 100%;
+    padding: 10px 13px;
+    border: 1.5px solid $vtx-border;
+    border-radius: 10px;
+    font-size: $vtx-font-size;
+    font-family: inherit;
+    color: $vtx-text;
+    background: $vtx-bg;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+
+    &::placeholder { color: $vtx-text-muted; }
+
+    &:focus {
+        outline: none;
+        border-color: var(--vtx-primary, #4f46e5);
+        box-shadow: 0 0 0 3px rgba(79,70,229,0.08);
+    }
+}
+
+@mixin vtx-btn-primary {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(
+        135deg,
+        var(--vtx-primary, #4f46e5) 0%,
+        color-mix(in srgb, var(--vtx-primary, #4f46e5) 70%, #7c3aed 30%) 100%
+    );
+    color: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s, opacity 0.2s;
+    box-shadow: 0 4px 14px $vtx-shadow-color;
+    letter-spacing: 0.01em;
+
+    &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 20px $vtx-shadow-color;
+    }
+
+    &:active:not(:disabled) { transform: translateY(0); }
+
+    &:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        box-shadow: none;
+    }
+}
+
+// ── Shared screen layout ──────────────────────────────────────────────────────
+
+%vtx-screen {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    height: 100%;
+}
+
+// ── Home screen layout ──────────────────────────────────────────────────────
+
+.vtx-home {
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    padding: 16px;
+    gap: 12px;
+    overflow-y: auto;
+
+    &__avatar {
+        width: 52px;
+        height: 52px;
+        margin: 0 auto 8px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+
+        &-name {
+            font-size: 13px;
+            font-weight: 700;
+            color: #6366f1;
+            text-align: center;
+            margin-bottom: 4px;
+            letter-spacing: 0.5px;
+        }
+    }
+
+    &__welcome {
+        text-align: center;
+        padding: 12px 0 4px;
+
+        &-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #111;
+            line-height: 1.4;
+        }
+        &-sub {
+            font-size: 11px;
+            color: #9ca3af;
+            margin-top: 4px;
+            letter-spacing: 0.3px;
+        }
+    }
+
+    &__welcome-back {
+        font-size: 12px;
+        color: var(--vtx-primary, #6366f1);
+        font-weight: 500;
+        text-align: center;
+        padding: 4px 0;
+    }
+
+    // Identity fields (always visible)
+    &__identity {
+        border-radius: 10px;
+
+        &-fields {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        &-input {
+            flex: 1;
+            padding: 7px 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 8px;
+            font-size: 12px;
+            outline: none;
+            font-family: inherit;
+            box-sizing: border-box;
+
+            &:focus { border-color: var(--vtx-primary, #6366f1); }
+        }
+    }
+
+    // Primary input area
+    &__input-row {
+        display: flex;
+        gap: 8px;
+
+        input {
+            flex: 1;
+            padding: 10px 14px;
+            border: 1.5px solid rgba(0,0,0,0.12);
+            border-radius: 12px;
+            font-size: 13px;
+            outline: none;
+            font-family: inherit;
+            transition: border-color 0.2s;
+            box-sizing: border-box;
+
+            &:focus { border-color: var(--vtx-primary, #6366f1); }
+            &::placeholder { color: #c9cbd0; }
+        }
+
+        button {
+            padding: 10px 14px;
+            background: var(--vtx-primary, #6366f1);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            font-weight: 600;
+            font-size: 14px;
+            transition: opacity 0.2s;
+
+            &:hover { opacity: 0.9; }
+        }
+    }
+}
+
+// ── Tier verification forms (inline) ─────────────────────────────────────────
+
+.vtx-verify-form {
+    padding: 12px;
+    background: rgba(99,102,241,0.03);
+    border: 1px solid rgba(99,102,241,0.15);
+    border-radius: 10px;
+    animation: vtx-fade-slide-in 0.2s ease;
+
+    &__title {
+        font-size: 12px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+
+    &__fields {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 8px;
+    }
+
+    &__input {
+        flex: 1;
+        min-width: 100px;
+        padding: 8px 10px;
+        border: 1px solid rgba(0,0,0,0.12);
+        border-radius: 8px;
+        font-size: 12px;
+        outline: none;
+        font-family: inherit;
+        box-sizing: border-box;
+
+        &:focus { border-color: var(--vtx-primary, #6366f1); }
+    }
+
+    &__submit {
+        width: 100%;
+        padding: 8px;
+        background: var(--vtx-primary, #6366f1);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+
+        &:hover { opacity: 0.9; }
+        &:disabled { opacity: 0.5; cursor: not-allowed; }
+    }
+
+    &__error {
+        font-size: 11px;
+        color: #ef4444;
+        margin-top: 4px;
+        min-height: 0;
+    }
+}
+
+// ── Inline verification bar (legacy, kept for compat) ────────────────────────
+
+.voltimax-chat-verify-bar {
+    padding: 16px;
+    background: rgba(0,0,0,0.03);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+    animation: vtx-slide-down 0.3s ease;
+
+    &__prompt {
+        font-size: 13px;
+        font-weight: 600;
+        margin-bottom: 10px;
+        color: var(--vtx-text, $vtx-text);
+    }
+
+    &__fields {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 10px;
+
+        @media (max-width: 480px) {
+            flex-direction: column;
+        }
+    }
+
+    &__input {
+        flex: 1;
+        padding: 10px 12px;
+        border: 1.5px solid rgba(0,0,0,0.12);
+        border-radius: 10px;
+        font-size: 13px;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+        background: $vtx-bg;
+        color: $vtx-text;
+
+        &::placeholder { color: $vtx-text-muted; }
+
+        &:focus {
+            border-color: var(--vtx-primary, #6366f1);
+        }
+    }
+
+    &__submit {
+        width: 100%;
+        padding: 10px;
+        background: var(--vtx-primary, #6366f1);
+        color: #fff;
+        border: none;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: opacity 0.2s;
+
+        &:hover { opacity: 0.9; }
+        &:disabled { opacity: 0.5; cursor: not-allowed; }
+    }
+
+    &__error {
+        color: #ef4444;
+        font-size: 12px;
+        margin-top: 6px;
+    }
+}
+
+// ── Consent footer (passive notice) ──────────────────────────────────────────
+
+.voltimax-chat-consent-footer {
+    padding: 10px 16px 14px;
+    font-size: 11px;
+    color: rgba(0,0,0,0.4);
+    text-align: center;
+    flex-shrink: 0;
+    margin-top: auto;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    margin-top: auto;
+    flex-shrink: 0;
+
+    a {
+        color: var(--vtx-primary, #6366f1);
+        text-decoration: underline;
+    }
+}
+
+// ── Welcome back banner ──────────────────────────────────────────────────────
+
+.voltimax-chat-welcome-banner {
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(99,102,241,0.03));
+    border-bottom: 1px solid rgba(99,102,241,0.1);
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--vtx-primary, #6366f1);
+    animation: vtx-fade-slide-in 0.3s ease;
+    margin-bottom: 8px;
+}
+
+// ── Sub-card chips (in chat area) ────────────────────────────────────────────
+
+.voltimax-chat-subcards-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 0;
+    animation: vtx-fade-slide-in 0.3s ease;
+}
+
+.voltimax-chat-subcard-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 14px;
+    border: 1.5px solid rgba(0,0,0,0.1);
+    border-radius: 999px;
+    background: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: $vtx-text;
+
+    &:hover {
+        border-color: var(--vtx-primary, #6366f1);
+        background: rgba(99,102,241,0.04);
+        transform: translateY(-1px);
+    }
+}
+
+// ── Free-text input area (on topics screen - legacy) ─────────────────────────
+
+.voltimax-chat-topics__input-area {
+    padding: 12px 0;
+    margin-top: 12px;
+    border-top: 1px solid rgba(0,0,0,0.06);
+
+    input {
+        width: 100%;
+        padding: 10px 14px;
+        border: 1.5px solid rgba(0,0,0,0.1);
+        border-radius: 10px;
+        font-size: 13px;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.2s;
+        box-sizing: border-box;
+        background: $vtx-bg;
+        color: $vtx-text;
+
+        &:focus {
+            border-color: var(--vtx-primary, #6366f1);
+        }
+
+        &::placeholder {
+            color: rgba(0,0,0,0.35);
+        }
+    }
+}
+
+// ── Loading dots (kept here as shared utility) ───────────────────────────────
+
+.voltimax-chat-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 6px;
+
+    span {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--vtx-primary, #4f46e5);
+        opacity: 0.3;
+        animation: vtx-dots 1.2s ease-in-out infinite;
+
+        &:nth-child(1) { animation-delay: 0s; }
+        &:nth-child(2) { animation-delay: 0.2s; }
+        &:nth-child(3) { animation-delay: 0.4s; }
+    }
+}

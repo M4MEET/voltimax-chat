@@ -1,0 +1,434 @@
+// ── Chat Window ───────────────────────────────────────────────────────────────
+
+.voltimax-chat-window {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    gap: 12px;
+
+    &__input-area {
+        display: flex;
+        gap: 10px;
+        padding: 12px 14px;
+        background: $vtx-bg;
+        border: 1px solid $vtx-border;
+        border-radius: 16px;
+        align-items: flex-end;
+        flex-shrink: 0;
+        transition: border-color 0.2s, box-shadow 0.2s;
+
+        &:focus-within {
+            border-color: var(--vtx-primary, #4f46e5);
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.08);
+        }
+    }
+
+    &__input {
+        flex: 1;
+        resize: none;
+        border: none;
+        outline: none;
+        background: transparent;
+        font-size: $vtx-font-size;
+        font-family: inherit;
+        color: $vtx-text;
+        max-height: 96px;
+        line-height: 1.5;
+        overflow-y: auto;
+
+        &::placeholder { color: $vtx-text-muted; }
+    }
+
+    &__send {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        border: none;
+        padding: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        background: var(--vtx-primary, #4f46e5);
+        color: #fff;
+        cursor: pointer;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), background 0.2s;
+
+        &:hover {
+            transform: scale(1.1);
+            background: color-mix(in srgb, var(--vtx-primary, #4f46e5) 85%, #000 15%);
+        }
+        &:active { transform: scale(0.95); }
+
+        svg { pointer-events: none; }
+    }
+}
+
+// ── Messages container wrapper (positions scroll button) ─────────────────────
+
+.voltimax-chat-messages-wrap {
+    flex: 1;
+    min-height: 0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.voltimax-chat-window__messages {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding-right: 2px;
+
+    &::-webkit-scrollbar { width: 3px; }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+        background: $vtx-border;
+        border-radius: 3px;
+    }
+}
+
+// ── Scroll-to-bottom button ───────────────────────────────────────────────────
+
+.voltimax-chat-scroll-btn {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    z-index: 5;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 1px solid $vtx-border;
+    background: $vtx-bg;
+    color: $vtx-text-secondary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+    transition: transform 0.15s, box-shadow 0.15s, color 0.15s, border-color 0.15s;
+
+    &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.18);
+        color: var(--vtx-primary, #4f46e5);
+        border-color: var(--vtx-primary, #4f46e5);
+    }
+}
+
+// ── AI message row (avatar + bubble column) ───────────────────────────────────
+
+.voltimax-chat-ai-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    align-self: flex-start;
+    max-width: 100%;
+    width: 100%;
+
+    &__avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8b5e3c, #6b8e23);
+        border: 2px solid rgba(107, 142, 35, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        margin-top: 18px;
+        color: #fff;
+        box-shadow: 0 2px 6px rgba(107, 142, 35, 0.2);
+    }
+
+    &__name {
+        font-size: 11px;
+        font-weight: 700;
+        color: #6b8e23;
+        letter-spacing: 0.02em;
+        padding-left: 2px;
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+        flex: 1;
+    }
+}
+
+// ── Group spacing ─────────────────────────────────────────────────────────────
+
+.voltimax-chat-message--user + .voltimax-chat-message--user { margin-top: 2px; }
+.voltimax-chat-ai-row + .voltimax-chat-ai-row               { margin-top: 2px; }
+.voltimax-chat-message--user + .voltimax-chat-ai-row,
+.voltimax-chat-ai-row + .voltimax-chat-message--user        { margin-top: 10px; }
+.voltimax-chat-ai-row + .voltimax-chat-typing,
+.voltimax-chat-message--user + .voltimax-chat-typing        { margin-top: 10px; }
+
+// ── Message Bubbles ───────────────────────────────────────────────────────────
+
+.voltimax-chat-message {
+    padding: 11px 15px;
+    line-height: 1.6;
+    word-wrap: break-word;
+    overflow-wrap: anywhere;
+    font-size: $vtx-font-size;
+    position: relative;
+
+    &--user {
+        align-self: flex-end;
+        max-width: 85%;
+        background: linear-gradient(
+            135deg,
+            var(--vtx-primary, #4f46e5) 0%,
+            color-mix(in srgb, var(--vtx-primary, #4f46e5) 70%, #7c3aed 30%) 100%
+        );
+        color: $vtx-user-msg-text;
+        border-radius: $vtx-msg-radius $vtx-msg-radius 4px $vtx-msg-radius;
+        box-shadow: 0 2px 12px rgba(79,70,229,0.25);
+    }
+
+    &--ai {
+        background: $vtx-ai-msg-bg;
+        color: $vtx-ai-msg-text;
+        border-radius: $vtx-msg-radius $vtx-msg-radius $vtx-msg-radius 4px;
+        border: 1px solid rgba(0,0,0,0.05);
+
+        // ── Markdown-rendered content inside AI bubbles ───────────────────────
+
+        p {
+            margin: 0;
+            line-height: 1.65;
+
+            &:not(:last-child) {
+                margin-bottom: 9px;
+            }
+        }
+
+        strong {
+            font-weight: 650;
+            color: #1a1a2e;
+        }
+
+        em {
+            font-style: italic;
+            color: $vtx-text-secondary;
+        }
+
+        .voltimax-chat-link {
+            color: var(--vtx-primary, #4f46e5);
+            text-decoration: underline;
+            text-underline-offset: 2px;
+            font-weight: 600;
+            word-break: break-all;
+
+            &:hover { text-decoration: none; }
+        }
+
+        // ── Tracking number chip ──────────────────────────────────────────────
+
+        .voltimax-chat-tracking {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(79, 70, 229, 0.08);
+            border: 1.5px solid rgba(79, 70, 229, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            vertical-align: middle;
+            max-width: 100%;
+
+            &__link {
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                padding: 4px 10px;
+                color: var(--vtx-primary, #4f46e5);
+                font-weight: 600;
+                font-size: 12px;
+                font-family: ui-monospace, 'SF Mono', 'Fira Code', monospace;
+                text-decoration: none;
+                word-break: break-all;
+                flex: 1;
+                min-width: 0;
+
+                svg { flex-shrink: 0; opacity: 0.7; }
+
+                &:hover { background: rgba(79, 70, 229, 0.06); text-decoration: underline; }
+            }
+
+            &__copy {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 100%;
+                min-height: 28px;
+                background: transparent;
+                border: none;
+                border-left: 1.5px solid rgba(79, 70, 229, 0.2);
+                color: var(--vtx-primary, #4f46e5);
+                cursor: pointer;
+                transition: background 0.15s, color 0.15s;
+                flex-shrink: 0;
+                padding: 0;
+
+                &:hover { background: rgba(79, 70, 229, 0.1); }
+                &:active { background: rgba(79, 70, 229, 0.2); }
+            }
+        }
+
+        ul, ol {
+            margin: 6px 0 4px;
+            padding-left: 18px;
+
+            &:not(:last-child) { margin-bottom: 9px; }
+
+            li {
+                margin-bottom: 5px;
+                line-height: 1.55;
+
+                &:last-child { margin-bottom: 0; }
+
+                strong { color: inherit; }
+            }
+        }
+
+        ul { list-style: disc; }
+        ol { list-style: decimal; }
+
+        // ── Streaming cursor ──────────────────────────────────────────────────
+
+        &.is-streaming::after {
+            content: '▋';
+            display: inline;
+            margin-left: 2px;
+            font-size: 13px;
+            line-height: 1;
+            vertical-align: middle;
+            opacity: 0.7;
+            animation: vtx-blink 0.7s steps(1) infinite;
+        }
+    }
+}
+
+// ── Message timestamp ─────────────────────────────────────────────────────────
+
+.voltimax-chat-message__time {
+    display: block;
+    font-size: 10px;
+    color: rgba(0,0,0,0.32);
+    margin-top: 5px;
+    text-align: right;
+    line-height: 1;
+    user-select: none;
+}
+
+.voltimax-chat-message--user .voltimax-chat-message__time {
+    color: rgba(255,255,255,0.6);
+}
+
+// ── Feedback buttons (below AI bubble) ───────────────────────────────────────
+
+.voltimax-chat-message__feedback {
+    display: flex;
+    gap: 4px;
+    padding-left: 2px;
+}
+
+.voltimax-chat-message__feedback-btn {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    border: 1px solid $vtx-border;
+    background: $vtx-bg;
+    color: $vtx-text-muted;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.15s;
+
+    &:hover:not(:disabled) {
+        background: $vtx-bg-hover;
+        border-color: var(--vtx-primary, #4f46e5);
+        color: var(--vtx-primary, #4f46e5);
+        transform: scale(1.1);
+    }
+
+    &.is-active {
+        background: var(--vtx-primary, #4f46e5);
+        border-color: var(--vtx-primary, #4f46e5);
+        color: #fff;
+    }
+
+    &[data-fb="down"].is-active {
+        background: #ef4444;
+        border-color: #ef4444;
+    }
+
+    &:disabled {
+        cursor: default;
+        opacity: 0.8;
+    }
+}
+
+// ── Typing indicator ──────────────────────────────────────────────────────────
+
+.voltimax-chat-typing {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    &__avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #8b5e3c, #6b8e23);
+        border: 2px solid rgba(107, 142, 35, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        color: #fff;
+        box-shadow: 0 2px 6px rgba(107, 142, 35, 0.2);
+    }
+
+    &__bubble {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px;
+        background: $vtx-ai-msg-bg;
+        border-radius: $vtx-msg-radius $vtx-msg-radius $vtx-msg-radius 4px;
+        border: 1px solid rgba(0,0,0,0.05);
+    }
+
+    &__text {
+        font-size: 12px;
+        color: #6b8e23;
+        font-weight: 500;
+        font-style: italic;
+    }
+
+    &__dots {
+        display: flex;
+        gap: 3px;
+        align-items: center;
+
+        span {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #6b8e23;
+            animation: vtx-dots 1.2s ease-in-out infinite;
+
+            &:nth-child(2) { animation-delay: 0.2s; }
+            &:nth-child(3) { animation-delay: 0.4s; }
+        }
+    }
+}

@@ -1,0 +1,215 @@
+// ── Topics screen (legacy structure kept for compat) ──────────────────────────
+
+.voltimax-chat-topics {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+
+    &__welcome {
+        text-align: center;
+        margin-bottom: 20px;
+
+        &-title {
+            font-size: 17px;
+            font-weight: 700;
+            color: $vtx-text;
+            margin-bottom: 6px;
+        }
+
+        &-sub {
+            font-size: 13px;
+            color: $vtx-text-secondary;
+        }
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+}
+
+// ── Quick reply chips ─────────────────────────────────────────────────────────
+
+.voltimax-chat-quickreplies {
+    display: flex;
+    gap: 7px;
+    padding: 10px 14px;
+    overflow-x: auto;
+    flex-shrink: 0;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar { display: none; }
+}
+
+.voltimax-chat-quickreply {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    padding: 7px 13px;
+    background: $vtx-bg-secondary;
+    border: 1.5px solid $vtx-border;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--vtx-primary, #4f46e5);
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    flex-shrink: 0;
+
+    &:hover {
+        background: $vtx-bg-hover;
+        border-color: var(--vtx-primary, #4f46e5);
+        transform: translateY(-1px);
+    }
+
+    &:active { transform: translateY(0); }
+}
+
+// ── Topic chips (compact horizontal pills) ───────────────────────────────────
+
+.vtx-topic-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 0 4px;
+}
+
+.vtx-topic-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 5px 10px;
+    border: 1px solid rgba(0,0,0,0.08);
+    border-radius: 16px;
+    background: #f8f9ff;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #4b5563;
+    font-family: inherit;
+    white-space: nowrap;
+
+    &__icon { font-size: 12px; line-height: 1; }
+
+    &:hover {
+        border-color: var(--vtx-primary, #6366f1);
+        background: rgba(99,102,241,0.06);
+        color: var(--vtx-primary, #6366f1);
+    }
+
+    &--active {
+        border-color: var(--vtx-primary, #6366f1);
+        background: rgba(99,102,241,0.08);
+        color: var(--vtx-primary, #6366f1);
+    }
+}
+
+.vtx-home__suggestions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    justify-content: center;
+}
+
+// ── Sub-topic expansion ──────────────────────────────────────────────────────
+
+.vtx-subtopics-area {
+    min-height: 0;
+}
+
+.vtx-subtopics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px 4px;
+    animation: vtx-fade-slide-in 0.2s ease;
+}
+
+.vtx-subtopic-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 11px;
+    border: 1px solid rgba(99,102,241,0.2);
+    border-radius: 16px;
+    background: rgba(99,102,241,0.04);
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--vtx-primary, #6366f1);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+
+    &__icon { font-size: 12px; line-height: 1; }
+
+    &:hover {
+        background: rgba(99,102,241,0.12);
+        transform: translateY(-1px);
+    }
+}
+
+// ── Legacy topic card (kept for backward compat if server sends them) ────────
+
+.voltimax-chat-topic-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    padding: 16px 14px;
+    background: $vtx-bg-secondary;
+    border: 1.5px solid $vtx-border;
+    border-radius: 14px;
+    cursor: pointer;
+    transition:
+        border-color 0.2s,
+        background 0.2s,
+        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
+        box-shadow 0.2s;
+    position: relative;
+    overflow: hidden;
+
+    &:hover {
+        border-color: var(--vtx-primary, #4f46e5);
+        background: $vtx-bg-hover;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px $vtx-shadow-color;
+    }
+
+    &:active { transform: translateY(-1px); }
+
+    &__icon {
+        font-size: 26px;
+        margin-bottom: 10px;
+        transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+        position: relative;
+        line-height: 1;
+    }
+
+    &__title {
+        font-weight: 700;
+        font-size: 13px;
+        color: $vtx-text;
+        margin-bottom: 3px;
+        position: relative;
+    }
+
+    &__desc {
+        font-size: 11px;
+        color: $vtx-text-secondary;
+        line-height: 1.4;
+        position: relative;
+    }
+
+    &__arrow {
+        position: absolute;
+        top: 14px;
+        right: 12px;
+        color: var(--vtx-primary, #4f46e5);
+        font-size: 14px;
+        opacity: 0;
+        transform: translateX(-4px);
+        transition: opacity 0.2s, transform 0.2s;
+    }
+}

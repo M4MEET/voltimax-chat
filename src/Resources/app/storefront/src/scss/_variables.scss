@@ -1,0 +1,36 @@
+// ── Layout ────────────────────────────────────────────────────────────────────
+$vtx-widget-width:    380px;
+$vtx-widget-height:   580px;
+$vtx-bubble-size:     60px;
+$vtx-border-radius:   20px;
+$vtx-msg-radius:      18px;
+$vtx-spacing:         20px;
+$vtx-bottom-offset:   80px;
+$vtx-font-size:       14px;
+$vtx-header-height:   72px;
+$vtx-z-index:         99999;
+
+// ── Light palette ─────────────────────────────────────────────────────────────
+$vtx-bg:              #ffffff;
+$vtx-bg-secondary:    #f8f9ff;
+$vtx-bg-hover:        #f0f0ff;
+$vtx-text:            #1a1a2e;
+$vtx-text-secondary:  #64748b;
+$vtx-text-muted:      #94a3b8;
+$vtx-border:          #e8eaf0;
+$vtx-shadow-color:    rgba(79, 70, 229, 0.15);
+
+// ── Message colors ────────────────────────────────────────────────────────────
+$vtx-user-msg-bg:     var(--vtx-primary-start, #4f46e5);
+$vtx-user-msg-text:   #ffffff;
+$vtx-ai-msg-bg:       #f1f3ff;
+$vtx-ai-msg-text:     #1a1a2e;
+
+// ── Dark palette ──────────────────────────────────────────────────────────────
+$vtx-dark-bg:         #0f0f1a;
+$vtx-dark-surface:    #1a1a2e;
+$vtx-dark-surface2:   #252538;
+$vtx-dark-border:     #2e2e45;
+$vtx-dark-text:       #e8e8f0;
+$vtx-dark-secondary:  #9090b0;
+$vtx-dark-ai-msg:     #1e1e32;

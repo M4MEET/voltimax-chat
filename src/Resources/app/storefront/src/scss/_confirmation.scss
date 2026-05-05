@@ -1,0 +1,192 @@
+/* ── Confirmation card ─────────────────────────────────────────────────── */
+.voltimax-chat-confirm {
+    margin: 8px 4px;
+    background: #fff !important;
+    border: 1.5px solid rgba(99, 102, 241, 0.2);
+    border-radius: 14px;
+    overflow: visible;
+    animation: vtx-fade-slide-in 0.3s ease;
+    box-shadow: 0 2px 12px rgba(99, 102, 241, 0.08);
+    flex-shrink: 0;
+    display: block;
+
+    &__header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 16px;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.06), rgba(99, 102, 241, 0.02));
+        border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--vtx-primary, #6366f1);
+
+        svg {
+            color: var(--vtx-primary, #6366f1);
+            flex-shrink: 0;
+        }
+    }
+
+    &__summary {
+        padding: 12px 16px 0;
+        font-size: 12px;
+        color: #6b7280;
+        line-height: 1.5;
+    }
+
+    &__fields {
+        padding: 12px 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    &__label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #9ca3af;
+    }
+
+    &__value {
+        font-size: 13px;
+        font-weight: 500;
+        color: #111827;
+        padding: 8px 12px;
+        background: #f8f9fc;
+        border-radius: 8px;
+        border: 1px solid #f3f4f6;
+    }
+
+    &__input {
+        font-family: inherit;
+        font-size: 13px;
+        padding: 8px 12px;
+        border: 1.5px solid #e5e7eb;
+        border-radius: 8px;
+        background: #fff;
+        color: #111827;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        width: 100%;
+
+        &:focus {
+            border-color: var(--vtx-primary, #6366f1);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        &::placeholder {
+            color: #d1d5db;
+        }
+    }
+
+    &__textarea {
+        resize: vertical;
+        min-height: 60px;
+    }
+
+    &__actions {
+        display: flex;
+        gap: 8px;
+        padding: 0 16px 14px;
+        justify-content: flex-end;
+    }
+
+    &__btn {
+        padding: 8px 18px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: none;
+
+        &--cancel {
+            background: #f3f4f6;
+            color: #6b7280;
+
+            &:hover {
+                background: #e5e7eb;
+                color: #374151;
+            }
+        }
+
+        &--confirm {
+            background: var(--vtx-primary, #6366f1);
+            color: #fff;
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+
+            &:hover {
+                opacity: 0.9;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+                transform: none;
+            }
+        }
+    }
+
+    &--done {
+        border-color: rgba(16, 185, 129, 0.3);
+        background: rgba(16, 185, 129, 0.04);
+    }
+
+    &__done {
+        padding: 16px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: 600;
+        color: #10b981;
+    }
+}
+
+/* Dark mode */
+.voltimax-chat-widget--dark .voltimax-chat-confirm {
+    background: #1e293b;
+    border-color: rgba(99, 102, 241, 0.3);
+
+    &__header {
+        background: rgba(99, 102, 241, 0.1);
+    }
+
+    &__summary {
+        color: #94a3b8;
+    }
+
+    &__value {
+        background: #0f172a;
+        border-color: #334155;
+        color: #e2e8f0;
+    }
+
+    &__input {
+        background: #0f172a;
+        border-color: #334155;
+        color: #e2e8f0;
+
+        &::placeholder { color: #475569; }
+    }
+
+    &__btn--cancel {
+        background: #334155;
+        color: #94a3b8;
+
+        &:hover { background: #475569; color: #e2e8f0; }
+    }
+
+    &--done {
+        background: rgba(16, 185, 129, 0.08);
+        border-color: rgba(16, 185, 129, 0.2);
+    }
+}

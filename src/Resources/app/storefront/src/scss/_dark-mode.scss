@@ -1,0 +1,234 @@
+.voltimax-chat-widget--dark {
+
+    // ── Base ─────────────────────────────────────────────────────────────────
+    background: $vtx-dark-bg;
+    color: $vtx-dark-text;
+
+    .voltimax-chat-widget__body {
+        background: $vtx-dark-bg;
+        &::-webkit-scrollbar-thumb { background: $vtx-dark-border; }
+    }
+
+    // ── Messages ─────────────────────────────────────────────────────────────
+    .voltimax-chat-message--ai {
+        background: $vtx-dark-ai-msg;
+        color: $vtx-dark-text;
+        border-color: $vtx-dark-border;
+    }
+
+    .voltimax-chat-typing {
+        background: $vtx-dark-ai-msg;
+        border-color: $vtx-dark-border;
+        span { background: $vtx-dark-secondary; }
+    }
+
+    // ── Input area ────────────────────────────────────────────────────────────
+    .voltimax-chat-window__input-area {
+        background: $vtx-dark-surface;
+        border-color: $vtx-dark-border;
+
+        &:focus-within { border-color: var(--vtx-primary, #4f46e5); }
+    }
+
+    .voltimax-chat-window__input {
+        color: $vtx-dark-text;
+        &::placeholder { color: $vtx-dark-secondary; }
+    }
+
+    // ── Home screen ──────────────────────────────────────────────────────────
+    .vtx-home {
+        &__welcome-title { color: $vtx-dark-text; }
+        &__welcome-sub { color: $vtx-dark-secondary; }
+        &__welcome-back { color: #818cf8; }
+    }
+
+    .vtx-home__identity {
+        border-color: $vtx-dark-border;
+
+        &-toggle {
+            color: $vtx-dark-secondary;
+            &:hover { color: $vtx-dark-text; }
+        }
+
+        &-input {
+            background: $vtx-dark-surface;
+            border-color: $vtx-dark-border;
+            color: $vtx-dark-text;
+            &:focus { border-color: var(--vtx-primary, #6366f1); }
+        }
+    }
+
+    .vtx-home__input-row {
+        input {
+            background: $vtx-dark-surface;
+            border-color: $vtx-dark-border;
+            color: $vtx-dark-text;
+            &::placeholder { color: $vtx-dark-secondary; }
+            &:focus { border-color: var(--vtx-primary, #6366f1); }
+        }
+    }
+
+    // ── Topic chips ──────────────────────────────────────────────────────────
+    .vtx-topic-chip {
+        background: $vtx-dark-surface;
+        border-color: $vtx-dark-border;
+        color: $vtx-dark-text;
+
+        &:hover {
+            border-color: var(--vtx-primary, #6366f1);
+            background: $vtx-dark-surface2;
+        }
+
+        &--active {
+            border-color: var(--vtx-primary, #6366f1);
+            background: rgba(99,102,241,0.15);
+            color: #818cf8;
+        }
+    }
+
+    // ── Sub-topic chips ──────────────────────────────────────────────────────
+    .vtx-subtopic-chip {
+        background: rgba(99,102,241,0.08);
+        border-color: rgba(99,102,241,0.25);
+        color: #a5b4fc;
+
+        &:hover {
+            background: rgba(99,102,241,0.18);
+        }
+    }
+
+    // ── Verify form ──────────────────────────────────────────────────────────
+    .vtx-verify-form {
+        background: rgba(99,102,241,0.06);
+        border-color: rgba(99,102,241,0.2);
+
+        &__title { color: $vtx-dark-text; }
+
+        &__input {
+            background: $vtx-dark-surface;
+            border-color: $vtx-dark-border;
+            color: $vtx-dark-text;
+            &:focus { border-color: var(--vtx-primary, #6366f1); }
+        }
+
+        &__error { color: #fca5a5; }
+    }
+
+    // ── Legacy topic cards ───────────────────────────────────────────────────
+    .voltimax-chat-topic-card {
+        background: $vtx-dark-surface;
+        border-color: $vtx-dark-border;
+
+        &__title { color: $vtx-dark-text; }
+        &__desc  { color: $vtx-dark-secondary; }
+
+        &:hover {
+            background: $vtx-dark-surface2;
+            border-color: var(--vtx-primary, #4f46e5);
+        }
+    }
+
+    .voltimax-chat-topics__welcome {
+        &-title { color: $vtx-dark-text; }
+        &-sub   { color: $vtx-dark-secondary; }
+    }
+
+    // ── Consent ───────────────────────────────────────────────────────────────
+    .voltimax-chat-consent__icon {
+        background: linear-gradient(135deg, rgba(79,70,229,0.2), rgba(79,70,229,0.1));
+    }
+
+    .voltimax-chat-consent__title,
+    .voltimax-chat-verify__title { color: $vtx-dark-text; }
+
+    .voltimax-chat-consent__text {
+        background: $vtx-dark-surface;
+        color: $vtx-dark-secondary;
+    }
+
+    .voltimax-chat-consent__label {
+        border-color: $vtx-dark-border;
+        color: $vtx-dark-text;
+        &:hover { border-color: var(--vtx-primary, #4f46e5); }
+    }
+
+    .voltimax-chat-consent__link { color: #818cf8; }
+
+    .voltimax-chat-verify__subtitle { color: $vtx-dark-secondary; }
+
+    .voltimax-chat-verify__field {
+        label { color: $vtx-dark-secondary; }
+    }
+
+    .voltimax-chat-verify__input {
+        background: $vtx-dark-surface;
+        border-color: $vtx-dark-border;
+        color: $vtx-dark-text;
+        &::placeholder { color: $vtx-dark-secondary; }
+        &:focus { border-color: var(--vtx-primary, #4f46e5); }
+    }
+
+    .voltimax-chat-verify__error {
+        background: rgba(220,38,38,0.1);
+        border-color: rgba(220,38,38,0.3);
+        color: #fca5a5;
+    }
+
+    // ── Inline verify bar (legacy) ──────────────────────────────────────────
+    .voltimax-chat-verify-bar {
+        background: rgba(255,255,255,0.03);
+        border-bottom-color: $vtx-dark-border;
+
+        &__prompt { color: $vtx-dark-text; }
+
+        &__input {
+            background: $vtx-dark-surface;
+            border-color: $vtx-dark-border;
+            color: $vtx-dark-text;
+            &::placeholder { color: $vtx-dark-secondary; }
+            &:focus { border-color: var(--vtx-primary, #6366f1); }
+        }
+
+        &__error { color: #fca5a5; }
+    }
+
+    // ── Consent footer ───────────────────────────────────────────────────────
+    .voltimax-chat-consent-footer {
+        color: $vtx-dark-secondary;
+        border-top-color: $vtx-dark-border;
+
+        a { color: #818cf8; }
+    }
+
+    // ── Welcome banner ───────────────────────────────────────────────────────
+    .voltimax-chat-welcome-banner {
+        background: linear-gradient(135deg, rgba(99,102,241,0.12), rgba(99,102,241,0.05));
+        border-bottom-color: rgba(99,102,241,0.2);
+        color: #818cf8;
+    }
+
+    // ── Sub-card chips ───────────────────────────────────────────────────────
+    .voltimax-chat-subcard-chip {
+        background: $vtx-dark-surface;
+        border-color: $vtx-dark-border;
+        color: $vtx-dark-text;
+
+        &:hover {
+            border-color: var(--vtx-primary, #6366f1);
+            background: $vtx-dark-surface2;
+        }
+    }
+
+    // ── Free-text input on topics screen (legacy) ────────────────────────────
+    .voltimax-chat-topics__input-area {
+        border-top-color: $vtx-dark-border;
+
+        input {
+            background: $vtx-dark-surface;
+            border-color: $vtx-dark-border;
+            color: $vtx-dark-text;
+            &::placeholder { color: $vtx-dark-secondary; }
+            &:focus { border-color: var(--vtx-primary, #6366f1); }
+        }
+    }
+}
