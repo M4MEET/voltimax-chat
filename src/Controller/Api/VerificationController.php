@@ -59,14 +59,14 @@ class VerificationController extends AbstractController
         $email = trim($data['email'] ?? '');
         $name = trim($data['name'] ?? '');
 
-        if ($email === '' || $name === '') {
-            return new JsonResponse(['error' => 'Name and email are required'], Response::HTTP_BAD_REQUEST);
+        if ($name === '') {
+            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
         }
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s.v');
         $this->connection->insert('voltimax_chat_consent_log', [
             'id' => Uuid::randomBytes(),
-            'customer_email' => $email,
+            'customer_email' => $email ?: null,
             'customer_name' => $name,
             'ip_address' => $request->getClientIp() ?? 'unknown',
             'consented_at' => $now,
@@ -93,8 +93,8 @@ class VerificationController extends AbstractController
         $name = trim($data['name'] ?? '');
         $orderNumber = trim($data['orderNumber'] ?? '');
 
-        if ($email === '' || $name === '') {
-            return new JsonResponse(['error' => 'Name and email are required'], Response::HTTP_BAD_REQUEST);
+        if ($name === '') {
+            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
         }
 
         if ($this->config->isOrderNumberRequired() && $orderNumber === '') {
@@ -137,7 +137,7 @@ class VerificationController extends AbstractController
         }
 
         $token = $this->jwt->create([
-            'email' => $email,
+            'email' => $email ?: null,
             'name' => $name,
             'customer_id' => $customerContext['customer_id'],
             'has_orders' => $customerContext['has_orders'],
