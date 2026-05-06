@@ -12,6 +12,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         this.httpClient      = new HttpClient();
         this.state           = 'CLOSED';
         this._minimized      = false;
+        this._expanded       = false;
         this.config          = null;
         this.token           = null;
         this.customerContext = null;
@@ -199,7 +200,12 @@ export default class VoltimaxChatPlugin extends Plugin {
 
     _loadConfig() {
         // Try to restore an active session first (page navigation)
-        if (this._restoreSession()) return;
+        if (this._restoreSession()) {
+            // Session restored — render bubble but hide it (widget is open)
+            this._renderBubble();
+            if (this._bubbleEl) this._bubbleEl.style.display = 'none';
+            return;
+        }
 
         this.httpClient.get(this.options.configUrl, (response) => {
             try {
@@ -249,6 +255,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
     _open() {
         this.state = 'OPEN';
+        if (this._bubbleEl) this._bubbleEl.style.display = 'none';
         this._renderWidget();
 
         // Check for returning user
@@ -269,7 +276,17 @@ export default class VoltimaxChatPlugin extends Plugin {
     _minimize() {
         this._minimized = true;
         const widget = document.querySelector('.voltimax-chat-widget');
-        if (widget) widget.style.display = 'none';
+        if (widget) {
+            widget.style.animation = 'vtx-widget-out 0.35s cubic-bezier(0.5, 0, 0.75, 0) forwards';
+            widget.addEventListener('animationend', () => {
+                widget.style.display = 'none';
+                widget.style.animation = '';
+            }, { once: true });
+        }
+        // Show bubble after a short delay so it appears as widget collapses into it
+        setTimeout(() => {
+            if (this._bubbleEl) this._bubbleEl.style.display = '';
+        }, 200);
     }
 
     _unminimize() {
@@ -277,8 +294,30 @@ export default class VoltimaxChatPlugin extends Plugin {
         this._unreadCount = 0;
         const badge = this._bubbleEl?.querySelector('.voltimax-chat-bubble__badge');
         if (badge) badge.style.display = 'none';
+        if (this._bubbleEl) this._bubbleEl.style.display = 'none';
         const widget = document.querySelector('.voltimax-chat-widget');
-        if (widget) widget.style.display = 'flex';
+        if (widget) {
+            widget.style.display = 'flex';
+            widget.style.animation = 'vtx-widget-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both';
+        }
+    }
+
+    _toggleExpand() {
+        this._expanded = !this._expanded;
+        const widget = document.querySelector('.voltimax-chat-widget');
+        if (!widget) return;
+        widget.classList.toggle('voltimax-chat-widget--expanded', this._expanded);
+        // Update button icon
+        const expandBtn = widget.querySelector('.voltimax-chat-widget__expand');
+        if (expandBtn) {
+            if (this._expanded) {
+                expandBtn.title = 'Verkleinern';
+                expandBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="4 14 10 14 10 20"/><polyline points="20 10 14 10 14 4"/><line x1="14" y1="10" x2="21" y2="3"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+            } else {
+                expandBtn.title = 'Vergr\u00f6\u00dfern';
+                expandBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+            }
+        }
     }
 
     _close() {
@@ -297,6 +336,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         this.state          = 'CLOSED';
         this._minimized     = false;
+        this._expanded      = false;
         this._chatId        = null;
         this._sessionId     = null;
         this._unreadCount   = 0;
@@ -315,6 +355,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         const widget = document.querySelector('.voltimax-chat-widget');
         if (widget) widget.remove();
 
+        if (this._bubbleEl) this._bubbleEl.style.display = '';
         const badge = this._bubbleEl?.querySelector('.voltimax-chat-bubble__badge');
         if (badge) badge.style.display = 'none';
     }
@@ -328,28 +369,47 @@ export default class VoltimaxChatPlugin extends Plugin {
     // ── Rating overlay ────────────────────────────────────────────────────────
 
     _showRatingOverlay() {
+        // First collapse the main widget into the bubble
         const widget = document.querySelector('.voltimax-chat-widget');
-        if (!widget) { this._doClose(); return; }
+        if (widget) {
+            widget.style.animation = 'vtx-widget-out 0.35s cubic-bezier(0.5, 0, 0.75, 0) forwards';
+            widget.addEventListener('animationend', () => {
+                widget.style.display = 'none';
+                widget.style.animation = '';
+                this._showRatingBubble();
+            }, { once: true });
+        } else {
+            this._showRatingBubble();
+        }
+    }
 
-        const overlay = document.createElement('div');
-        overlay.className = 'voltimax-chat-rating';
+    _showRatingBubble() {
+        // Remove any existing rating bubble
+        const existing = document.querySelector('.vtx-rating-bubble');
+        if (existing) existing.remove();
+
+        const posClass = this.config?.widgetPosition === 'bottom-left' ? 'vtx-rating-bubble--bottom-left' : 'vtx-rating-bubble--bottom-right';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'vtx-rating-bubble ' + posClass;
+        bubble.style.setProperty('--vtx-primary-start', this.config?.primaryColor || '#4338CA');
+        bubble.style.setProperty('--vtx-primary-end', this.config?.secondaryColor || this._shiftColor(this.config?.primaryColor || '#4338CA', 30));
 
         const title = document.createElement('div');
-        title.className = 'voltimax-chat-rating__title';
-        title.textContent = 'How was your chat experience?';
-        overlay.appendChild(title);
+        title.className = 'vtx-rating-bubble__title';
+        title.textContent = 'Wie war dein Chat?';
+        bubble.appendChild(title);
 
         const starsRow = document.createElement('div');
-        starsRow.className = 'voltimax-chat-rating__stars';
+        starsRow.className = 'vtx-rating-bubble__stars';
 
         const starBtns = [];
         let selectedRating = 0;
 
         for (let i = 1; i <= 5; i++) {
             const star = document.createElement('button');
-            star.className = 'voltimax-chat-rating__star';
+            star.className = 'vtx-rating-bubble__star';
             star.textContent = '\u2605';
-            star.dataset.star = String(i);
             const idx = i;
             star.addEventListener('mouseenter', () => {
                 starBtns.forEach((s, j) => s.classList.toggle('is-hovered', j < idx));
@@ -363,33 +423,48 @@ export default class VoltimaxChatPlugin extends Plugin {
                     s.classList.toggle('is-selected', j < idx);
                     s.classList.remove('is-hovered');
                 });
-                this._submitRating(idx, overlay);
+                this._submitRating(idx, bubble);
             });
             starsRow.appendChild(star);
             starBtns.push(star);
         }
-        overlay.appendChild(starsRow);
+        bubble.appendChild(starsRow);
 
         const skipBtn = document.createElement('button');
-        skipBtn.className = 'voltimax-chat-rating__skip';
-        skipBtn.textContent = 'Skip';
-        skipBtn.addEventListener('click', () => this._doClose());
-        overlay.appendChild(skipBtn);
+        skipBtn.className = 'vtx-rating-bubble__skip';
+        skipBtn.textContent = '\u00dcberspringen';
+        skipBtn.addEventListener('click', () => {
+            this._collapseRatingBubble(bubble);
+        });
+        bubble.appendChild(skipBtn);
 
-        widget.appendChild(overlay);
+        document.body.appendChild(bubble);
     }
 
-    _submitRating(stars, overlay) {
+    _submitRating(stars, bubble) {
         if (this._sessionId) {
             this._callServerB('/chat/rating', { session_id: this._sessionId, rating: stars });
         }
-        // Show "thank you" then close
-        overlay.textContent = '';
+        // Morph into thank you
+        bubble.innerHTML = '';
+        bubble.classList.add('vtx-rating-bubble--thanks');
         const thanks = document.createElement('div');
-        thanks.className = 'voltimax-chat-rating__thanks';
-        thanks.textContent = 'Thank you!' + ' \uD83D\uDE4F';
-        overlay.appendChild(thanks);
-        setTimeout(() => this._doClose(), 1200);
+        thanks.className = 'vtx-rating-bubble__thanks';
+        thanks.textContent = 'Danke! \uD83D\uDE4F';
+        bubble.appendChild(thanks);
+
+        // After 1s, collapse into the chat bubble
+        setTimeout(() => {
+            this._collapseRatingBubble(bubble);
+        }, 1200);
+    }
+
+    _collapseRatingBubble(bubble) {
+        bubble.style.animation = 'vtx-rating-collapse 0.35s cubic-bezier(0.5, 0, 0.75, 0) forwards';
+        bubble.addEventListener('animationend', () => {
+            bubble.remove();
+            this._doClose();
+        }, { once: true });
     }
 
     // ── Widget chrome ─────────────────────────────────────────────────────────
@@ -412,17 +487,43 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         this._applyTheme(this.config.themeMode || 'light');
 
-        // Header
+        // Header — Dynamic Island style
         const header = document.createElement('div');
         header.className = 'voltimax-chat-widget__header';
 
+        // Compact view (default) — just status dot + title
+        const compactView = document.createElement('div');
+        compactView.className = 'voltimax-chat-widget__header-compact';
+
+        const statusDot = document.createElement('span');
+        statusDot.className = 'voltimax-chat-widget__status-dot';
+
+        const compactTitle = document.createElement('span');
+        compactTitle.className = 'voltimax-chat-widget__compact-title';
+        compactTitle.textContent = this.config.widgetTitle || 'Groot';
+
+        compactView.appendChild(statusDot);
+        compactView.appendChild(compactTitle);
+        header.appendChild(compactView);
+
+        // Expanded view (on hover) — left: expand + info, right: menu + min + close
+        const expandedView = document.createElement('div');
+        expandedView.className = 'voltimax-chat-widget__header-expanded';
+
+        // Left group: expand button + title/status
+        const leftGroup = document.createElement('div');
+        leftGroup.className = 'voltimax-chat-widget__header-left';
+
+        const expandBtn = document.createElement('button');
+        expandBtn.className = 'voltimax-chat-widget__expand';
+        expandBtn.setAttribute('aria-label', 'Expand');
+        expandBtn.title = 'Vergr\u00f6\u00dfern';
+        expandBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
+        expandBtn.addEventListener('click', () => this._toggleExpand());
+        leftGroup.appendChild(expandBtn);
+
         const headerInfo = document.createElement('div');
         headerInfo.className = 'voltimax-chat-widget__header-info';
-
-        const avatar = document.createElement('div');
-        avatar.className = 'voltimax-chat-widget__avatar';
-        // Safe: hardcoded SVG
-        avatar.innerHTML = '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>';
 
         const headerText = document.createElement('div');
         headerText.className = 'voltimax-chat-widget__header-text';
@@ -442,50 +543,78 @@ export default class VoltimaxChatPlugin extends Plugin {
         headerText.appendChild(titleEl);
         headerText.appendChild(status);
         headerText.appendChild(chatIdEl);
-        headerInfo.appendChild(avatar);
         headerInfo.appendChild(headerText);
-        header.appendChild(headerInfo);
+        leftGroup.appendChild(headerInfo);
+        expandedView.appendChild(leftGroup);
 
+        // Right group: three-dots menu + minimize + close
         const actions = document.createElement('div');
         actions.className = 'voltimax-chat-widget__header-actions';
 
-        // New chat (shown only during CHATTING)
-        const newChatBtn = document.createElement('button');
-        newChatBtn.className = 'voltimax-chat-widget__new-chat';
-        newChatBtn.setAttribute('aria-label', 'Neuer Chat');
-        newChatBtn.title = 'Neuer Chat';
-        newChatBtn.style.display = 'none';
-        // Safe: hardcoded SVG
-        newChatBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 101.056-4.11L1 10"/></svg>';
-        newChatBtn.addEventListener('click', () => this._startNewChat());
-        actions.appendChild(newChatBtn);
+        // Three-dots menu button + dropdown
+        // Three-dots menu — button stays in header, dropdown on document.body
+        const menuBtn = document.createElement('button');
+        menuBtn.setAttribute('aria-label', 'Men\u00fc');
+        menuBtn.title = 'Men\u00fc';
+        menuBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg>';
+        actions.appendChild(menuBtn);
 
-        // Copy transcript (shown only during CHATTING)
-        const copyBtn = document.createElement('button');
-        copyBtn.className = 'voltimax-chat-widget__copy';
-        copyBtn.setAttribute('aria-label', 'Transkript kopieren');
-        copyBtn.title = 'Transkript kopieren';
-        copyBtn.style.display = 'none';
-        // Safe: hardcoded SVG
-        copyBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
-        copyBtn.addEventListener('click', () => this._copyTranscript());
-        actions.appendChild(copyBtn);
+        const menuDropdown = document.createElement('div');
+        menuDropdown.className = 'vtx-header-menu__dropdown';
+        menuDropdown.style.cssText = 'display:none;position:fixed;z-index:200000;';
+
+        const newChatItem = document.createElement('button');
+        newChatItem.className = 'vtx-header-menu__item voltimax-chat-widget__new-chat';
+        newChatItem.style.display = 'none';
+        newChatItem.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 101.056-4.11L1 10"/></svg><span>Neuer Chat</span>';
+        newChatItem.addEventListener('click', () => { menuDropdown.style.display = 'none'; this._startNewChat(); });
+        menuDropdown.appendChild(newChatItem);
+
+        const copyItem = document.createElement('button');
+        copyItem.className = 'vtx-header-menu__item voltimax-chat-widget__copy';
+        copyItem.style.display = 'none';
+        copyItem.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg><span>Transkript kopieren</span>';
+        copyItem.addEventListener('click', () => { menuDropdown.style.display = 'none'; this._copyTranscript(); });
+        menuDropdown.appendChild(copyItem);
+
+        document.body.appendChild(menuDropdown);
+        this._menuDropdown = menuDropdown;
+        this._menuBtn = menuBtn;
+
+        menuBtn.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            if (menuDropdown.style.display !== 'none') {
+                menuDropdown.style.display = 'none';
+                return;
+            }
+            var rect = menuBtn.getBoundingClientRect();
+            menuDropdown.style.top = (rect.bottom + 6) + 'px';
+            menuDropdown.style.right = (window.innerWidth - rect.right) + 'px';
+            menuDropdown.style.left = 'auto';
+            menuDropdown.style.display = 'block';
+        });
+
+        document.addEventListener('mousedown', (e) => {
+            if (menuDropdown.style.display !== 'none' && !menuBtn.contains(e.target) && !menuDropdown.contains(e.target)) {
+                menuDropdown.style.display = 'none';
+            }
+        });
 
         const minBtn = document.createElement('button');
         minBtn.setAttribute('aria-label', 'Minimize');
-        // Safe: hardcoded SVG
         minBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg>';
         minBtn.addEventListener('click', () => this._minimize());
         actions.appendChild(minBtn);
 
         const closeBtn = document.createElement('button');
         closeBtn.setAttribute('aria-label', 'Close');
-        // Safe: hardcoded SVG
         closeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>';
         closeBtn.addEventListener('click', () => this._close());
         actions.appendChild(closeBtn);
 
-        header.appendChild(actions);
+        expandedView.appendChild(actions);
+        header.appendChild(expandedView);
         widget.appendChild(header);
 
         const body = document.createElement('div');
@@ -608,17 +737,12 @@ export default class VoltimaxChatPlugin extends Plugin {
         avatarName.className = 'vtx-home__avatar-name';
         avatarName.textContent = 'Groot';
 
-        const welcomeTitle = document.createElement('div');
-        welcomeTitle.className = 'vtx-home__welcome-title';
-        welcomeTitle.textContent = this.config.welcomeMessage || 'Hallo! Wie kann ich dir helfen?';
-
         const welcomeSub = document.createElement('div');
         welcomeSub.className = 'vtx-home__welcome-sub';
         welcomeSub.textContent = 'Dein KI-Assistent f\u00fcr Voltimax';
 
         welcomeWrap.appendChild(avatarWrap);
         welcomeWrap.appendChild(avatarName);
-        welcomeWrap.appendChild(welcomeTitle);
         welcomeWrap.appendChild(welcomeSub);
         container.appendChild(welcomeWrap);
 
@@ -652,7 +776,6 @@ export default class VoltimaxChatPlugin extends Plugin {
                 this.token = null;
                 this.customerContext = null;
                 nameInput.value = '';
-                emailInput.value = '';
                 resumeBar.remove();
             });
 
@@ -676,19 +799,12 @@ export default class VoltimaxChatPlugin extends Plugin {
         nameInput.required = true;
         if (savedUser && savedUser.name) nameInput.value = savedUser.name;
 
-        const emailInput = document.createElement('input');
-        emailInput.className = 'vtx-home__identity-input';
-        emailInput.type = 'email';
-        emailInput.placeholder = 'Deine E-Mail';
-        if (savedUser && savedUser.email) emailInput.value = savedUser.email;
-
         identityFields.appendChild(nameInput);
-        identityFields.appendChild(emailInput);
         identity.appendChild(identityFields);
 
         container.appendChild(identity);
 
-        // Primary input area
+        // Primary input area — matches chat session input style
         const inputRow = document.createElement('div');
         inputRow.className = 'vtx-home__input-row';
 
@@ -697,7 +813,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         mainInput.placeholder = 'Wie kann ich dir helfen?';
 
         const sendBtn = document.createElement('button');
-        sendBtn.textContent = '\u27A4';
+        sendBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
 
         const doFreeText = () => {
             const text = mainInput.value.trim();
@@ -711,14 +827,32 @@ export default class VoltimaxChatPlugin extends Plugin {
                 return;
             }
 
-            this._pendingFreeText = text;
-            const email = emailInput.value.trim();
+            // Animate the message flying down
+            const inputRect = inputRow.getBoundingClientRect();
+            const flyMsg = document.createElement('div');
+            flyMsg.className = 'vtx-fly-message';
+            flyMsg.textContent = text;
+            flyMsg.style.position = 'fixed';
+            flyMsg.style.left = inputRect.left + 'px';
+            flyMsg.style.top = inputRect.top + 'px';
+            flyMsg.style.width = inputRect.width + 'px';
+            document.body.appendChild(flyMsg);
 
-            if (email) {
-                this._verifyAndStart('general', name, email, '');
-            } else {
-                this._anonymousVerifyAndStart('general');
-            }
+            // Target: bottom of widget body
+            const body = document.querySelector('.voltimax-chat-widget__body');
+            const targetY = body ? body.getBoundingClientRect().bottom - 40 : inputRect.top + 200;
+
+            requestAnimationFrame(() => {
+                flyMsg.style.transition = 'all 0.4s cubic-bezier(0.25, 1, 0.5, 1)';
+                flyMsg.style.top = targetY + 'px';
+                flyMsg.style.opacity = '0';
+                flyMsg.style.transform = 'scale(0.8)';
+            });
+            setTimeout(() => flyMsg.remove(), 500);
+
+            this._pendingFreeText = text;
+            mainInput.value = '';
+            this._anonymousVerifyAndStart('general');
         };
 
         mainInput.addEventListener('keydown', (e) => {
@@ -740,13 +874,17 @@ export default class VoltimaxChatPlugin extends Plugin {
             '\uD83D\uDCE6 Bestellstatus',
             '\uD83D\uDD0B Produktsuche',
             '\uD83D\uDE97 Fahrzeug-Batterie',
-            '\u21A9\uFE0F Retoure',
-            '\uD83D\uDE9A Versand',
-            '\uD83E\uDDFE Rechnung',
+            '\u21A9\uFE0F Retoure & Erstattung',
+            '\uD83D\uDE9A Versand & Lieferzeit',
+            '\uD83E\uDDFE Rechnung anfordern',
             '\u267B\uFE0F Batteriepfand',
             '\uD83C\uDFAB Ticket-Status',
             '\uD83D\uDCC4 R\u00fcckgaberecht',
-            '\uD83D\uDCAC Support',
+            '\uD83D\uDCAC Support kontaktieren',
+            '\uD83D\uDCB3 Zahlungsstatus',
+            '\uD83D\uDD12 Mein Konto',
+            '\u26A0\uFE0F Problem melden',
+            '\uD83D\uDD0C Zubeh\u00f6r',
         ];
         this._renderHomeSuggestions(suggestionsContainer, defaultSuggestions, mainInput, doFreeText);
         container.appendChild(suggestionsContainer);
@@ -776,7 +914,6 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         // Store references for later use
         this._homeNameInput = nameInput;
-        this._homeEmailInput = emailInput;
     }
 
     _renderHomeSuggestions(container, suggestions, inputEl, submitFn) {
@@ -891,7 +1028,6 @@ export default class VoltimaxChatPlugin extends Plugin {
 
     _onSubTopicClick(topicId, subTopicId, tier) {
         const name = this._homeNameInput ? this._homeNameInput.value.trim() : '';
-        const email = this._homeEmailInput ? this._homeEmailInput.value.trim() : '';
 
         if (!name) {
             // Name is required — highlight the field
@@ -914,26 +1050,14 @@ export default class VoltimaxChatPlugin extends Plugin {
         }
 
         if (tier === 0) {
-            // Tier 0: use name/email from home fields
-            if (email) {
-                this._verifyAndStart(subTopicId, name, email, '');
-            } else {
-                this._anonymousVerifyAndStart(subTopicId);
-            }
+            // Tier 0: anonymous start, no email needed
+            this._anonymousVerifyAndStart(subTopicId);
         } else if (tier === 1) {
-            // Tier 1: needs name + email
-            if (email) {
-                this._verifyAndStart(subTopicId, name, email, '');
-            } else {
-                this._showAccountVerifyForm(subTopicId);
-            }
+            // Tier 1: needs identity — show account verify form
+            this._showAccountVerifyForm(subTopicId);
         } else if (tier === 2) {
-            // Tier 2: verify identity first, then show order form
-            if (email) {
-                this._verifyAndStart(subTopicId, name, email, '');
-            } else {
-                this._showOrderVerifyForm(subTopicId);
-            }
+            // Tier 2: needs order — show order verify form
+            this._showOrderVerifyForm(subTopicId);
         }
     }
 
@@ -994,7 +1118,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             errorDiv.textContent = '';
 
             const name = (this._homeNameInput ? this._homeNameInput.value.trim() : '') || 'Guest';
-            const verifyEmail = (this._homeEmailInput ? this._homeEmailInput.value.trim() : '') || 'guest_' + Date.now() + '@voltimax.chat';
+            const verifyEmail = '';
 
             this.httpClient.post(this.options.consentUrl, JSON.stringify({
                 name: name, email: verifyEmail,
@@ -1071,12 +1195,9 @@ export default class VoltimaxChatPlugin extends Plugin {
         emailInput.placeholder = 'Your email';
         emailInput.required = true;
 
-        // Pre-fill from home identity fields
+        // Pre-fill name from home identity field
         if (this._homeNameInput && this._homeNameInput.value.trim()) {
             nameInput.value = this._homeNameInput.value.trim();
-        }
-        if (this._homeEmailInput && this._homeEmailInput.value.trim()) {
-            emailInput.value = this._homeEmailInput.value.trim();
         }
 
         fields.appendChild(nameInput);
@@ -1171,8 +1292,8 @@ export default class VoltimaxChatPlugin extends Plugin {
         body.textContent = '';
         body.appendChild(loader);
 
-        const guestName = 'Guest';
-        const guestEmail = 'guest_' + Date.now() + '@voltimax.chat';
+        const guestName = (this._homeNameInput && this._homeNameInput.value.trim()) || 'Guest';
+        const guestEmail = '';
 
         this.httpClient.post(this.options.consentUrl, JSON.stringify({
             name: guestName, email: guestEmail,
@@ -1828,7 +1949,21 @@ export default class VoltimaxChatPlugin extends Plugin {
                 });
             }
         } else if (data.type === 'error') {
-            this._addMessage('ai', data.message || 'An error occurred.');
+            var errMsg = data.message || 'An error occurred.';
+
+            // Auth/token errors: stop reconnecting, clear stale session, go back to home
+            if (errMsg.indexOf('401') !== -1 || errMsg.indexOf('Authentication') !== -1 || errMsg.indexOf('Token') !== -1) {
+                this._sessionClosed = true; // prevent reconnect loop
+                clearTimeout(this._reconnectTimer);
+                if (this.ws) { this.ws.close(); this.ws = null; }
+                this._clearSession();
+                this.token = null;
+                this.state = 'OPEN';
+                this._showHome(null);
+                return;
+            }
+
+            this._addMessage('ai', errMsg);
         }
     }
 
@@ -1904,6 +2039,13 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (streaming) streaming.classList.remove('is-streaming');
 
         if (sender === 'ai') {
+            // Update last user message status to "Read"
+            if (this._lastUserStatusEl) {
+                this._lastUserStatusEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/><polyline points="14 6 3 17"/></svg> Gelesen';
+                this._lastUserStatusEl.classList.add('is-read');
+                this._lastUserStatusEl = null;
+            }
+
             const aiMessageId = messageId || this._generateId();
 
             // Row structure: avatar | [name + bubble + feedback]
@@ -1964,6 +2106,13 @@ export default class VoltimaxChatPlugin extends Plugin {
             timeEl.textContent = this._formatTime(new Date());
             msg.appendChild(timeEl);
 
+            // Delivery status
+            const statusEl = document.createElement('span');
+            statusEl.className = 'voltimax-chat-message__status';
+            statusEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Gesendet';
+            msg.appendChild(statusEl);
+            this._lastUserStatusEl = statusEl;
+
             wrapper.appendChild(msg);
             messages.appendChild(wrapper);
             messages.scrollTop = messages.scrollHeight;
@@ -2021,6 +2170,30 @@ export default class VoltimaxChatPlugin extends Plugin {
             badge.textContent = this._unreadCount > 9 ? '9+' : String(this._unreadCount);
             badge.style.display = '';
         }
+        // Show floating notification toast
+        this._showUnreadToast();
+    }
+
+    _showUnreadToast() {
+        // Remove existing toast
+        const existing = document.querySelector('.voltimax-chat-toast');
+        if (existing) existing.remove();
+
+        const toast = document.createElement('div');
+        toast.className = 'voltimax-chat-toast';
+        const posClass = this.config?.widgetPosition === 'bottom-left' ? 'voltimax-chat-toast--bottom-left' : 'voltimax-chat-toast--bottom-right';
+        toast.classList.add(posClass);
+
+        const count = this._unreadCount;
+        toast.textContent = count === 1 ? '1 neue Nachricht' : `${count} neue Nachrichten`;
+        toast.addEventListener('click', () => {
+            toast.remove();
+            this._unminimize();
+        });
+        document.body.appendChild(toast);
+
+        // Auto-dismiss after 4s
+        setTimeout(() => { if (toast.parentNode) toast.remove(); }, 4000);
     }
 
     // ── Sub-card chips in chat (kept for Server B responses) ──────────────────
@@ -2103,6 +2276,11 @@ export default class VoltimaxChatPlugin extends Plugin {
     // ── Typing indicator ──────────────────────────────────────────────────────
 
     _showTypingIndicator() {
+        // Update last user message status to "Delivered"
+        if (this._lastUserStatusEl) {
+            this._lastUserStatusEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/><polyline points="14 6 3 17" opacity="0.4"/></svg> Zugestellt';
+        }
+
         const messages = document.querySelector('.voltimax-chat-window__messages');
         if (!messages || messages.querySelector('.voltimax-chat-typing')) return;
 
