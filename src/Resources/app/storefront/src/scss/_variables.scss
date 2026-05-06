@@ -1,40 +1,46 @@
 // ── Theme: Voltimax Signature ─────────────────────────────────────────────────
-// Deep indigo (#4338CA) → gold (#F3B664) gradient — brand identity
-// Premium, distinctive, unmistakably Voltimax
+// Deep indigo (#4338CA) → gold (#D4A04A) gradient — brand identity
+// LiveChat-inspired compact, glassmorphic design
 
 // ── Layout ────────────────────────────────────────────────────────────────────
-$vtx-widget-width:    380px;
-$vtx-widget-height:   580px;
-$vtx-bubble-size:     60px;
-$vtx-border-radius:   20px;
-$vtx-msg-radius:      18px;
-$vtx-spacing:         20px;
+$vtx-widget-width:    370px;
+$vtx-widget-height:   600px;
+$vtx-bubble-size:     56px;
+$vtx-border-radius:   16px;
+$vtx-msg-radius:      16px;
+$vtx-spacing:         16px;
 $vtx-bottom-offset:   80px;
-$vtx-font-size:       14px;
-$vtx-header-height:   72px;
+$vtx-font-size:       13.5px;
+$vtx-header-height:   56px;
 $vtx-z-index:         99999;
 
 // ── Light palette ─────────────────────────────────────────────────────────────
-$vtx-bg:              #FAFAF8;
-$vtx-bg-secondary:    #F9F6F0;
-$vtx-bg-hover:        #F3EDE2;
-$vtx-text:            #1E1B4B;
-$vtx-text-secondary:  #6B7280;
-$vtx-text-muted:      #9CA3AF;
-$vtx-border:          #E8E4DC;
-$vtx-shadow-color:    rgba(67, 56, 202, 0.15);
+$vtx-bg:              #ffffff;
+$vtx-bg-secondary:    #f8f9fc;
+$vtx-bg-hover:        #f1f3f9;
+$vtx-text:            #1a1d26;
+$vtx-text-secondary:  #64748b;
+$vtx-text-muted:      #94a3b8;
+$vtx-border:          #e2e8f0;
+$vtx-shadow-color:    rgba(67, 56, 202, 0.12);
 
 // ── Message colors ────────────────────────────────────────────────────────────
 $vtx-user-msg-bg:     var(--vtx-primary-start, #4338CA);
 $vtx-user-msg-text:   #ffffff;
-$vtx-ai-msg-bg:       #F7F5EF;
-$vtx-ai-msg-text:     #1E1B4B;
+$vtx-ai-msg-bg:       rgba(241, 245, 249, 0.75);
+$vtx-ai-msg-text:     #1a1d26;
 
 // ── Dark palette ──────────────────────────────────────────────────────────────
-$vtx-dark-bg:         #0E0C18;
-$vtx-dark-surface:    #171424;
-$vtx-dark-surface2:   #201D30;
-$vtx-dark-border:     #2E2A45;
-$vtx-dark-text:       #EDE8E0;
-$vtx-dark-secondary:  #A8A090;
-$vtx-dark-ai-msg:     #1C1928;
+$vtx-dark-bg:         #0c0f1a;
+$vtx-dark-surface:    #151929;
+$vtx-dark-surface2:   #1c2137;
+$vtx-dark-border:     #262d45;
+$vtx-dark-text:       #e8eaf0;
+$vtx-dark-secondary:  #8892a8;
+$vtx-dark-ai-msg:     #171c2e;
+
+// ── Glassmorphism tokens ──────────────────────────────────────────────────────
+$vtx-glass-bg:        rgba(255, 255, 255, 0.72);
+$vtx-glass-border:    rgba(255, 255, 255, 0.2);
+$vtx-glass-blur:      20px;
+$vtx-glass-shadow:    0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
