@@ -6,50 +6,57 @@
 }
 
 @keyframes vtx-widget-in {
-    from {
+    0% {
         opacity: 0;
-        transform: translateY(24px) scale(0.96);
+        transform: scale(0.15);
+        border-radius: 50%;
     }
-    to {
+    50% {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        border-radius: 24px;
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+        border-radius: 16px;
     }
 }
 
 @keyframes vtx-widget-out {
     from {
         opacity: 1;
-        transform: translateY(0) scale(1);
+        transform: scale(1);
     }
     to {
         opacity: 0;
-        transform: translateY(16px) scale(0.96);
+        transform: scale(0.15);
+        border-radius: 50%;
     }
 }
 
 @keyframes vtx-msg-in-user {
-    from { opacity: 0; transform: translateX(12px) scale(0.95); }
+    from { opacity: 0; transform: translateX(8px) scale(0.97); }
     to   { opacity: 1; transform: translateX(0) scale(1); }
 }
 
 @keyframes vtx-msg-in-ai {
-    from { opacity: 0; transform: translateX(-12px) scale(0.95); }
+    from { opacity: 0; transform: translateX(-8px) scale(0.97); }
     to   { opacity: 1; transform: translateX(0) scale(1); }
 }
 
 @keyframes vtx-card-in {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes vtx-pulse-ring {
-    0%   { transform: scale(1); opacity: 0.6; }
-    70%  { transform: scale(1.5); opacity: 0; }
-    100% { transform: scale(1.5); opacity: 0; }
+    0%   { transform: scale(1); opacity: 0.5; }
+    70%  { transform: scale(1.45); opacity: 0; }
+    100% { transform: scale(1.45); opacity: 0; }
 }
 
 @keyframes vtx-dots {
-    0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+    0%, 80%, 100% { transform: scale(0.6); opacity: 0.35; }
     40%            { transform: scale(1); opacity: 1; }
 }
 
@@ -59,7 +66,7 @@
 }
 
 @keyframes vtx-fade-in {
-    from { opacity: 0; transform: scale(0.85); }
+    from { opacity: 0; transform: scale(0.9); }
     to   { opacity: 1; transform: scale(1); }
 }
 
@@ -69,29 +76,40 @@
 }
 
 @keyframes vtx-fade-slide-in {
-    from { opacity: 0; transform: translateY(-6px); }
+    from { opacity: 0; transform: translateY(-4px); }
     to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes vtx-island-shimmer {
+    0%   { background-position: 0% 50%; }
+    50%  { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes vtx-dot-pulse {
+    0%, 100% { box-shadow: 0 0 4px rgba(74, 222, 128, 0.4); }
+    50%      { box-shadow: 0 0 8px rgba(74, 222, 128, 0.7); }
 }
 
 // ── Applied ───────────────────────────────────────────────────────────────────
 
 .voltimax-chat-widget {
-    animation: vtx-widget-in 0.32s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation: vtx-widget-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
 .voltimax-chat-message {
-    &--user { animation: vtx-msg-in-user 0.22s ease-out both; }
-    &--ai   { animation: vtx-msg-in-ai   0.22s ease-out both; }
+    &--user { animation: vtx-msg-in-user 0.2s cubic-bezier(0.25, 1, 0.5, 1) both; }
+    &--ai   { animation: vtx-msg-in-ai   0.2s cubic-bezier(0.25, 1, 0.5, 1) both; }
 }
 
 .voltimax-chat-ai-row {
-    animation: vtx-msg-in-ai 0.22s ease-out both;
+    animation: vtx-msg-in-ai 0.2s cubic-bezier(0.25, 1, 0.5, 1) both;
 }
 
 .voltimax-chat-topic-card {
     @for $i from 1 through 8 {
         &:nth-child(#{$i}) {
-            animation: vtx-card-in 0.3s ease-out #{$i * 0.05}s both;
+            animation: vtx-card-in 0.25s ease-out #{$i * 0.04}s both;
         }
     }
 }
