@@ -3,31 +3,31 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 10px 14px;
-    margin-bottom: 8px;
-    background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(99, 102, 241, 0.03));
-    border: 1px solid rgba(99, 102, 241, 0.15);
-    border-radius: 10px;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+    background: rgba(67, 56, 202, 0.04);
+    border: 1px solid rgba(67, 56, 202, 0.08);
+    border-radius: 8px;
     animation: vtx-fade-slide-in 0.3s ease;
 
     &--loading {
         justify-content: center;
-        padding: 8px;
+        padding: 6px;
     }
 
     &__info {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
         color: var(--vtx-primary, #6366f1);
     }
 
     &__actions {
         display: flex;
-        gap: 6px;
+        gap: 4px;
     }
 
     &__btn {
-        padding: 5px 12px;
+        padding: 4px 10px;
         border-radius: 6px;
         font-size: 11px;
         font-weight: 600;
@@ -43,9 +43,9 @@
         }
 
         &--secondary {
-            background: rgba(0, 0, 0, 0.06);
-            color: #6b7280;
-            &:hover { background: rgba(0, 0, 0, 0.1); }
+            background: rgba(0, 0, 0, 0.04);
+            color: $vtx-text-secondary;
+            &:hover { background: rgba(0, 0, 0, 0.08); }
         }
     }
 }
@@ -53,13 +53,13 @@
 /* Dark mode */
 .voltimax-chat-widget--dark {
     .vtx-resume-bar {
-        background: rgba(99, 102, 241, 0.12);
-        border-color: rgba(99, 102, 241, 0.25);
+        background: rgba(67, 56, 202, 0.08);
+        border-color: rgba(67, 56, 202, 0.18);
 
         &__btn--secondary {
-            background: rgba(255, 255, 255, 0.08);
-            color: #94a3b8;
-            &:hover { background: rgba(255, 255, 255, 0.12); }
+            background: rgba(255, 255, 255, 0.06);
+            color: $vtx-dark-secondary;
+            &:hover { background: rgba(255, 255, 255, 0.1); }
         }
     }
 }
@@ -68,8 +68,8 @@
 .vtx-choices {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    padding: 8px 0;
+    gap: 5px;
+    padding: 6px 0;
     animation: vtx-fade-slide-in 0.3s ease;
 }
 
@@ -77,9 +77,9 @@
     display: inline-flex;
     align-items: center;
     padding: 4px 10px;
-    border: 1px solid rgba(99, 102, 241, 0.2);
+    border: 1px solid rgba(67, 56, 202, 0.12);
     border-radius: 999px;
-    background: rgba(99, 102, 241, 0.03);
+    background: rgba(67, 56, 202, 0.03);
     color: var(--vtx-primary, #6366f1);
     font-size: 11px;
     font-weight: 500;
@@ -89,233 +89,226 @@
     white-space: nowrap;
 
     &:hover {
-        background: rgba(99, 102, 241, 0.1);
+        background: rgba(67, 56, 202, 0.08);
         border-color: var(--vtx-primary, #6366f1);
+        transform: translateY(-1px);
     }
 
-    &:active {
-        transform: scale(0.97);
-    }
+    &:active { transform: scale(0.97); }
 
     &--secondary {
-        border-color: rgba(0, 0, 0, 0.12);
-        background: rgba(0, 0, 0, 0.03);
-        color: #6b7280;
-        font-size: 11px;
-        padding: 6px 12px;
+        border-color: rgba(0, 0, 0, 0.08);
+        background: rgba(0, 0, 0, 0.02);
+        color: $vtx-text-secondary;
+        padding: 4px 10px;
 
         &:hover {
-            background: rgba(0, 0, 0, 0.06);
-            border-color: rgba(0, 0, 0, 0.2);
-            color: #374151;
+            background: rgba(0, 0, 0, 0.05);
+            border-color: rgba(0, 0, 0, 0.15);
+            color: $vtx-text;
             box-shadow: none;
         }
     }
 
     &--danger {
-        border-color: rgba(239, 68, 68, 0.3);
-        background: rgba(239, 68, 68, 0.06);
+        border-color: rgba(239, 68, 68, 0.2);
+        background: rgba(239, 68, 68, 0.03);
         color: #dc2626;
 
         &:hover {
-            background: rgba(239, 68, 68, 0.12);
+            background: rgba(239, 68, 68, 0.08);
             border-color: #ef4444;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
         }
     }
 }
 
 /* ── Input prompt card ──────────────────────────────────────── */
 .vtx-input-prompt {
-    margin: 8px 0;
-    padding: 16px;
+    margin: 6px 0;
+    padding: 12px;
     background: #fff;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 14px;
+    border: 1px solid $vtx-border;
+    border-radius: 12px;
     animation: vtx-fade-slide-in 0.3s ease;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
 
     &__field-row {
-        margin-bottom: 10px;
+        margin-bottom: 8px;
     }
 
     &__field-label {
         display: block;
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 600;
-        color: #6b7280;
-        margin-bottom: 4px;
+        color: $vtx-text-muted;
+        margin-bottom: 3px;
         text-transform: uppercase;
         letter-spacing: 0.03em;
     }
 
     &__label {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 600;
-        color: #374151;
-        margin-bottom: 10px;
+        color: $vtx-text;
+        margin-bottom: 8px;
         display: flex;
         align-items: center;
-        gap: 6px;
+        gap: 5px;
 
         &::before {
             content: '\1F4E6';
-            font-size: 16px;
+            font-size: 14px;
         }
     }
 
     &__row {
         display: flex;
-        gap: 8px;
+        gap: 6px;
     }
 
     &__input {
         flex: 1;
-        padding: 10px 14px;
-        border: 1.5px solid #e5e7eb;
-        border-radius: 10px;
-        font-size: 14px;
+        padding: 8px 10px;
+        border: 1px solid $vtx-border;
+        border-radius: 8px;
+        font-size: 13px;
         font-family: inherit;
         outline: none;
         transition: border-color 0.2s, box-shadow 0.2s;
+        background: $vtx-bg-secondary;
 
         &:focus {
             border-color: var(--vtx-primary, #6366f1);
-            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(67, 56, 202, 0.06);
         }
 
         &:disabled {
-            background: #f9fafb;
-            color: #9ca3af;
+            background: $vtx-bg-secondary;
+            color: $vtx-text-muted;
         }
     }
 
     &__submit {
-        padding: 10px 18px;
+        padding: 8px 14px;
         background: var(--vtx-primary, #6366f1);
         color: #fff;
         border: none;
-        border-radius: 10px;
-        font-size: 13px;
+        border-radius: 8px;
+        font-size: 12px;
         font-weight: 600;
         cursor: pointer;
         white-space: nowrap;
         transition: opacity 0.2s, transform 0.2s;
         font-family: inherit;
 
-        &:hover { opacity: 0.9; transform: translateY(-1px); }
-        &:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        &:hover { transform: translateY(-1px); }
+        &:disabled { opacity: 0.45; cursor: not-allowed; transform: none; }
     }
 
     &__error {
-        font-size: 12px;
+        font-size: 11px;
         color: #ef4444;
-        margin-top: 6px;
+        margin-top: 4px;
         min-height: 0;
     }
 }
 
 /* ── Info card ──────────────────────────────────────────────── */
 .vtx-info-card {
-    margin: 8px 4px;
+    margin: 6px 2px;
     background: #fff !important;
-    border: 1.5px solid #e5e7eb;
-    border-radius: 14px;
+    border: 1px solid $vtx-border;
+    border-radius: 12px;
     overflow: visible;
     animation: vtx-fade-slide-in 0.3s ease;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
     display: block;
     width: auto;
-
-    // Prevent flex collapse inside messages container
     flex-shrink: 0;
 
     &--verified {
-        border-color: rgba(16, 185, 129, 0.4);
-        border-width: 2px;
-        background: #f0fdf4 !important;
+        border-color: rgba(16, 185, 129, 0.3);
+        border-width: 1.5px;
+        background: rgba(240, 253, 244, 0.6) !important;
     }
 
     &--error {
-        border-color: rgba(239, 68, 68, 0.3);
-        background: #fff;
+        border-color: rgba(239, 68, 68, 0.2);
     }
 
     &--error &__header {
         color: #dc2626;
-        background: rgba(239, 68, 68, 0.06);
+        background: rgba(239, 68, 68, 0.04);
     }
 
     &__error-body {
-        padding: 12px 16px;
-        font-size: 13px;
-        color: #374151;
-        line-height: 1.5;
-
-        p { margin: 0 0 10px; }
+        padding: 10px 12px;
+        font-size: 12px;
+        color: $vtx-text;
+        line-height: 1.45;
+        p { margin: 0 0 8px; }
     }
 
     &__error-tips {
         margin: 0;
-        padding-left: 18px;
-        font-size: 12px;
-        color: #6b7280;
-
-        li { margin-bottom: 4px; }
+        padding-left: 16px;
+        font-size: 11px;
+        color: $vtx-text-secondary;
+        li { margin-bottom: 3px; }
     }
 
-
     &__header {
-        padding: 14px 16px;
-        font-size: 14px;
+        padding: 10px 12px;
+        font-size: 13px;
         font-weight: 700;
-        border-bottom: 1px solid #f3f4f6;
+        border-bottom: 1px solid rgba(0,0,0,0.04);
         display: block;
-        min-height: 20px;
+        min-height: 18px;
     }
 
     &--verified &__header {
         color: #059669;
-        background: rgba(16, 185, 129, 0.08);
-        border-radius: 12px 12px 0 0;
+        background: rgba(16, 185, 129, 0.06);
+        border-radius: 11px 11px 0 0;
     }
 
     &__grid {
         display: grid;
-        grid-template-columns: 80px 1fr;
-        gap: 4px 12px;
-        padding: 14px 16px;
+        grid-template-columns: 72px 1fr;
+        gap: 3px 10px;
+        padding: 10px 12px;
     }
 
     &__label {
-        font-size: 11px;
+        font-size: 10px;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.04em;
-        color: #9ca3af;
+        color: $vtx-text-muted;
         padding: 2px 0;
     }
 
     &__value {
-        font-size: 13px;
+        font-size: 12px;
         font-weight: 500;
-        color: #111827;
+        color: $vtx-text;
         padding: 2px 0;
     }
 
     &__actions {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        padding: 12px 16px;
-        border-top: 1px solid #f3f4f6;
+        gap: 5px;
+        padding: 8px 12px;
+        border-top: 1px solid rgba(0,0,0,0.04);
     }
 
     &__empty {
-        padding: 24px 16px;
+        padding: 18px 12px;
         text-align: center;
-        color: #9ca3af;
-        font-size: 13px;
+        color: $vtx-text-muted;
+        font-size: 12px;
     }
 }
 
@@ -325,53 +318,53 @@
     align-items: center;
     justify-content: space-between;
     width: 100%;
-    padding: 12px 16px;
+    padding: 8px 12px;
     border: none;
-    border-bottom: 1px solid #f3f4f6;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
     background: none;
     cursor: pointer;
-    transition: background 0.2s;
+    transition: background 0.15s;
     font-family: inherit;
     text-align: left;
 
     &:last-child { border-bottom: none; }
-    &:hover { background: rgba(99, 102, 241, 0.03); }
+    &:hover { background: rgba(67, 56, 202, 0.02); }
 
     &__info {
         display: flex;
         flex-direction: column;
-        gap: 2px;
+        gap: 1px;
     }
 
     &__number {
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 700;
         color: var(--vtx-primary, #6366f1);
     }
 
     &__meta {
-        font-size: 12px;
-        color: #6b7280;
+        font-size: 11px;
+        color: $vtx-text-secondary;
     }
 
     &__date {
-        font-size: 11px;
-        color: #9ca3af;
+        font-size: 10px;
+        color: $vtx-text-muted;
         white-space: nowrap;
     }
 }
 
-/* ── Suggestion chips (horizontal scrollable + collapsible) ── */
+/* ── Suggestion chips ─────────────────────────────────────────── */
 .vtx-suggestions-wrap {
     display: flex;
     align-items: center;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    background: rgba(248, 249, 252, 0.9);
+    border-top: none;
+    background: transparent;
     animation: vtx-fade-slide-in 0.2s ease;
     padding: 0;
     overflow: hidden;
     transition: max-height 0.2s ease, padding 0.2s ease, border-width 0.2s ease;
-    max-height: 50px;
+    max-height: 44px;
 
     &.vtx-suggestions-wrap--collapsed {
         max-height: 0;
@@ -382,15 +375,15 @@
 
 .vtx-suggestions-toggle {
     position: absolute;
-    right: 8px;
+    right: 6px;
     bottom: 100%;
-    width: 20px;
-    height: 16px;
-    border: 1px solid rgba(0, 0, 0, 0.08);
+    width: 18px;
+    height: 14px;
+    border: 1px solid rgba(0, 0, 0, 0.06);
     border-bottom: none;
-    background: rgba(248, 249, 252, 0.95);
-    color: #9ca3af;
-    font-size: 9px;
+    background: transparent;
+    color: $vtx-text-muted;
+    font-size: 8px;
     cursor: pointer;
     padding: 0;
     line-height: 1;
@@ -399,45 +392,45 @@
 
     &:hover {
         color: var(--vtx-primary, #6366f1);
-        background: rgba(99, 102, 241, 0.08);
+        background: rgba(67, 56, 202, 0.06);
     }
 }
 
 .vtx-suggestions-scroll {
     display: flex;
-    gap: 5px;
-    padding: 6px 8px;
+    gap: 4px;
+    padding: 5px 6px;
     overflow-x: auto;
     overflow-y: hidden;
     scroll-behavior: smooth;
     -webkit-overflow-scrolling: touch;
     width: 100%;
-
-    /* Hide scrollbar but keep scroll */
     scrollbar-width: none;
     &::-webkit-scrollbar { display: none; }
 }
 
-/* Legacy wrapper (cards use this) */
+/* Legacy wrapper */
 .vtx-suggestions {
     display: flex;
-    gap: 5px;
-    padding: 6px 10px;
+    gap: 4px;
+    padding: 5px 8px;
     overflow-x: auto;
     overflow-y: hidden;
-    border-top: 1px solid rgba(0, 0, 0, 0.06);
-    background: rgba(248, 249, 252, 0.8);
+    border-top: none;
+    background: transparent;
     scrollbar-width: none;
     &::-webkit-scrollbar { display: none; }
 }
 
 .vtx-suggestion-chip {
     padding: 4px 10px;
-    border: 1px solid #e5e7eb;
+    border: 1px solid rgba(67, 56, 202, 0.2);
     border-radius: 999px;
-    background: #fff;
-    color: #374151;
-    font-size: 11px;
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    color: $vtx-text;
+    font-size: 10px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
@@ -448,70 +441,68 @@
     &:hover {
         border-color: var(--vtx-primary, #6366f1);
         color: var(--vtx-primary, #6366f1);
-        background: rgba(99, 102, 241, 0.04);
+        background: rgba(67, 56, 202, 0.06);
     }
 }
 
 /* ── Dark mode overrides ────────────────────────────────────── */
 .voltimax-chat-widget--dark {
     .vtx-choice-btn {
-        background: rgba(99, 102, 241, 0.1);
-        border-color: rgba(99, 102, 241, 0.3);
+        background: rgba(67, 56, 202, 0.08);
+        border-color: rgba(67, 56, 202, 0.2);
         color: #a5b4fc;
-
-        &:hover {
-            background: rgba(99, 102, 241, 0.2);
-        }
+        &:hover { background: rgba(67, 56, 202, 0.15); }
     }
 
     .vtx-input-prompt {
-        background: #1e293b;
-        border-color: #334155;
+        background: $vtx-dark-surface;
+        border-color: $vtx-dark-border;
 
-        &__label { color: #e2e8f0; }
+        &__label { color: $vtx-dark-text; }
         &__input {
-            background: #0f172a;
-            border-color: #475569;
-            color: #e2e8f0;
+            background: $vtx-dark-bg;
+            border-color: $vtx-dark-border;
+            color: $vtx-dark-text;
         }
     }
 
     .vtx-info-card {
-        background: #1e293b;
-        border-color: #334155;
+        background: $vtx-dark-surface !important;
+        border-color: $vtx-dark-border;
 
-        &--verified { border-color: rgba(16, 185, 129, 0.3); }
-        &__header { border-color: #334155; color: #e2e8f0; }
-        &--verified .vtx-info-card__header { color: #34d399; background: rgba(16, 185, 129, 0.08); }
-        &__grid { color: #e2e8f0; }
-        &__label { color: #94a3b8; }
-        &__value { color: #f1f5f9; }
-        &__actions { border-color: #334155; }
+        &--verified { border-color: rgba(16, 185, 129, 0.25); }
+        &__header { border-color: $vtx-dark-border; color: $vtx-dark-text; }
+        &--verified .vtx-info-card__header { color: #34d399; background: rgba(16, 185, 129, 0.06); }
+        &__grid { color: $vtx-dark-text; }
+        &__label { color: $vtx-dark-secondary; }
+        &__value { color: $vtx-dark-text; }
+        &__actions { border-color: $vtx-dark-border; }
     }
 
     .vtx-order-row {
-        border-color: #334155;
-        &:hover { background: rgba(99, 102, 241, 0.06); }
+        border-color: $vtx-dark-border;
+        &:hover { background: rgba(67, 56, 202, 0.04); }
         &__number { color: #a5b4fc; }
-        &__meta { color: #94a3b8; }
-        &__date { color: #64748b; }
+        &__meta { color: $vtx-dark-secondary; }
+        &__date { color: darken($vtx-dark-secondary, 15%); }
     }
 
     .vtx-suggestions,
     .vtx-suggestions-wrap {
-        background: rgba(15, 23, 42, 0.8);
-        border-color: #334155;
+        background: transparent;
+        border-color: transparent;
     }
 
     .vtx-suggestions-toggle {
-        color: #64748b;
-        &:hover { color: #a5b4fc; background: rgba(99, 102, 241, 0.15); }
+        background: transparent;
+        color: $vtx-dark-secondary;
+        &:hover { color: #a5b4fc; }
     }
 
     .vtx-suggestion-chip {
-        background: #1e293b;
-        border-color: #475569;
-        color: #e2e8f0;
+        background: rgba(255, 255, 255, 0.06);
+        border-color: rgba(99, 102, 241, 0.25);
+        color: $vtx-dark-text;
 
         &:hover {
             background: rgba(99, 102, 241, 0.1);

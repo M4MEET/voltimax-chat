@@ -1,4 +1,4 @@
-// ── Topics screen (legacy structure kept for compat) ──────────────────────────
+// ── Topics screen (legacy) ────────────────────────────────────────────────────
 
 .voltimax-chat-topics {
     display: flex;
@@ -7,17 +7,17 @@
 
     &__welcome {
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 14px;
 
         &-title {
-            font-size: 17px;
+            font-size: 16px;
             font-weight: 700;
             color: $vtx-text;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
         }
 
         &-sub {
-            font-size: 13px;
+            font-size: 12px;
             color: $vtx-text-secondary;
         }
     }
@@ -25,7 +25,7 @@
     &__grid {
         display: grid;
         grid-template-columns: 1fr 1fr;
-        gap: 10px;
+        gap: 8px;
     }
 }
 
@@ -33,12 +33,11 @@
 
 .voltimax-chat-quickreplies {
     display: flex;
-    gap: 7px;
-    padding: 10px 14px;
+    gap: 5px;
+    padding: 6px 10px;
     overflow-x: auto;
     flex-shrink: 0;
     scrollbar-width: none;
-
     &::-webkit-scrollbar { display: none; }
 }
 
@@ -46,62 +45,63 @@
     display: inline-flex;
     align-items: center;
     white-space: nowrap;
-    padding: 7px 13px;
-    background: $vtx-bg-secondary;
-    border: 1.5px solid $vtx-border;
-    border-radius: 20px;
-    font-size: 12px;
+    padding: 5px 10px;
+    background: #fff;
+    border: 1px solid $vtx-border;
+    border-radius: 999px;
+    font-size: 11px;
     font-weight: 500;
-    color: var(--vtx-primary, #4f46e5);
+    color: $vtx-text;
     cursor: pointer;
-    transition: background 0.15s, border-color 0.15s, transform 0.15s;
+    transition: all 0.2s;
     flex-shrink: 0;
 
     &:hover {
-        background: $vtx-bg-hover;
         border-color: var(--vtx-primary, #4f46e5);
+        color: var(--vtx-primary, #4f46e5);
+        background: rgba(67,56,202,0.03);
         transform: translateY(-1px);
     }
-
     &:active { transform: translateY(0); }
 }
 
-// ── Topic chips (compact horizontal pills) ───────────────────────────────────
+// ── Home suggestion chips ────────────────────────────────────────────────────
 
 .vtx-topic-chips {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    padding: 0 4px;
+    gap: 4px;
+    padding: 0 2px;
 }
 
 .vtx-topic-chip {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 3px 8px;
-    border: 1px solid rgba(0,0,0,0.06);
-    border-radius: 12px;
-    background: #f8f9ff;
+    gap: 3px;
+    padding: 4px 8px;
+    border: 1px solid rgba(0,0,0,0.05);
+    border-radius: 999px;
+    background: $vtx-bg-secondary;
     font-size: 10px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s;
-    color: #4b5563;
+    color: $vtx-text-secondary;
     font-family: inherit;
     white-space: nowrap;
 
-    &__icon { font-size: 12px; line-height: 1; }
+    &__icon { font-size: 11px; line-height: 1; }
 
     &:hover {
         border-color: var(--vtx-primary, #6366f1);
-        background: rgba(99,102,241,0.06);
+        background: rgba(67,56,202,0.05);
         color: var(--vtx-primary, #6366f1);
+        transform: translateY(-1px);
     }
 
     &--active {
         border-color: var(--vtx-primary, #6366f1);
-        background: rgba(99,102,241,0.08);
+        background: rgba(67,56,202,0.06);
         color: var(--vtx-primary, #6366f1);
     }
 }
@@ -122,19 +122,19 @@
 .vtx-subtopics {
     display: flex;
     flex-wrap: wrap;
-    gap: 6px;
-    padding: 8px 4px;
+    gap: 5px;
+    padding: 6px 2px;
     animation: vtx-fade-slide-in 0.2s ease;
 }
 
 .vtx-subtopic-chip {
     display: inline-flex;
     align-items: center;
-    gap: 4px;
-    padding: 6px 11px;
-    border: 1px solid rgba(99,102,241,0.2);
-    border-radius: 16px;
-    background: rgba(99,102,241,0.04);
+    gap: 3px;
+    padding: 5px 10px;
+    border: 1px solid rgba(67,56,202,0.15);
+    border-radius: 999px;
+    background: rgba(67,56,202,0.03);
     font-size: 11px;
     font-weight: 500;
     color: var(--vtx-primary, #6366f1);
@@ -145,69 +145,62 @@
     &__icon { font-size: 12px; line-height: 1; }
 
     &:hover {
-        background: rgba(99,102,241,0.12);
+        background: rgba(67,56,202,0.08);
         transform: translateY(-1px);
     }
 }
 
-// ── Legacy topic card (kept for backward compat if server sends them) ────────
+// ── Legacy topic card ────────────────────────────────────────────────────────
 
 .voltimax-chat-topic-card {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     text-align: left;
-    padding: 16px 14px;
+    padding: 12px;
     background: $vtx-bg-secondary;
-    border: 1.5px solid $vtx-border;
-    border-radius: 14px;
+    border: 1px solid $vtx-border;
+    border-radius: 12px;
     cursor: pointer;
-    transition:
-        border-color 0.2s,
-        background 0.2s,
-        transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1),
-        box-shadow 0.2s;
+    transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
     position: relative;
     overflow: hidden;
 
     &:hover {
         border-color: var(--vtx-primary, #4f46e5);
         background: $vtx-bg-hover;
-        transform: translateY(-3px);
-        box-shadow: 0 8px 20px $vtx-shadow-color;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px $vtx-shadow-color;
     }
 
     &:active { transform: translateY(-1px); }
 
     &__icon {
-        font-size: 26px;
-        margin-bottom: 10px;
+        font-size: 22px;
+        margin-bottom: 6px;
         transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
-        position: relative;
         line-height: 1;
     }
 
     &__title {
         font-weight: 700;
-        font-size: 13px;
+        font-size: 12px;
         color: $vtx-text;
-        margin-bottom: 3px;
-        position: relative;
+        margin-bottom: 2px;
     }
 
     &__desc {
-        font-size: 11px;
+        font-size: 10px;
         color: $vtx-text-secondary;
-        line-height: 1.4;
-        position: relative;
+        line-height: 1.35;
     }
 
     &__arrow {
         position: absolute;
-        top: 14px;
-        right: 12px;
+        top: 12px;
+        right: 10px;
         color: var(--vtx-primary, #4f46e5);
-        font-size: 14px;
+        font-size: 12px;
         opacity: 0;
         transform: translateX(-4px);
         transition: opacity 0.2s, transform 0.2s;
