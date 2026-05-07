@@ -95,7 +95,11 @@ class JwtTokenService
 
     private function getSecret(): string
     {
-        return $this->secret ?? ($this->config?->getJwtSecret() ?? '');
+        $secret = $this->secret ?? ($this->config?->getJwtSecret() ?? '');
+        if ($secret === '') {
+            throw new \RuntimeException('VoltimaxChat: JWT secret is not configured. Set it in plugin settings.');
+        }
+        return $secret;
     }
 
     private function getTtl(): int
