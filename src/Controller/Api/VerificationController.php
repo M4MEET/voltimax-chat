@@ -66,7 +66,7 @@ class VerificationController extends AbstractController
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s.v');
         $this->connection->insert('voltimax_chat_consent_log', [
             'id' => Uuid::randomBytes(),
-            'customer_email' => $email ?: null,
+            'customer_email' => $email ?: '',
             'customer_name' => $name,
             'ip_address' => $request->getClientIp() ?? 'unknown',
             'consented_at' => $now,
