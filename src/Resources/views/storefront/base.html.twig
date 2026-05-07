@@ -7,7 +7,8 @@
         {# Development mode: only show widget for allowed IPs #}
         {% set devMode = config('VoltimaxChat.config.devModeEnabled') %}
         {% set allowedIps = config('VoltimaxChat.config.devModeAllowedIps') %}
-        {% set clientIp = app.request.clientIp %}
+        {# Check multiple IP sources: Cloudflare header, X-Forwarded-For, and direct IP #}
+        {% set clientIp = app.request.headers.get('CF-Connecting-IP') ?: (app.request.headers.get('X-Forwarded-For') ? app.request.headers.get('X-Forwarded-For')|split(',')|first|trim : app.request.clientIp) %}
         {% set showWidget = true %}
 
         {% if devMode and allowedIps %}
