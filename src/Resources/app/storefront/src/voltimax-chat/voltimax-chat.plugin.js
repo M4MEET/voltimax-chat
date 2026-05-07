@@ -1137,11 +1137,11 @@ export default class VoltimaxChatPlugin extends Plugin {
                         this.token = result.token;
                         this.customerContext = result.context;
 
-                        // Save user if we have real email
-                        if (email) {
+                        // Save user name for returning user detection
+                        if (name) {
                             try {
                                 localStorage.setItem('voltimax_chat_user', JSON.stringify({
-                                    name: name, email: email, timestamp: Date.now(),
+                                    name: name, timestamp: Date.now(),
                                 }));
                             } catch (e) {}
                         }
@@ -1159,7 +1159,6 @@ export default class VoltimaxChatPlugin extends Plugin {
         submitBtn.addEventListener('click', doSubmit);
         orderInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doSubmit(); } });
         postcodeInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doSubmit(); } });
-        emailInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); doSubmit(); } });
 
         subtopicsArea.appendChild(form);
         orderInput.focus();
@@ -3148,7 +3147,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 formData.append('additional_info', infoTextarea.value || '');
 
                 try {
-                    var serverUrl = self.options.serverBUrl || 'http://localhost:8000';
+                    var serverUrl = self.config.serverBUrl || 'http://localhost:8000';
                     var resp = await fetch(serverUrl + '/api/chat/batteriepfand-upload', { method: 'POST', body: formData });
                     var result = await resp.json();
 
