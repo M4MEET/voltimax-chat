@@ -38,6 +38,12 @@ class RateLimitMiddleware implements EventSubscriberInterface
     public function onKernelRequest(RequestEvent $event): void
     {
         $request = $event->getRequest();
+
+        // Only check bans on voltimax routes — don't interfere with the rest of the shop
+        if (strpos($request->getPathInfo(), '/voltimax/') !== 0) {
+            return;
+        }
+
         $ip = $request->getClientIp() ?? 'unknown';
 
         if ($this->isBanned($ip)) {
