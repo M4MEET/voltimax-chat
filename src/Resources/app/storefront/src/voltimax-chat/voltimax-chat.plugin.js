@@ -2373,15 +2373,18 @@ export default class VoltimaxChatPlugin extends Plugin {
                     input = document.createElement('textarea');
                     input.className = 'voltimax-chat-confirm__input voltimax-chat-confirm__textarea';
                     input.rows = 3;
-                    input.placeholder = field.label + '...';
+                    input.placeholder = field.label + ' *';
                 } else {
                     input = document.createElement('input');
                     input.className = 'voltimax-chat-confirm__input';
                     input.type = field.type || 'text';
-                    input.placeholder = field.label + '...';
+                    input.placeholder = field.label + ' *';
                 }
                 input.value = field.value || '';
+                input.required = true;
                 input.dataset.key = field.key;
+                // Clear error on input
+                input.addEventListener('input', () => { input.style.borderColor = ''; });
                 row.appendChild(input);
                 fieldInputs[field.key] = input;
             } else {
@@ -2416,12 +2419,24 @@ export default class VoltimaxChatPlugin extends Plugin {
         confirmBtn.addEventListener('click', () => {
             // Collect field values
             const fields = {};
+            let hasEmpty = false;
             for (const [key, el] of Object.entries(fieldInputs)) {
                 if (el instanceof HTMLElement) {
                     fields[key] = el.value;
+                    // Validate required editable fields
+                    if (!el.value.trim()) {
+                        el.style.borderColor = '#ef4444';
+                        hasEmpty = true;
+                    } else {
+                        el.style.borderColor = '';
+                    }
                 } else {
                     fields[key] = el.value;
                 }
+            }
+
+            if (hasEmpty) {
+                return; // Don't submit with empty fields
             }
 
             // Disable buttons, show loading
