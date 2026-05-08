@@ -2385,7 +2385,21 @@ export default class VoltimaxChatPlugin extends Plugin {
                 input.dataset.key = field.key;
                 // Clear error on input
                 input.addEventListener('input', () => { input.style.borderColor = ''; });
-                row.appendChild(input);
+
+                // Prefix support: fixed text + editable input in one row
+                if (field.prefix) {
+                    const prefixRow = document.createElement('div');
+                    prefixRow.style.cssText = 'display:flex;align-items:center;gap:0;';
+                    const prefixEl = document.createElement('span');
+                    prefixEl.style.cssText = 'font-size:12px;font-weight:600;color:#6b7280;white-space:nowrap;padding:6px 4px 6px 10px;background:#f8f9fc;border:1px solid #e2e8f0;border-right:none;border-radius:8px 0 0 8px;';
+                    prefixEl.textContent = field.prefix;
+                    input.style.borderRadius = '0 8px 8px 0';
+                    prefixRow.appendChild(prefixEl);
+                    prefixRow.appendChild(input);
+                    row.appendChild(prefixRow);
+                } else {
+                    row.appendChild(input);
+                }
                 fieldInputs[field.key] = input;
             } else {
                 const value = document.createElement('div');
