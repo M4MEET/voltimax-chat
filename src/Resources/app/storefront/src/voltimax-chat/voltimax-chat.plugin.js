@@ -45,6 +45,19 @@ export default class VoltimaxChatPlugin extends Plugin {
             }
         });
 
+        // Shopware uses AJAX navigation — also save on popstate and click
+        window.addEventListener('popstate', () => {
+            if (this.state === 'CHATTING' && this._sessionId) {
+                this._saveSession();
+            }
+        });
+        document.addEventListener('click', (e) => {
+            var link = e.target.closest('a[href]');
+            if (link && link.hostname === window.location.hostname && !link.target && this.state === 'CHATTING' && this._sessionId) {
+                this._saveSession();
+            }
+        }, true);
+
         this._loadConfig();
     }
 
