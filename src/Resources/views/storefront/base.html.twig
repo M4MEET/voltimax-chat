@@ -15,8 +15,17 @@
             {% set ipList = allowedIps|split(',') %}
             {% set showWidget = false %}
             {% for ip in ipList %}
-                {% if ip|trim == clientIp %}
+                {% set trimmedIp = ip|trim %}
+                {# Exact match #}
+                {% if trimmedIp == clientIp %}
                     {% set showWidget = true %}
+                {# IPv6 prefix match: if allowed IP contains ':', check if client IP starts with same /64 prefix #}
+                {% elseif ':' in trimmedIp and ':' in clientIp %}
+                    {% set allowedPrefix = trimmedIp|split(':')|slice(0, 4)|join(':') %}
+                    {% set clientPrefix = clientIp|split(':')|slice(0, 4)|join(':') %}
+                    {% if allowedPrefix == clientPrefix %}
+                        {% set showWidget = true %}
+                    {% endif %}
                 {% endif %}
             {% endfor %}
         {% endif %}
