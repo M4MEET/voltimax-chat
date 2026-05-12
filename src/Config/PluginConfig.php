@@ -162,19 +162,9 @@ class PluginConfig
         return (bool) $this->get('devModeEnabled', $salesChannelId);
     }
 
-    public function getDevModeAllowedIps(?string $salesChannelId = null): array
+    public function getDevModeSecret(?string $salesChannelId = null): string
     {
-        $raw = (string) ($this->get('devModeAllowedIps', $salesChannelId) ?? '');
-        if (empty($raw)) return [];
-        return array_map('trim', explode(',', $raw));
-    }
-
-    public function isIpAllowedInDevMode(string $clientIp, ?string $salesChannelId = null): bool
-    {
-        if (!$this->isDevModeEnabled($salesChannelId)) return true;
-        $allowed = $this->getDevModeAllowedIps($salesChannelId);
-        if (empty($allowed)) return true;
-        return in_array($clientIp, $allowed, true);
+        return (string) ($this->get('devModeSecret', $salesChannelId) ?? '');
     }
 
     /** @return mixed */
