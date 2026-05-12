@@ -259,15 +259,17 @@
             <label>Enable development mode</label>
             <label lang="de-DE">Entwicklungsmodus aktivieren</label>
             <defaultValue>false</defaultValue>
-            <helpText>Widget only visible to allowed IPs below.</helpText>
-            <helpText lang="de-DE">Widget nur für die unten erlaubten IPs sichtbar.</helpText>
+            <helpText>Widget only visible to users with the dev mode cookie. Share the activation URL to grant access.</helpText>
+            <helpText lang="de-DE">Widget nur für Nutzer mit Dev-Mode-Cookie sichtbar. Teilen Sie die Aktivierungs-URL, um Zugriff zu gewähren.</helpText>
         </input-field>
 
-        <input-field type="textarea">
-            <name>devModeAllowedIps</name>
-            <label>Allowed IPs (comma-separated)</label>
-            <label lang="de-DE">Erlaubte IPs (kommagetrennt)</label>
-            <placeholder>192.168.1.100, 10.0.0.1</placeholder>
+        <input-field type="text">
+            <name>devModeSecret</name>
+            <label>Dev mode secret key</label>
+            <label lang="de-DE">Dev-Mode-Schlüssel</label>
+            <placeholder>my-secret-key-123</placeholder>
+            <helpText>Activation URL: https://your-shop.de/?groot_dev=YOUR_SECRET_KEY — sets a 30-day cookie. Use ?groot_dev=off to deactivate.</helpText>
+            <helpText lang="de-DE">Aktivierungs-URL: https://your-shop.de/?groot_dev=IHR_SCHLÜSSEL — setzt ein 30-Tage-Cookie. ?groot_dev=off zum Deaktivieren.</helpText>
         </input-field>
     </card>
 
