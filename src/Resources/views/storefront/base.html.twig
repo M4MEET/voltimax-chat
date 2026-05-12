@@ -4,30 +4,37 @@
     {{ parent() }}
 
     {% if config('VoltimaxChat.config.pluginEnabled') %}
-        {# Development mode: only show widget for allowed IPs #}
+        {# Development mode: cookie-based access control #}
         {% set devMode = config('VoltimaxChat.config.devModeEnabled') %}
-        {% set allowedIps = config('VoltimaxChat.config.devModeAllowedIps') %}
-        {# Check multiple IP sources: Cloudflare header, X-Forwarded-For, and direct IP #}
-        {% set clientIp = app.request.headers.get('CF-Connecting-IP') ?: (app.request.headers.get('X-Forwarded-For') ? app.request.headers.get('X-Forwarded-For')|split(',')|first|trim : app.request.clientIp) %}
+        {% set devSecret = config('VoltimaxChat.config.devModeSecret') %}
         {% set showWidget = true %}
 
-        {% if devMode and allowedIps %}
-            {% set ipList = allowedIps|split(',') %}
+        {% if devMode and devSecret %}
             {% set showWidget = false %}
-            {% for ip in ipList %}
-                {% set trimmedIp = ip|trim %}
-                {# Exact match #}
-                {% if trimmedIp == clientIp %}
+
+            {# Check URL param: ?groot_dev=SECRET sets cookie, ?groot_dev=off clears it #}
+            {% set paramValue = app.request.query.get('groot_dev') %}
+            {% if paramValue == devSecret %}
+                {% set showWidget = true %}
+                {# Cookie is set via inline script below #}
+            {% elseif paramValue == 'off' %}
+                {% set showWidget = false %}
+                {# Cookie removal is handled via inline script below #}
+            {% else %}
+                {# Check existing cookie #}
+                {% set cookieValue = app.request.cookies.get('groot_dev') %}
+                {% if cookieValue == '1' %}
                     {% set showWidget = true %}
-                {# IPv6 prefix match: if allowed IP contains ':', check if client IP starts with same /64 prefix #}
-                {% elseif ':' in trimmedIp and ':' in clientIp %}
-                    {% set allowedPrefix = trimmedIp|split(':')|slice(0, 4)|join(':') %}
-                    {% set clientPrefix = clientIp|split(':')|slice(0, 4)|join(':') %}
-                    {% if allowedPrefix == clientPrefix %}
-                        {% set showWidget = true %}
-                    {% endif %}
                 {% endif %}
-            {% endfor %}
+            {% endif %}
+        {% endif %}
+
+        {# Handle cookie set/remove via script #}
+        {% set paramValue = app.request.query.get('groot_dev') %}
+        {% if devMode and devSecret and paramValue == devSecret %}
+            <script>document.cookie='groot_dev=1;path=/;max-age=2592000;SameSite=Lax';</script>
+        {% elseif devMode and paramValue == 'off' %}
+            <script>document.cookie='groot_dev=;path=/;max-age=0';</script>
         {% endif %}
 
         {% if showWidget %}
