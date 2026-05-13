@@ -2683,7 +2683,20 @@ export default class VoltimaxChatPlugin extends Plugin {
         var el = this._buildInfoCardDOM(card);
         if (el) {
             messages.appendChild(el);
-            messages.scrollTop = messages.scrollHeight;
+
+            // For close_chat cards: hide suggestions and scroll fully into view
+            if (card.card_type === 'close_chat') {
+                var suggestionsWrap = document.querySelector('.vtx-suggestions-wrap');
+                if (suggestionsWrap) suggestionsWrap.style.display = 'none';
+                var suggestionsLegacy = document.querySelector('.vtx-suggestions');
+                if (suggestionsLegacy) suggestionsLegacy.style.display = 'none';
+            }
+
+            // Delay scroll slightly so DOM has time to layout
+            setTimeout(function() {
+                messages.scrollTop = messages.scrollHeight;
+                el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+            }, 100);
         }
     }
 
