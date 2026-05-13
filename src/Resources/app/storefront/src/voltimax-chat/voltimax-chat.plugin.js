@@ -1818,6 +1818,8 @@ export default class VoltimaxChatPlugin extends Plugin {
                 this._renderSubCardChips(parentTopic);
             }
         } else if (data.type === 'message') {
+            // Clear typing indicator
+            if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
             // Skip the topic greeting if user typed free-text (their message is already queued)
             if (this._skipNextGreeting) {
                 this._skipNextGreeting = false;
