@@ -29,6 +29,8 @@ class OrderDataService
         $criteria->addAssociation('deliveries.stateMachineState');
         $criteria->addAssociation('stateMachineState');
         $criteria->addAssociation('transactions.stateMachineState');
+        $criteria->addAssociation('addresses');
+        $criteria->addAssociation('orderCustomer');
         $criteria->setLimit(1);
 
         $order = $this->orderRepository->search($criteria, $context)->first();
@@ -44,6 +46,8 @@ class OrderDataService
         $criteria->addAssociation('deliveries.stateMachineState');
         $criteria->addAssociation('stateMachineState');
         $criteria->addAssociation('transactions.stateMachineState');
+        $criteria->addAssociation('addresses');
+        $criteria->addAssociation('orderCustomer');
         $criteria->addSorting(new FieldSorting('orderDateTime', FieldSorting::DESCENDING));
         $criteria->setLimit($limit);
 
@@ -96,6 +100,27 @@ class OrderDataService
             $paymentStatus = $txns->last()?->getStateMachineState()?->getTechnicalName();
         }
 
+        // Billing address from order addresses
+        $billingAddress = null;
+        $billingAddressId = $order->getBillingAddressId();
+        $addresses = $order->getAddresses();
+        if ($billingAddressId && $addresses !== null) {
+            $addr = $addresses->get($billingAddressId);
+            if ($addr) {
+                $billingAddress = [
+                    'firstName' => $addr->getFirstName(),
+                    'lastName' => $addr->getLastName(),
+                    'street' => $addr->getStreet(),
+                    'zipcode' => $addr->getZipcode(),
+                    'city' => $addr->getCity(),
+                    'country' => $addr->getCountry()?->getName(),
+                ];
+            }
+        }
+
+        // Customer email
+        $customerEmail = $order->getOrderCustomer()?->getEmail();
+
         return [
             'orderNumber' => $order->getOrderNumber(),
             'orderDate' => $order->getOrderDateTime()?->format('Y-m-d H:i'),
@@ -104,6 +129,8 @@ class OrderDataService
             'paymentStatus' => $paymentStatus,
             'totalAmount' => $order->getAmountTotal(),
             'currency' => $order->getCurrency()?->getIsoCode() ?? 'EUR',
+            'customerEmail' => $customerEmail,
+            'billingAddress' => $billingAddress,
             'lineItems' => $lineItems,
             'deliveries' => $deliveries,
         ];
