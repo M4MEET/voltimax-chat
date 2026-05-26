@@ -1,0 +1,50 @@
+{% sw_extends '@Storefront/storefront/page/checkout/finish/index.html.twig' %}
+
+{% block page_checkout_finish %}
+    {{ parent() }}
+
+    {# Groot Chat Attribution — fire conversion event if purchase was influenced by chat recommendation #}
+    {% if page.order is defined and page.order %}
+    <script>
+    (function(){
+        try {
+            var attrRaw = null;
+            // Check cookie first, then sessionStorage
+            var cookies = document.cookie.split(';');
+            for (var i = 0; i < cookies.length; i++) {
+                var c = cookies[i].trim();
+                if (c.indexOf('groot_attribution=') === 0) {
+                    attrRaw = decodeURIComponent(c.substring('groot_attribution='.length));
+                    break;
+                }
+            }
+            if (!attrRaw) {
+                try { attrRaw = sessionStorage.getItem('groot_attribution'); } catch(e){}
+            }
+            if (!attrRaw) return;
+
+            var attr = JSON.parse(attrRaw);
+            // Only attribute if the click was within the last 30 minutes
+            if (attr.ts && (Date.now() - attr.ts) > 1800000) return;
+
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push({
+                event: 'groot_conversion',
+                groot_ref: attr.ref || 'chat',
+                groot_session: attr.session || '',
+                groot_campaign: attr.campaign || '',
+                groot_product_page: attr.page || '',
+                order_number: '{{ page.order.orderNumber }}',
+                order_total: {{ page.order.amountTotal }},
+                currency: '{{ page.order.currency.isoCode ?? "EUR" }}',
+                items_count: {{ page.order.lineItems|length }},
+            });
+
+            // Clear attribution after firing (prevent double-counting)
+            document.cookie = 'groot_attribution=;path=/;max-age=0';
+            try { sessionStorage.removeItem('groot_attribution'); } catch(e){}
+        } catch(e) { /* silent */ }
+    })();
+    </script>
+    {% endif %}
+{% endblock %}

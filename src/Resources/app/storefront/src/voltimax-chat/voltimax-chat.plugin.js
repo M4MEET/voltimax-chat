@@ -209,6 +209,77 @@ export default class VoltimaxChatPlugin extends Plugin {
         }).catch(() => {});
     }
 
+    // ── GA4 / Analytics Tracking ────────────────────────────────────────────
+
+    _pushGA4(event, params) {
+        try {
+            window.dataLayer = window.dataLayer || [];
+            window.dataLayer.push(Object.assign({ event: event }, params || {}));
+        } catch (e) { /* silent */ }
+    }
+
+    _trackProductImpression(links) {
+        if (!links || !links.length) return;
+        var items = [];
+        var self = this;
+        links.forEach(function(link, idx) {
+            if (!link.product_id) return;
+            items.push({
+                item_id: link.product_id,
+                item_name: link.label,
+                item_brand: 'Voltimax',
+                item_category: 'Chat Recommendation',
+                item_variant: link.style === 'alternative' ? 'cheaper_alternative' : 'primary',
+                price: link.product_price || 0,
+                index: idx,
+                item_list_id: 'groot_chat',
+                item_list_name: 'Groot Chat Recommendations',
+            });
+        });
+        if (items.length > 0) {
+            self._pushGA4('view_item_list', {
+                item_list_id: 'groot_chat',
+                item_list_name: 'Groot Chat Recommendations',
+                items: items,
+                groot_session: self._chatId || '',
+            });
+        }
+    }
+
+    _trackProductClick(link, index) {
+        if (!link || !link.product_id) return;
+        var item = {
+            item_id: link.product_id,
+            item_name: link.label,
+            item_brand: 'Voltimax',
+            item_category: 'Chat Recommendation',
+            item_variant: link.style === 'alternative' ? 'cheaper_alternative' : 'primary',
+            price: link.product_price || 0,
+            index: index || 0,
+            item_list_id: 'groot_chat',
+            item_list_name: 'Groot Chat Recommendations',
+        };
+        // GA4 standard select_item event
+        this._pushGA4('select_item', {
+            item_list_id: 'groot_chat',
+            item_list_name: 'Groot Chat Recommendations',
+            items: [item],
+            groot_session: this._chatId || '',
+        });
+        // Set attribution cookie for purchase tracking (30 min expiry)
+        try {
+            var attr = JSON.stringify({
+                chat_id: this._chatId || '',
+                session_id: this._sessionId || '',
+                product_id: link.product_id,
+                product_name: link.label,
+                product_price: link.product_price || 0,
+                ts: Date.now(),
+            });
+            document.cookie = 'groot_attribution=' + encodeURIComponent(attr) + ';path=/;max-age=1800;SameSite=Lax';
+        } catch (e) { /* silent */ }
+    }
+
     // ── Config + bubble ───────────────────────────────────────────────────────
 
     _loadConfig() {
@@ -1731,6 +1802,10 @@ export default class VoltimaxChatPlugin extends Plugin {
                         topic_id:   this.currentTopic || 'general',
                         session_id: this._sessionId,
                     });
+                    this._pushGA4('groot_chat_started', {
+                        groot_session: this._chatId,
+                        topic: this.currentTopic || 'general',
+                    });
                 }
             }
 
@@ -2821,6 +2896,8 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (c.links && c.links.length > 0) {
             var linksDiv = document.createElement('div');
             linksDiv.style.cssText = 'padding:8px 12px;border-top:1px solid ' + theme.border + '30';
+            var self = this;
+            var linkIndex = 0;
             c.links.forEach(function(link) {
                 if (link.detail) {
                     // Product link with detail — render as a mini product card
@@ -2829,6 +2906,13 @@ export default class VoltimaxChatPlugin extends Plugin {
                     card.href = link.url || '#';
                     card.target = '_blank';
                     card.rel = 'noopener';
+                    // GA4: track product click
+                    (function(lnk, idx) {
+                        card.addEventListener('click', function() {
+                            self._trackProductClick(lnk, idx);
+                        });
+                    })(link, linkIndex++);
+
                     if (isAlt) {
                         card.style.cssText = 'display:block;text-decoration:none;padding:8px 12px;margin:-2px 0 6px 16px;border:1px solid #22c55e;border-radius:8px;background:' + theme.bg + ';transition:all 0.2s';
                         card.addEventListener('mouseenter', function() { card.style.borderColor = '#16a34a'; card.style.boxShadow = '0 2px 8px rgba(34,197,94,0.15)'; });
@@ -2885,6 +2969,8 @@ export default class VoltimaxChatPlugin extends Plugin {
                 }
             });
             el.appendChild(linksDiv);
+            // GA4: track product impressions for cards with product links
+            this._trackProductImpression(c.links);
         }
 
         // Inline form (e.g. order lookup, compatibility check)

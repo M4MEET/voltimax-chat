@@ -48,5 +48,24 @@
              style="display: none;">
         </div>
         {% endif %}
+
+        {# Groot Chat Attribution Tracking — detect groot_ref params and persist for purchase attribution #}
+        <script>
+        (function(){
+            var params = new URLSearchParams(window.location.search);
+            var ref = params.get('groot_ref');
+            if (ref) {
+                var attr = {
+                    ref: ref,
+                    session: params.get('groot_session') || '',
+                    campaign: params.get('groot_campaign') || '',
+                    page: window.location.pathname,
+                    ts: Date.now()
+                };
+                document.cookie = 'groot_attribution=' + encodeURIComponent(JSON.stringify(attr)) + ';path=/;max-age=1800;SameSite=Lax';
+                try { sessionStorage.setItem('groot_attribution', JSON.stringify(attr)); } catch(e){}
+            }
+        })();
+        </script>
     {% endif %}
 {% endblock %}
