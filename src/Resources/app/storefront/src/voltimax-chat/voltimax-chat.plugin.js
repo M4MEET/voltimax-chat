@@ -3237,7 +3237,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             fileRow.appendChild(fileInput);
             uploadDiv.appendChild(fileRow);
 
-            // Text fields (name, email)
+            // Text fields (name, email, subject)
             var textInputs = {};
             (c.fields || []).forEach(function(f) {
                 var row = document.createElement('div');
@@ -3246,13 +3246,22 @@ export default class VoltimaxChatPlugin extends Plugin {
                 label.style.cssText = 'display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:4px';
                 label.textContent = f.label;
                 row.appendChild(label);
-                var input = document.createElement('input');
-                input.type = f.type || 'text';
-                input.value = f.value || '';
-                input.placeholder = f.label + '...';
-                input.style.cssText = 'display:block;width:100%;font-size:12px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;background:#fff';
-                row.appendChild(input);
-                textInputs[f.key] = input;
+                if (f.editable === false) {
+                    // Read-only field (e.g. subject)
+                    var readOnly = document.createElement('div');
+                    readOnly.style.cssText = 'font-size:12px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#f3f4f6;color:#6b7280';
+                    readOnly.textContent = f.value || '';
+                    row.appendChild(readOnly);
+                    textInputs[f.key] = { value: f.value || '' };
+                } else {
+                    var input = document.createElement('input');
+                    input.type = f.type || 'text';
+                    input.value = f.value || '';
+                    input.placeholder = f.label + '...';
+                    input.style.cssText = 'display:block;width:100%;font-size:12px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;background:#fff';
+                    row.appendChild(input);
+                    textInputs[f.key] = input;
+                }
                 uploadDiv.appendChild(row);
             });
 
