@@ -3279,22 +3279,61 @@ export default class VoltimaxChatPlugin extends Plugin {
             infoRow.appendChild(infoTextarea);
             uploadDiv.appendChild(infoRow);
 
+            // Inline error display helper
+            var errorEls = {};
+            function showFieldError(key, msg) {
+                if (!errorEls[key]) {
+                    var errEl = document.createElement('div');
+                    errEl.style.cssText = 'font-size:11px;color:#dc2626;margin-top:2px;padding-left:2px';
+                    if (key === 'form_type') { radioGroup.appendChild(errEl); }
+                    else if (key === 'file') { fileRow.appendChild(errEl); }
+                    else if (textInputs[key] && textInputs[key].parentNode) { textInputs[key].parentNode.appendChild(errEl); }
+                    errorEls[key] = errEl;
+                }
+                errorEls[key].textContent = msg;
+                errorEls[key].style.display = 'block';
+                if (key === 'form_type') { radioGroup.querySelectorAll('label').forEach(function(l) { l.style.borderColor = '#fca5a5'; }); }
+                else if (key === 'file') { fileInput.style.borderColor = '#fca5a5'; }
+                else if (textInputs[key] && textInputs[key].style) { textInputs[key].style.borderColor = '#fca5a5'; }
+            }
+            function clearFieldError(key) {
+                if (errorEls[key]) { errorEls[key].style.display = 'none'; }
+                if (key === 'form_type') { radioGroup.querySelectorAll('label').forEach(function(l) { l.style.borderColor = '#d1d5db'; }); }
+                else if (key === 'file') { fileInput.style.borderColor = '#d1d5db'; }
+                else if (textInputs[key] && textInputs[key].style) { textInputs[key].style.borderColor = '#d1d5db'; }
+            }
+            function clearAllErrors() { Object.keys(errorEls).forEach(function(k) { clearFieldError(k); }); }
+            // Clear errors on input
+            Object.keys(textInputs).forEach(function(key) {
+                var el = textInputs[key];
+                if (el && el.addEventListener) { el.addEventListener('input', function() { clearFieldError(key); }); }
+            });
+            fileInput.addEventListener('change', function() { clearFieldError('file'); });
+
             // Submit button
             var submitBtn = document.createElement('button');
             submitBtn.style.cssText = 'width:100%;padding:10px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px';
             submitBtn.textContent = 'Formular einreichen \u2192';
             submitBtn.addEventListener('click', async function() {
-                if (!selectedType.value) { alert('Bitte w\u00e4hle ein Formular aus.'); return; }
-                if (!fileInput.files || !fileInput.files[0]) { alert('Bitte eine PDF-Datei hochladen.'); return; }
+                clearAllErrors();
+                var hasErrors = false;
+                if (!selectedType.value) { showFieldError('form_type', 'Bitte w\u00e4hle ein Formular aus.'); hasErrors = true; }
+                if (!fileInput.files || !fileInput.files[0]) { showFieldError('file', 'Bitte lade eine PDF-Datei hoch.'); hasErrors = true; }
+                var nameVal = (textInputs['customer_name'] && textInputs['customer_name'].value) ? textInputs['customer_name'].value.trim() : '';
+                if (!nameVal) { showFieldError('customer_name', 'Bitte gib deinen Namen ein.'); hasErrors = true; }
+                var emailVal = (textInputs['customer_email'] && textInputs['customer_email'].value) ? textInputs['customer_email'].value.trim() : '';
+                if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) { showFieldError('customer_email', 'Bitte gib eine g\u00fcltige E-Mail-Adresse ein.'); hasErrors = true; }
+                if (hasErrors) return;
 
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Wird hochgeladen...';
+                submitBtn.style.opacity = '0.7';
 
                 var formData = new FormData();
                 formData.append('file', fileInput.files[0]);
                 formData.append('form_type', selectedType.value);
-                formData.append('customer_name', (textInputs['customer_name'] || {}).value || '');
-                formData.append('customer_email', (textInputs['customer_email'] || {}).value || '');
+                formData.append('customer_name', nameVal);
+                formData.append('customer_email', emailVal);
                 formData.append('session_id', self._sessionId || '');
                 formData.append('additional_info', infoTextarea.value || '');
 
@@ -3304,7 +3343,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     var result = await resp.json();
 
                     if (result.success) {
-                        uploadDiv.innerHTML = '';
+                        while (uploadDiv.firstChild) uploadDiv.removeChild(uploadDiv.firstChild);
                         var done = document.createElement('div');
                         done.style.cssText = 'text-align:center;padding:16px';
 
@@ -3349,12 +3388,18 @@ export default class VoltimaxChatPlugin extends Plugin {
                     } else {
                         submitBtn.disabled = false;
                         submitBtn.textContent = 'Formular einreichen \u2192';
-                        alert('Fehler: ' + (result.error || 'Upload fehlgeschlagen'));
+                        submitBtn.style.opacity = '1';
+                        if (result.field_errors) {
+                            Object.keys(result.field_errors).forEach(function(key) { showFieldError(key, result.field_errors[key]); });
+                        } else if (result.error) {
+                            self._addMessage('ai', '\u26a0\ufe0f ' + result.error);
+                        }
                     }
                 } catch (err) {
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Formular einreichen \u2192';
-                    alert('Upload fehlgeschlagen: ' + err.message);
+                    submitBtn.style.opacity = '1';
+                    self._addMessage('ai', '\u26a0\ufe0f Upload fehlgeschlagen. Bitte versuche es erneut.');
                 }
             });
             uploadDiv.appendChild(submitBtn);
