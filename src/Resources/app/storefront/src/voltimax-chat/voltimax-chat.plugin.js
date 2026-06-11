@@ -1764,7 +1764,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             this.ws.onopen = () => {
                 this._reconnectAttempts = 0;
                 clearTimeout(this._reconnectTimer);
-                this.ws.send(JSON.stringify({ type: 'auth', token: this.token }));
+                this.ws.send(JSON.stringify({ type: 'auth', token: this.token, chat_id: this._chatId || '' }));
                 this._pendingTopic = topicId;
                 this._setConnectionStatus('ws');
             };
