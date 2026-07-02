@@ -45,11 +45,15 @@ VoltimaxChat (Groot) is an AI-powered customer support chatbot embedded in the V
 
 | Service | Data shared | Purpose | Legal basis |
 |---------|-------------|---------|-------------|
-| **Anthropic (Claude)** | Chat messages (anonymised) | AI response generation | Legitimate interest / Consent |
-| **OpenAI** | Message text (for embedding) | Knowledge base search (RAG) | Legitimate interest / Consent |
-| **LangSmith** | Chat traces, prompts, responses | AI quality monitoring & debugging | Legitimate interest |
+| **Anthropic (Claude)** | Chat messages (full text) | AI response generation | Consent / Legitimate interest |
+| **OpenAI** | Query text (for embedding) | Knowledge base search (RAG) | Consent / Legitimate interest |
+| **LangSmith (EU region)** | Chat traces, prompts, responses — stored in the EU (`eu.api.smith.langchain.com`) | AI quality monitoring & debugging | Legitimate interest |
 | **Zendesk** | Name, email, chat transcript, file uploads | Support ticket creation | Contract performance |
-| **MongoDB** | All session data | Application database | Contract performance |
+
+> **Important accuracy notes:**
+> - **Not anonymised.** Chat messages are transmitted to Anthropic, OpenAI and LangSmith **in full** — including any name, email or order number the customer types. Only the chat ID (e.g. `#A1B2C3D4`) is a pseudonym. Do not describe this data as "anonymised".
+> - **No model training.** Anthropic and OpenAI do **not** use API data to train their models by default.
+> - **MongoDB is not a third party.** The database (`atlas-local`) is **self-hosted on your own Hetzner server** — session data is never shared with MongoDB Inc. or Atlas cloud. Hetzner (hosting) is the only infrastructure sub-processor; see §6.
 
 ---
 
@@ -117,12 +121,14 @@ erfüllung (Art. 6 Abs. 1 lit. b DSGVO) bei bestellbezogenen Anfragen.
 
 Drittanbieter:
 Für die KI-Textgenerierung nutzen wir Dienste von Anthropic (Claude) und OpenAI. 
-Ihre Nachrichten werden zur Verarbeitung an diese Dienste übermittelt. Die 
-Anbieter verarbeiten die Daten gemäß ihren Datenschutzrichtlinien und im Rahmen 
-von Standardvertragsklauseln (SCCs) für die Datenübermittlung in Drittländer.
+Ihre Nachrichten werden im vollen Wortlaut zur Verarbeitung an diese Dienste 
+übermittelt. Die Übermittlung in die USA erfolgt auf Grundlage von Standard-
+vertragsklauseln (SCCs). Die Anbieter verwenden über die API übermittelte Daten 
+standardmäßig nicht zum Training ihrer Modelle.
 
-Für die Qualitätsüberwachung nutzen wir LangSmith (LangChain Inc.). Chat-
-verläufe werden anonymisiert gespeichert, um die Antwortqualität zu verbessern.
+Für die Qualitätsüberwachung nutzen wir LangSmith (LangChain Inc.). Die 
+Verarbeitung erfolgt in der EU-Region; Chatverläufe werden dort gespeichert, 
+um die Antwortqualität zu verbessern.
 
 Support-Tickets werden bei Zendesk (Zendesk Inc.) erstellt, wenn eine Eskalation 
 an unser Support-Team erfolgt.
@@ -169,12 +175,13 @@ order-related enquiries.
 
 Third-party providers:
 For AI text generation, we use services from Anthropic (Claude) and OpenAI. 
-Your messages are transmitted to these services for processing. These providers 
-process data in accordance with their privacy policies and under Standard 
-Contractual Clauses (SCCs) for data transfers to third countries.
+Your messages are transmitted in full to these services for processing. 
+Transfers to the USA are covered by Standard Contractual Clauses (SCCs). These 
+providers do not use data submitted via their APIs to train their models by 
+default.
 
-For quality monitoring, we use LangSmith (LangChain Inc.). Chat histories are 
-stored anonymously to improve response quality.
+For quality monitoring, we use LangSmith (LangChain Inc.), processed in the EU 
+region. Chat histories are stored there to improve response quality.
 
 Support tickets are created with Zendesk (Zendesk Inc.) when an escalation to 
 our support team occurs.
@@ -289,8 +296,9 @@ Ensure you have DPAs in place with:
 | **OpenAI** | Text embeddings for RAG | https://openai.com/policies/data-processing-addendum |
 | **LangChain (LangSmith)** | AI tracing & monitoring | https://www.langchain.com/legal |
 | **Zendesk** | Support ticket management | https://www.zendesk.com/company/data-processing-form/ |
-| **Hetzner** | Server hosting (MongoDB data) | https://www.hetzner.com/legal/privacy-policy |
-| **MongoDB Atlas** (if used) | Cloud database | https://www.mongodb.com/legal/dpa |
+| **Hetzner** | Server hosting (all data incl. self-hosted MongoDB) | https://www.hetzner.com/legal/privacy-policy |
+
+> MongoDB runs self-hosted (`atlas-local`) on the Hetzner server — no separate MongoDB Atlas / cloud DPA is required. If you ever migrate to MongoDB Atlas cloud, add their DPA: https://www.mongodb.com/legal/dpa
 
 ---
 
