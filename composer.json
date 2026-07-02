@@ -3,7 +3,7 @@
     "description": "AI-powered chat widget for Shopware 6 storefronts with Server B AI integration",
     "type": "shopware-platform-plugin",
     "license": "MIT",
-    "version": "2.3.1",
+    "version": "2.3.2",
     "authors": [
         {
             "name": "Meet Joshi",
