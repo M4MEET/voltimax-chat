@@ -57,6 +57,15 @@
             <helpText lang="de-DE">Die Basis-URL des KI-Chat-Backends (Server B).</helpText>
         </input-field>
 
+        <input-field type="bool">
+            <name>requireApiSecret</name>
+            <label>Require API secret (data API)</label>
+            <label lang="de-DE">API-Secret erforderlich (Daten-API)</label>
+            <helpText>When enabled, Server B must present the Integration's secret access key (X-Voltimax-Api-Secret header) in addition to the access key. Enable only after Server B is configured with the secret.</helpText>
+            <helpText lang="de-DE">Wenn aktiviert, muss Server B zusätzlich zum Access Key den Secret Access Key der Integration senden (X-Voltimax-Api-Secret-Header). Erst aktivieren, nachdem Server B mit dem Secret konfiguriert wurde.</helpText>
+            <defaultValue>false</defaultValue>
+        </input-field>
+
         <input-field type="password">
             <name>jwtSecret</name>
             <label>JWT Secret</label>

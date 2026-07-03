@@ -7,16 +7,20 @@ use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Symfony\Component\HttpFoundation\Request;
+use Voltimax\Chat\Config\PluginConfig;
 
 class ApiKeyAuthenticator
 {
     private const HEADER = 'X-Voltimax-Api-Key';
+    private const SECRET_HEADER = 'X-Voltimax-Api-Secret';
 
     private EntityRepository $integrationRepository;
+    private PluginConfig $config;
 
-    public function __construct(EntityRepository $integrationRepository)
+    public function __construct(EntityRepository $integrationRepository, PluginConfig $config)
     {
         $this->integrationRepository = $integrationRepository;
+        $this->config = $config;
     }
 
     public function authenticate(Request $request): bool
@@ -33,8 +37,31 @@ class ApiKeyAuthenticator
         $criteria->addFilter(new EqualsFilter('accessKey', $providedKey));
         $criteria->setLimit(1);
 
-        return $this->integrationRepository
+        $integration = $this->integrationRepository
             ->search($criteria, Context::createDefaultContext())
-            ->count() > 0;
+            ->first();
+
+        if ($integration === null) {
+            return false;
+        }
+
+        // The access key alone is not a secret (it is visible in the admin and
+        // in requests). When the caller also presents the integration's SECRET
+        // key, verify it against the stored hash. With requireApiSecret enabled
+        // the secret becomes mandatory — access-key-only callers are rejected.
+        $providedSecret = $request->headers->get(self::SECRET_HEADER);
+        $storedHash = method_exists($integration, 'getSecretAccessKey')
+            ? $integration->getSecretAccessKey()
+            : null;
+
+        if (!empty($providedSecret) && !empty($storedHash)) {
+            return password_verify($providedSecret, $storedHash);
+        }
+
+        if ($this->config->isApiSecretRequired()) {
+            return false; // secret missing (or unreadable) while enforcement is on
+        }
+
+        return true; // legacy mode: access key only
     }
 }

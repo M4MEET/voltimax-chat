@@ -25,6 +25,11 @@ class PluginConfig
         return $this->get('serverBUrl', $salesChannelId);
     }
 
+    public function isApiSecretRequired(?string $salesChannelId = null): bool
+    {
+        return (bool) $this->get('requireApiSecret', $salesChannelId);
+    }
+
     public function getJwtSecret(?string $salesChannelId = null): ?string
     {
         return $this->get('jwtSecret', $salesChannelId);

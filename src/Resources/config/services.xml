@@ -27,6 +27,7 @@
              Create an Integration in the admin, copy its Access Key to Server B's config. -->
         <service id="Voltimax\Chat\Security\ApiKeyAuthenticator">
             <argument type="service" id="integration.repository"/>
+            <argument type="service" id="Voltimax\Chat\Config\PluginConfig"/>
         </service>
 
         <!-- Rate Limiter -->

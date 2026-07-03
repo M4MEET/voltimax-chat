@@ -116,14 +116,27 @@ class VerificationController extends AbstractController
             $customerContext['customer_id'] = $customer->getId();
         }
 
+        // email_verified: only true when the caller demonstrated a connection
+        // between the email and real shop data — i.e. the provided order number
+        // exists AND belongs to that email (possession-style proof, same
+        // philosophy as order+ZIP verification on Server B). Merely typing an
+        // email that happens to exist as a customer is NOT verification.
+        $emailVerified = false;
+
         if ($orderNumber !== '') {
             $criteria = new Criteria();
             $criteria->addFilter(new EqualsFilter('orderNumber', $orderNumber));
+            $criteria->addAssociation('orderCustomer');
             $criteria->setLimit(1);
             $order = $this->orderRepository->search($criteria, $context)->first();
 
             if ($order !== null) {
                 $customerContext['has_orders'] = true;
+                $orderCustomer = method_exists($order, 'getOrderCustomer') ? $order->getOrderCustomer() : null;
+                if ($email !== '' && $orderCustomer !== null
+                    && strcasecmp((string) $orderCustomer->getEmail(), $email) === 0) {
+                    $emailVerified = true;
+                }
             } elseif ($this->config->isStrictValidation()) {
                 return new JsonResponse(['error' => 'Order not found'], Response::HTTP_UNPROCESSABLE_ENTITY);
             }
@@ -142,6 +155,7 @@ class VerificationController extends AbstractController
             'customer_id' => $customerContext['customer_id'],
             'has_orders' => $customerContext['has_orders'],
             'is_b2b' => $customerContext['is_b2b'],
+            'email_verified' => $emailVerified,
         ]);
 
         return new JsonResponse(['token' => $token, 'context' => $customerContext]);
