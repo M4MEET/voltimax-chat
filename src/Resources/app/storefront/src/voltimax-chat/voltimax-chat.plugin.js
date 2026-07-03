@@ -155,6 +155,19 @@ export default class VoltimaxChatPlugin extends Plugin {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
+    /**
+     * Only allow http(s) and same-origin relative URLs in href attributes.
+     * Server-/AI-supplied card links must never inject javascript:/data: URIs.
+     */
+    _safeUrl(url) {
+        if (typeof url !== 'string' || url === '') return '#';
+        var trimmed = url.trim();
+        if (/^https?:\/\//i.test(trimmed)) return trimmed;
+        if (trimmed.charAt(0) === '/' && trimmed.charAt(1) !== '/') return trimmed;
+        return '#';
+    }
+
+
     _buildAvatarEl() {
         var el = document.createElement('div');
         el.className = 'voltimax-chat-ai-row__avatar';
@@ -2903,7 +2916,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     // Product link with detail — render as a mini product card
                     var isAlt = link.style === 'alternative';
                     var card = document.createElement('a');
-                    card.href = link.url || '#';
+                    card.href = self._safeUrl(link.url);
                     card.target = '_blank';
                     card.rel = 'noopener';
                     // GA4: track product click
@@ -2943,7 +2956,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     row.style.cssText = 'display:flex;align-items:center;gap:6px;margin-bottom:4px';
 
                     var a = document.createElement('a');
-                    a.href = link.url || '#';
+                    a.href = self._safeUrl(link.url);
                     a.target = '_blank';
                     a.rel = 'noopener';
                     a.className = 'vtx-choice-btn';

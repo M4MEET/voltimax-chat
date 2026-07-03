@@ -25,11 +25,6 @@ class PluginConfig
         return $this->get('serverBUrl', $salesChannelId);
     }
 
-    public function getApiKey(?string $salesChannelId = null): ?string
-    {
-        return $this->get('sharedApiKey', $salesChannelId);
-    }
-
     public function getJwtSecret(?string $salesChannelId = null): ?string
     {
         return $this->get('jwtSecret', $salesChannelId);

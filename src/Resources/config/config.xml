@@ -58,14 +58,6 @@
         </input-field>
 
         <input-field type="password">
-            <name>sharedApiKey</name>
-            <label>API Key</label>
-            <label lang="de-DE">API-Schlüssel</label>
-            <helpText>Shared API key for authentication between Shopware and the AI server.</helpText>
-            <helpText lang="de-DE">Gemeinsamer API-Schlüssel zur Authentifizierung zwischen Shopware und dem KI-Server.</helpText>
-        </input-field>
-
-        <input-field type="password">
             <name>jwtSecret</name>
             <label>JWT Secret</label>
             <label lang="de-DE">JWT-Geheimnis</label>
