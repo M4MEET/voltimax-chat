@@ -328,10 +328,12 @@ export default class VoltimaxChatPlugin extends Plugin {
         badge.className = 'voltimax-chat-bubble__badge';
         badge.style.display = 'none';
         badge.textContent = '0';
-        btn.appendChild(badge);
 
         btn.addEventListener('click', () => this._onBubbleClick());
         bubble.appendChild(btn);
+        // On the wrapper, NOT the button: the button clips overflow (shimmer
+        // effect), which cut the badge to a sliver.
+        bubble.appendChild(badge);
         document.body.appendChild(bubble);
         this._bubbleEl = bubble;
     }
@@ -3374,28 +3376,57 @@ export default class VoltimaxChatPlugin extends Plugin {
             infoRow.appendChild(infoTextarea);
             uploadDiv.appendChild(infoRow);
 
-            // Inline error display helper
+            // Inline error display helper — highlights the EXACT missing field:
+            // strong red border + tinted background + shake, and the first
+            // errored field is scrolled into view and focused so it can't be
+            // missed even when it sits above the fold of a long form.
             var errorEls = {};
+            function fieldContainer(key) {
+                if (key === 'form_type') return radioGroup;
+                if (key === 'file') return fileRow;
+                return textInputs[key] ? textInputs[key].parentNode : null;
+            }
+            function shake(el) {
+                if (!el) return;
+                el.style.animation = 'none';
+                // force reflow so the animation restarts on repeated submits
+                void el.offsetWidth;
+                el.style.animation = 'vtx-shake 0.4s ease';
+            }
             function showFieldError(key, msg) {
                 if (!errorEls[key]) {
                     var errEl = document.createElement('div');
-                    errEl.style.cssText = 'font-size:11px;color:#dc2626;margin-top:2px;padding-left:2px';
+                    errEl.setAttribute('role', 'alert');
+                    errEl.style.cssText = 'font-size:11px;font-weight:600;color:#dc2626;margin-top:4px;padding:3px 6px;background:#fef2f2;border-radius:4px;display:flex;align-items:center;gap:4px';
                     if (key === 'form_type') { radioGroup.appendChild(errEl); }
                     else if (key === 'file') { fileRow.appendChild(errEl); }
                     else if (textInputs[key] && textInputs[key].parentNode) { textInputs[key].parentNode.appendChild(errEl); }
                     errorEls[key] = errEl;
                 }
-                errorEls[key].textContent = msg;
-                errorEls[key].style.display = 'block';
-                if (key === 'form_type') { radioGroup.querySelectorAll('label').forEach(function(l) { l.style.borderColor = '#fca5a5'; }); }
-                else if (key === 'file') { fileInput.style.borderColor = '#fca5a5'; }
-                else if (textInputs[key] && textInputs[key].style) { textInputs[key].style.borderColor = '#fca5a5'; }
+                errorEls[key].textContent = '\u26A0\uFE0F ' + msg;
+                errorEls[key].style.display = 'flex';
+                if (key === 'form_type') {
+                    radioGroup.querySelectorAll('label').forEach(function(l) { l.style.borderColor = '#dc2626'; l.style.background = '#fef2f2'; });
+                } else if (key === 'file') {
+                    fileInput.style.borderColor = '#dc2626'; fileInput.style.background = '#fef2f2';
+                    fileInput.setAttribute('aria-invalid', 'true');
+                } else if (textInputs[key] && textInputs[key].style) {
+                    textInputs[key].style.borderColor = '#dc2626'; textInputs[key].style.background = '#fef2f2';
+                    textInputs[key].setAttribute('aria-invalid', 'true');
+                }
+                shake(fieldContainer(key));
             }
             function clearFieldError(key) {
                 if (errorEls[key]) { errorEls[key].style.display = 'none'; }
-                if (key === 'form_type') { radioGroup.querySelectorAll('label').forEach(function(l) { l.style.borderColor = '#d1d5db'; }); }
-                else if (key === 'file') { fileInput.style.borderColor = '#d1d5db'; }
-                else if (textInputs[key] && textInputs[key].style) { textInputs[key].style.borderColor = '#d1d5db'; }
+                if (key === 'form_type') {
+                    radioGroup.querySelectorAll('label').forEach(function(l) { l.style.borderColor = '#d1d5db'; l.style.background = '#fff'; });
+                } else if (key === 'file') {
+                    fileInput.style.borderColor = '#d1d5db'; fileInput.style.background = '#f9fafb';
+                    fileInput.removeAttribute('aria-invalid');
+                } else if (textInputs[key] && textInputs[key].style) {
+                    textInputs[key].style.borderColor = '#d1d5db'; textInputs[key].style.background = '#fff';
+                    textInputs[key].removeAttribute('aria-invalid');
+                }
             }
             function clearAllErrors() { Object.keys(errorEls).forEach(function(k) { clearFieldError(k); }); }
             // Clear errors on input
@@ -3403,22 +3434,41 @@ export default class VoltimaxChatPlugin extends Plugin {
                 var el = textInputs[key];
                 if (el && el.addEventListener) { el.addEventListener('input', function() { clearFieldError(key); }); }
             });
-            fileInput.addEventListener('change', function() { clearFieldError('file'); });
+            fileInput.addEventListener('change', function() { clearFieldError('file'); if (typeof submitNotice !== 'undefined') submitNotice.style.display = 'none'; });
 
             // Submit button
             var submitBtn = document.createElement('button');
             submitBtn.style.cssText = 'width:100%;padding:10px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px';
             submitBtn.textContent = 'Formular einreichen \u2192';
+            // Notice next to the submit button — feedback exactly where the
+            // customer clicked, pointing them at the highlighted fields above.
+            var submitNotice = document.createElement('div');
+            submitNotice.setAttribute('role', 'alert');
+            submitNotice.style.cssText = 'display:none;margin-top:8px;padding:8px 10px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:12px;font-weight:600;color:#b91c1c;text-align:center';
+
             submitBtn.addEventListener('click', async function() {
                 clearAllErrors();
-                var hasErrors = false;
-                if (!selectedType.value) { showFieldError('form_type', 'Bitte w\u00e4hle ein Formular aus.'); hasErrors = true; }
-                if (!fileInput.files || !fileInput.files[0]) { showFieldError('file', 'Bitte lade eine PDF-Datei hoch.'); hasErrors = true; }
+                submitNotice.style.display = 'none';
+                var errKeys = [];
+                if (!selectedType.value) { showFieldError('form_type', 'Bitte w\u00e4hle ein Formular aus.'); errKeys.push('form_type'); }
+                if (!fileInput.files || !fileInput.files[0]) { showFieldError('file', 'Bitte lade eine PDF-Datei hoch.'); errKeys.push('file'); }
                 var nameVal = (textInputs['customer_name'] && textInputs['customer_name'].value) ? textInputs['customer_name'].value.trim() : '';
-                if (!nameVal) { showFieldError('customer_name', 'Bitte gib deinen Namen ein.'); hasErrors = true; }
+                if (!nameVal) { showFieldError('customer_name', 'Bitte gib deinen Namen ein.'); errKeys.push('customer_name'); }
                 var emailVal = (textInputs['customer_email'] && textInputs['customer_email'].value) ? textInputs['customer_email'].value.trim() : '';
-                if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) { showFieldError('customer_email', 'Bitte gib eine g\u00fcltige E-Mail-Adresse ein.'); hasErrors = true; }
-                if (hasErrors) return;
+                if (!emailVal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) { showFieldError('customer_email', 'Bitte gib eine g\u00fcltige E-Mail-Adresse ein.'); errKeys.push('customer_email'); }
+                if (errKeys.length) {
+                    submitNotice.textContent = errKeys.length === 1
+                        ? 'Ein Pflichtfeld fehlt noch \u2014 siehe rote Markierung oben.'
+                        : errKeys.length + ' Pflichtfelder fehlen noch \u2014 siehe rote Markierungen oben.';
+                    submitNotice.style.display = 'block';
+                    // Bring the FIRST missing field into view and focus it
+                    var firstEl = fieldContainer(errKeys[0]);
+                    if (firstEl && firstEl.scrollIntoView) {
+                        firstEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                    if (textInputs[errKeys[0]]) { textInputs[errKeys[0]].focus({ preventScroll: true }); }
+                    return;
+                }
 
                 submitBtn.disabled = true;
                 submitBtn.textContent = 'Wird hochgeladen...';
@@ -3498,6 +3548,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 }
             });
             uploadDiv.appendChild(submitBtn);
+            uploadDiv.appendChild(submitNotice);
 
             el.appendChild(uploadDiv);
         }
