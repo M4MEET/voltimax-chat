@@ -113,3 +113,18 @@
         }
     }
 }
+
+// Respect the user's motion preference — scoped to the widget so the shop
+// page's own styles are untouched.
+@media (prefers-reduced-motion: reduce) {
+    .voltimax-chat-widget,
+    .voltimax-chat-widget *,
+    .voltimax-chat-bubble,
+    .voltimax-chat-bubble *,
+    .voltimax-chat-toast {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}

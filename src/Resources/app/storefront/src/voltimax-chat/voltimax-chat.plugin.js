@@ -26,6 +26,8 @@ export default class VoltimaxChatPlugin extends Plugin {
         this._chatId         = null;
         this._sessionId      = null;
         this._unreadCount    = 0;
+        this._history        = [];   // structured transcript for safe session restore
+        this._restoring      = false;
         this._streamingRow   = null;
         this._streamingRaw   = '';
         this._typingEl          = null;
@@ -73,14 +75,10 @@ export default class VoltimaxChatPlugin extends Plugin {
                 token: this.token,
                 config: this.config,
                 customerContext: this.customerContext,
-                messages: [],
+                // Structured items re-rendered through the safe builders on
+                // restore — innerHTML is never persisted (stored-XSS surface).
+                history: (this._history || []).slice(-60),
             };
-            // Save visible messages
-            var msgEls = document.querySelectorAll('.voltimax-chat-message');
-            msgEls.forEach(function(el) {
-                var role = el.classList.contains('voltimax-chat-message--user') ? 'user' : 'ai';
-                data.messages.push({ role: role, html: el.innerHTML });
-            });
             sessionStorage.setItem('voltimax_chat_session', JSON.stringify(data));
         } catch (e) { /* silent */ }
     }
@@ -91,6 +89,11 @@ export default class VoltimaxChatPlugin extends Plugin {
             if (!raw) return false;
             var data = JSON.parse(raw);
             if (!data.sessionId || !data.token || !data.config) return false;
+            if (data.messages && !data.history) {
+                // Legacy innerHTML-format session from an older widget — drop it.
+                this._clearSession();
+                return false;
+            }
 
             this._chatId = data.chatId;
             this._sessionId = data.sessionId;
@@ -104,32 +107,26 @@ export default class VoltimaxChatPlugin extends Plugin {
             this._renderWidget();
             this._buildChatUI(data.topic || 'general');
 
-            // Restore messages
+            // Restore messages from structured history — re-rendered through
+            // the safe builders, never by re-injecting stored HTML.
             var messages = document.querySelector('.voltimax-chat-window__messages');
-            if (messages && data.messages && data.messages.length) {
+            if (messages && data.history && data.history.length) {
                 var self = this;
-                data.messages.forEach(function(msg) {
-                    if (msg.role === 'user') {
-                        var row = document.createElement('div');
-                        row.className = 'voltimax-chat-message voltimax-chat-message--user';
-                        row.innerHTML = msg.html;
-                        messages.appendChild(row);
-                    } else {
-                        var aiRow = document.createElement('div');
-                        aiRow.className = 'voltimax-chat-ai-row';
-                        var avatarEl = document.createElement('div');
-                        avatarEl = self._buildAvatarEl();
-                        var rowBody = document.createElement('div');
-                        rowBody.className = 'voltimax-chat-ai-row__body';
-                        var bubble = document.createElement('div');
-                        bubble.className = 'voltimax-chat-message voltimax-chat-message--ai';
-                        bubble.innerHTML = msg.html;
-                        rowBody.appendChild(bubble);
-                        aiRow.appendChild(avatarEl);
-                        aiRow.appendChild(rowBody);
-                        messages.appendChild(aiRow);
-                    }
+                this._restoring = true;
+                data.history.forEach(function(item) {
+                    try {
+                        if (item.kind === 'user' || item.kind === 'ai') {
+                            self._addMessage(item.kind, item.text || '');
+                        } else if (item.kind === 'ai_card') {
+                            if (item.text) self._addMessage('ai', item.text);
+                            if (item.card) self._renderInfoCard(item.card);
+                        } else if (item.kind === 'card' && item.card) {
+                            self._renderInfoCard(item.card);
+                        }
+                    } catch (e) { /* skip unrenderable item */ }
                 });
+                this._restoring = false;
+                this._history = data.history.slice(-60);
                 messages.scrollTop = messages.scrollHeight;
             }
 
@@ -150,6 +147,7 @@ export default class VoltimaxChatPlugin extends Plugin {
     }
 
     _clearSession() {
+        this._history = [];
         try { sessionStorage.removeItem('voltimax_chat_session'); } catch (e) { /* silent */ }
     }
 
@@ -910,6 +908,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         mainInput.placeholder = 'Wie kann ich dir helfen?';
 
         const sendBtn = document.createElement('button');
+        sendBtn.setAttribute('aria-label', 'Nachricht senden');
         sendBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
 
         const doFreeText = () => {
@@ -1541,6 +1540,9 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const messages = document.createElement('div');
         messages.className = 'voltimax-chat-window__messages';
+        messages.setAttribute('role', 'log');
+        messages.setAttribute('aria-live', 'polite');
+        messages.setAttribute('aria-label', 'Chat-Verlauf');
         messagesWrap.appendChild(messages);
 
         // Scroll-to-bottom button
@@ -1646,6 +1648,9 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const messages = document.createElement('div');
         messages.className = 'voltimax-chat-window__messages';
+        messages.setAttribute('role', 'log');
+        messages.setAttribute('aria-live', 'polite');
+        messages.setAttribute('aria-label', 'Chat-Verlauf');
         messagesWrap.appendChild(messages);
 
         const scrollBtn = document.createElement('button');
@@ -1777,6 +1782,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             this.ws.onopen = () => {
                 this._reconnectAttempts = 0;
                 clearTimeout(this._reconnectTimer);
+                this._hideReconnectBanner();
                 this.ws.send(JSON.stringify({ type: 'auth', token: this.token, chat_id: this._chatId || '' }));
                 this._pendingTopic = topicId;
                 this._setConnectionStatus('ws');
@@ -1933,6 +1939,11 @@ export default class VoltimaxChatPlugin extends Plugin {
             if (messages) {
                 var aiMessageId = data.message_id || this._generateId();
 
+                if (!this._restoring) {
+                    this._history.push({ kind: 'ai_card', text: data.content || '', card: data.info_card || null });
+                    if (this._history.length > 60) this._history.shift();
+                }
+
                 // Same row structure as _addMessage: avatar | rowBody
                 var row = document.createElement('div');
                 row.className = 'voltimax-chat-ai-row';
@@ -2078,7 +2089,11 @@ export default class VoltimaxChatPlugin extends Plugin {
         // Auto-reconnect with exponential backoff (C3)
         if (this.state !== 'CHATTING' || !this._currentTopicId) return;
         const MAX_ATTEMPTS = 5;
-        if (this._reconnectAttempts >= MAX_ATTEMPTS) return;
+        if (this._reconnectAttempts >= MAX_ATTEMPTS) {
+            // Don't give up silently — the customer would type into a dead chat.
+            this._showReconnectBanner();
+            return;
+        }
 
         const delay = Math.min(1000 * Math.pow(2, this._reconnectAttempts), 30000);
         this._reconnectAttempts++;
@@ -2090,6 +2105,40 @@ export default class VoltimaxChatPlugin extends Plugin {
     }
 
     // ── Messages ──────────────────────────────────────────────────────────────
+
+    _showReconnectBanner() {
+        if (document.querySelector('.voltimax-chat-reconnect')) return;
+        var messages = document.querySelector('.voltimax-chat-window__messages');
+        if (!messages) return;
+        var banner = document.createElement('div');
+        banner.className = 'voltimax-chat-reconnect';
+        banner.setAttribute('role', 'alert');
+        var txt = document.createElement('span');
+        txt.textContent = 'Verbindung unterbrochen';
+        banner.appendChild(txt);
+        var self = this;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = 'Erneut verbinden';
+        btn.addEventListener('click', function() {
+            btn.disabled = true;
+            txt.textContent = 'Verbinde\u2026';
+            self._reconnectAttempts = 0;
+            self._connectToServerB(self._currentTopicId);
+        });
+        banner.appendChild(btn);
+        messages.appendChild(banner);
+        messages.scrollTop = messages.scrollHeight;
+        var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
+        if (input) { input.disabled = true; input.placeholder = 'Verbindung unterbrochen'; }
+    }
+
+    _hideReconnectBanner() {
+        var banner = document.querySelector('.voltimax-chat-reconnect');
+        if (banner) banner.remove();
+        var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
+        if (input && !this._inputLocked) { input.disabled = false; input.placeholder = 'Schreib eine Nachricht...'; }
+    }
 
     _sendMessage(input) {
         const text = input.value.trim();
@@ -2135,6 +2184,12 @@ export default class VoltimaxChatPlugin extends Plugin {
     _addMessage(sender, content, messageId = null) {
         const messages = document.querySelector('.voltimax-chat-window__messages');
         if (!messages) return null;
+
+        // Record for session restore (structured — no innerHTML round-trips)
+        if (!this._restoring && content) {
+            this._history.push({ kind: sender === 'user' ? 'user' : 'ai', text: content });
+            if (this._history.length > 60) this._history.shift();
+        }
 
         // Finalize any active streaming bubble
         const streaming = messages.querySelector('.is-streaming');
@@ -2768,6 +2823,11 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
         messages.querySelectorAll('.vtx-input-prompt').forEach(function(el) { el.remove(); });
 
+        if (!this._restoring && card) {
+            this._history.push({ kind: 'card', card: card });
+            if (this._history.length > 60) this._history.shift();
+        }
+
         var el = this._buildInfoCardDOM(card);
         if (el) {
             messages.appendChild(el);
@@ -3244,13 +3304,32 @@ export default class VoltimaxChatPlugin extends Plugin {
             fileRow.style.cssText = 'margin-bottom:10px';
             var fileLabel = document.createElement('label');
             fileLabel.style.cssText = 'display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:4px';
-            fileLabel.textContent = 'PDF hochladen *';
+            fileLabel.textContent = 'PDF hochladen oder hierher ziehen *';
             fileRow.appendChild(fileLabel);
             var fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.accept = '.pdf';
             fileInput.style.cssText = 'display:block;width:100%;font-size:12px;padding:6px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb';
             fileRow.appendChild(fileInput);
+            // Drag & drop support
+            fileRow.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                fileInput.style.borderColor = '#4F46E5';
+                fileInput.style.background = '#eef2ff';
+            });
+            fileRow.addEventListener('dragleave', function() {
+                fileInput.style.borderColor = '#d1d5db';
+                fileInput.style.background = '#f9fafb';
+            });
+            fileRow.addEventListener('drop', function(e) {
+                e.preventDefault();
+                fileInput.style.borderColor = '#d1d5db';
+                fileInput.style.background = '#f9fafb';
+                if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    fileInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+            });
             uploadDiv.appendChild(fileRow);
 
             // Text fields (name, email, subject)

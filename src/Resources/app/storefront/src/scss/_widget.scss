@@ -143,6 +143,8 @@
     @media (max-width: 480px) {
         width: 100vw;
         height: 100dvh;
+        // Keep the input above the iPhone home indicator / gesture bar
+        padding-bottom: env(safe-area-inset-bottom);
         bottom: 0;
         right: 0 !important;
         left: 0 !important;
