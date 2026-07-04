@@ -310,6 +310,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             }
             if (!this.config.enabled) return;
             this._renderBubble();
+            this._renderTeaser();
         });
     }
 
@@ -336,6 +337,75 @@ export default class VoltimaxChatPlugin extends Plugin {
         bubble.appendChild(badge);
         document.body.appendChild(bubble);
         this._bubbleEl = bubble;
+    }
+
+    // ── First-visit teaser: "Hast du eine Frage?" next to the bubble ─────────
+    // Shown once per browser session, ~1.5s after load, only while the chat
+    // is closed. Click opens the chat; scrolling down or the × dismisses it.
+    _renderTeaser() {
+        try {
+            if (sessionStorage.getItem('voltimax_chat_teaser_seen')) return;
+        } catch (e) { return; }
+        if (this.state !== 'CLOSED' || !this._bubbleEl) return;
+
+        var self = this;
+        setTimeout(function() {
+            if (self.state !== 'CLOSED' || document.querySelector('.voltimax-chat-teaser')) return;
+
+            var teaser = document.createElement('div');
+            var pos = self.config && self.config.widgetPosition === 'bottom-left' ? 'bottom-left' : 'bottom-right';
+            teaser.className = 'voltimax-chat-teaser voltimax-chat-teaser--' + pos;
+            teaser.setAttribute('role', 'button');
+            teaser.setAttribute('tabindex', '0');
+            teaser.setAttribute('aria-label', 'Chat \u00f6ffnen: Hast du eine Frage?');
+
+            var text = document.createElement('span');
+            text.className = 'voltimax-chat-teaser__text';
+            text.textContent = 'Hast du eine Frage? \uD83D\uDCAC';
+            teaser.appendChild(text);
+
+            var close = document.createElement('button');
+            close.className = 'voltimax-chat-teaser__close';
+            close.setAttribute('aria-label', 'Hinweis schlie\u00dfen');
+            close.textContent = '\u00d7';
+            close.addEventListener('click', function(e) {
+                e.stopPropagation();
+                self._dismissTeaser();
+            });
+            teaser.appendChild(close);
+
+            var open = function() { self._dismissTeaser(); self._onBubbleClick(); };
+            teaser.addEventListener('click', open);
+            teaser.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+            });
+
+            document.body.appendChild(teaser);
+            self._teaserEl = teaser;
+
+            // Visitor scrolled down = browsing — get out of the way
+            self._teaserScrollHandler = function() {
+                if (window.scrollY > 150) self._dismissTeaser();
+            };
+            window.addEventListener('scroll', self._teaserScrollHandler, { passive: true });
+
+            // Opening the chat via the bubble also dismisses it
+            var btn = self._bubbleEl.querySelector('.voltimax-chat-bubble__button');
+            if (btn) btn.addEventListener('click', function() { self._dismissTeaser(); }, { once: true });
+        }, 1500);
+    }
+
+    _dismissTeaser() {
+        try { sessionStorage.setItem('voltimax_chat_teaser_seen', '1'); } catch (e) { /* silent */ }
+        if (this._teaserScrollHandler) {
+            window.removeEventListener('scroll', this._teaserScrollHandler);
+            this._teaserScrollHandler = null;
+        }
+        var teaser = this._teaserEl || document.querySelector('.voltimax-chat-teaser');
+        if (!teaser) return;
+        this._teaserEl = null;
+        teaser.classList.add('voltimax-chat-teaser--hide');
+        setTimeout(function() { if (teaser.parentNode) teaser.remove(); }, 300);
     }
 
     _onBubbleClick() {
