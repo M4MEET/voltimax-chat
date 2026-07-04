@@ -39,6 +39,23 @@ export default class VoltimaxChatPlugin extends Plugin {
         this._expandedTopicId   = null;
         this._sessionClosed     = false;
         this._inputLocked       = false;
+        // Cross-tab: unique id per tab; _yielded = another tab owns the socket
+        this._tabId             = Math.random().toString(36).slice(2) + Date.now().toString(36);
+        this._yielded           = false;
+
+        // Cross-tab coordination: 'storage' fires in OTHER tabs only, which is
+        // exactly the takeover/mirror signal we need.
+        window.addEventListener('storage', (e) => this._onStorageEvent(e));
+        // visibilitychange covers tab switches; 'focus' covers the case where
+        // the owning window closes and this one is already visible.
+        const reclaimIfYielded = () => {
+            if (document.visibilityState === 'visible'
+                && this._yielded && this.state === 'CHATTING') {
+                this._resumeHere();
+            }
+        };
+        document.addEventListener('visibilitychange', reclaimIfYielded);
+        window.addEventListener('focus', reclaimIfYielded);
 
         // Save session before page navigation so chat survives
         window.addEventListener('beforeunload', () => {
@@ -64,6 +81,9 @@ export default class VoltimaxChatPlugin extends Plugin {
     }
 
     // ── Session Persistence ──────────────────────────────────────────────────
+    // The session lives in localStorage so the conversation follows the
+    // customer into new tabs (product links open _blank). Cross-tab socket
+    // ownership is handled in the "connection ownership" section below.
 
     _saveSession() {
         try {
@@ -75,22 +95,39 @@ export default class VoltimaxChatPlugin extends Plugin {
                 token: this.token,
                 config: this.config,
                 customerContext: this.customerContext,
+                minimized: !!this._minimized,
+                ts: Date.now(),
                 // Structured items re-rendered through the safe builders on
                 // restore — innerHTML is never persisted (stored-XSS surface).
                 history: (this._history || []).slice(-60),
             };
-            sessionStorage.setItem('voltimax_chat_session', JSON.stringify(data));
+            localStorage.setItem('voltimax_chat_session', JSON.stringify(data));
         } catch (e) { /* silent */ }
     }
 
     _restoreSession() {
         try {
-            var raw = sessionStorage.getItem('voltimax_chat_session');
+            var raw = localStorage.getItem('voltimax_chat_session');
+            if (!raw) {
+                // Migrate a session saved by a pre-2.8 widget mid-deploy
+                raw = sessionStorage.getItem('voltimax_chat_session');
+                if (raw) {
+                    try {
+                        localStorage.setItem('voltimax_chat_session', raw);
+                        sessionStorage.removeItem('voltimax_chat_session');
+                    } catch (e) { /* silent */ }
+                }
+            }
             if (!raw) return false;
             var data = JSON.parse(raw);
             if (!data.sessionId || !data.token || !data.config) return false;
             if (data.messages && !data.history) {
                 // Legacy innerHTML-format session from an older widget — drop it.
+                this._clearSession();
+                return false;
+            }
+            if (data.ts && Date.now() - data.ts > 24 * 3600 * 1000) {
+                // Stale conversation (localStorage outlives the browser session)
                 this._clearSession();
                 return false;
             }
@@ -109,36 +146,27 @@ export default class VoltimaxChatPlugin extends Plugin {
 
             // Restore messages from structured history — re-rendered through
             // the safe builders, never by re-injecting stored HTML.
-            var messages = document.querySelector('.voltimax-chat-window__messages');
-            if (messages && data.history && data.history.length) {
-                var self = this;
-                this._restoring = true;
-                data.history.forEach(function(item) {
-                    try {
-                        if (item.kind === 'user' || item.kind === 'ai') {
-                            self._addMessage(item.kind, item.text || '');
-                        } else if (item.kind === 'ai_card') {
-                            if (item.text) self._addMessage('ai', item.text);
-                            if (item.card) self._renderInfoCard(item.card);
-                        } else if (item.kind === 'card' && item.card) {
-                            self._renderInfoCard(item.card);
-                        }
-                    } catch (e) { /* skip unrenderable item */ }
-                });
-                this._restoring = false;
-                this._history = data.history.slice(-60);
-                messages.scrollTop = messages.scrollHeight;
-            }
+            this._replayHistory(data.history);
 
-            // Check if last message was from user (AI response was interrupted)
-            var lastMsg = data.messages && data.messages.length ? data.messages[data.messages.length - 1] : null;
-            if (lastMsg && lastMsg.role === 'user') {
-                this._pendingResend = lastMsg.html;
-            }
-
-            // Reconnect WebSocket
             this.state = 'CHATTING';
-            this._connectToServerB(data.topic || 'general');
+
+            if (data.minimized) {
+                // The customer had collapsed the chat — restore to the bubble,
+                // not a surprise-open window on every new tab.
+                this._minimized = true;
+                var widget = document.querySelector('.voltimax-chat-widget');
+                if (widget) widget.style.display = 'none';
+                if (this._bubbleEl) this._bubbleEl.style.display = '';
+            }
+
+            if (document.visibilityState === 'visible') {
+                this._connectToServerB(data.topic || 'general');
+            } else {
+                // Background tab (cmd+click) — don't steal the socket from the
+                // tab the customer is still reading. Claimed on visibility.
+                this._yielded = true;
+                this._showHandoffNotice();
+            }
 
             return true;
         } catch (e) {
@@ -146,9 +174,131 @@ export default class VoltimaxChatPlugin extends Plugin {
         }
     }
 
+    // Replay structured history into the messages container (clears it first).
+    // Used by initial restore and by cross-tab mirroring/takeover.
+    _replayHistory(history) {
+        var messages = document.querySelector('.voltimax-chat-window__messages');
+        if (!messages || !history || !history.length) return;
+        messages.textContent = '';
+        var self = this;
+        this._restoring = true;
+        history.forEach(function(item) {
+            try {
+                if (item.kind === 'user' || item.kind === 'ai') {
+                    self._addMessage(item.kind, item.text || '');
+                } else if (item.kind === 'ai_card') {
+                    if (item.text) self._addMessage('ai', item.text);
+                    if (item.card) self._renderInfoCard(item.card);
+                } else if (item.kind === 'card' && item.card) {
+                    self._renderInfoCard(item.card);
+                }
+            } catch (e) { /* skip unrenderable item */ }
+        });
+        this._restoring = false;
+        this._history = history.slice(-60);
+        messages.scrollTop = messages.scrollHeight;
+    }
+
     _clearSession() {
         this._history = [];
-        try { sessionStorage.removeItem('voltimax_chat_session'); } catch (e) { /* silent */ }
+        try {
+            localStorage.removeItem('voltimax_chat_session');
+            localStorage.removeItem('voltimax_chat_owner');
+            sessionStorage.removeItem('voltimax_chat_session');
+        } catch (e) { /* silent */ }
+    }
+
+    // ── Cross-tab connection ownership ────────────────────────────────────────
+    // Exactly one tab holds the WebSocket: the last one the customer looked
+    // at. Claims go through localStorage; the 'storage' event tells the
+    // previous owner to yield. A yielded tab mirrors the shared transcript
+    // and reclaims automatically when it becomes visible again.
+
+    _claimConnection() {
+        this._yielded = false;
+        try {
+            localStorage.setItem('voltimax_chat_owner',
+                JSON.stringify({ tab: this._tabId, ts: Date.now() }));
+        } catch (e) { /* silent */ }
+    }
+
+    _onStorageEvent(e) {
+        if (e.key === 'voltimax_chat_owner' && e.newValue) {
+            try {
+                if (JSON.parse(e.newValue).tab !== this._tabId) this._yieldConnection();
+            } catch (err) { /* silent */ }
+        } else if (e.key === 'voltimax_chat_session') {
+            if (!e.newValue && this.state === 'CHATTING') {
+                // Chat was closed in another tab — tear down here too.
+                // Null the session first so /chat/end isn't posted twice.
+                this._sessionId = null;
+                this._doClose();
+            } else if (e.newValue && this._yielded && this.state === 'CHATTING') {
+                // Live-mirror the conversation the owning tab is having.
+                // Replay clears the container, so re-mount the handoff notice.
+                try {
+                    this._replayHistory(JSON.parse(e.newValue).history);
+                    this._showHandoffNotice();
+                } catch (err) { /* silent */ }
+            }
+        }
+    }
+
+    _yieldConnection() {
+        if (this._yielded || this.state !== 'CHATTING') return;
+        this._yielded = true;
+        clearTimeout(this._reconnectTimer);
+        this._reconnectAttempts = 0;
+        if (this.ws)  { try { this.ws.onclose = null; this.ws.close(); } catch (e) {} this.ws = null; }
+        if (this.sse) { try { this.sse.close(); } catch (e) {} this.sse = null; }
+        this._setConnectionStatus('disconnected');
+        this._showHandoffNotice();
+    }
+
+    _resumeHere() {
+        this._yielded = false;
+        this._hideHandoffNotice();
+        // The other tab may have continued the conversation — sync first
+        try {
+            var raw = localStorage.getItem('voltimax_chat_session');
+            if (raw) {
+                var data = JSON.parse(raw);
+                if ((data.history || []).length !== (this._history || []).length) {
+                    this._replayHistory(data.history);
+                }
+            }
+        } catch (e) { /* silent */ }
+        this._reconnectAttempts = 0;
+        this._connectToServerB(this._currentTopicId || this.currentTopic || 'general');
+    }
+
+    _showHandoffNotice() {
+        if (document.querySelector('.voltimax-chat-handoff')) return;
+        var messages = document.querySelector('.voltimax-chat-window__messages');
+        if (!messages) return;
+        var banner = document.createElement('div');
+        banner.className = 'voltimax-chat-handoff';
+        banner.setAttribute('role', 'status');
+        var txt = document.createElement('span');
+        txt.textContent = 'Der Chat läuft gerade in einem anderen Tab.';
+        banner.appendChild(txt);
+        var self = this;
+        var btn = document.createElement('button');
+        btn.type = 'button';
+        btn.textContent = 'Hier fortsetzen';
+        btn.addEventListener('click', function() { self._resumeHere(); });
+        banner.appendChild(btn);
+        messages.appendChild(banner);
+        messages.scrollTop = messages.scrollHeight;
+        var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
+        if (input) { input.disabled = true; input.placeholder = 'Chat in anderem Tab aktiv'; }
+    }
+
+    _hideHandoffNotice() {
+        var banner = document.querySelector('.voltimax-chat-handoff');
+        if (banner) banner.remove();
+        var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
+        if (input && !this._inputLocked) { input.disabled = false; input.placeholder = 'Schreib eine Nachricht …'; }
     }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
@@ -442,6 +592,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
     _minimize() {
         this._minimized = true;
+        if (this.state === 'CHATTING') this._saveSession();
         const widget = document.querySelector('.voltimax-chat-widget');
         if (widget) {
             widget.style.animation = 'vtx-widget-out 0.35s cubic-bezier(0.5, 0, 0.75, 0) forwards';
@@ -458,6 +609,11 @@ export default class VoltimaxChatPlugin extends Plugin {
 
     _unminimize() {
         this._minimized = false;
+        if (this.state === 'CHATTING') {
+            this._saveSession();
+            // Opening the chat here is an explicit "continue in this tab"
+            if (this._yielded) this._resumeHere();
+        }
         this._unreadCount = 0;
         const badge = this._bubbleEl?.querySelector('.voltimax-chat-bubble__badge');
         if (badge) badge.style.display = 'none';
@@ -1847,6 +2003,8 @@ export default class VoltimaxChatPlugin extends Plugin {
     _connectToServerB(topicId) {
         if (!this.config.serverBUrl || !this.token) return;
 
+        // This tab is about to hold the socket — other tabs yield via storage event
+        this._claimConnection();
         this._currentTopicId = topicId;
         const wsUrl = this.config.serverBUrl.replace(/^http/, 'ws') + '/ws/chat';
         try {
@@ -2167,7 +2325,8 @@ export default class VoltimaxChatPlugin extends Plugin {
         this._setConnectionStatus('disconnected');
 
         // Don't reconnect if session was explicitly closed (idle timeout, etc.)
-        if (this._sessionClosed) return;
+        // or if another tab took over the connection
+        if (this._sessionClosed || this._yielded) return;
 
         // Auto-reconnect with exponential backoff (C3)
         if (this.state !== 'CHATTING' || !this._currentTopicId) return;
@@ -2429,8 +2588,9 @@ export default class VoltimaxChatPlugin extends Plugin {
                 this._scrollMessageIntoView(messages, row);
             }
 
-            if (this._minimized) this._incrementBadge();
-            this._saveSession();
+            // No badge/save during history replay (restore or cross-tab mirror)
+            if (this._minimized && !this._restoring) this._incrementBadge();
+            if (!this._restoring) this._saveSession();
 
             return msg;
         } else {
@@ -2469,7 +2629,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             wrapper.appendChild(msg);
             messages.appendChild(wrapper);
             messages.scrollTop = messages.scrollHeight;
-            this._saveSession();
+            if (!this._restoring) this._saveSession();
             return msg;
         }
     }
