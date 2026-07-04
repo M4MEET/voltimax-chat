@@ -196,6 +196,17 @@
     }
 }
 
+// Consecutive AI messages: avatar + name once per burst. The avatar keeps its
+// 20px width (visibility, not display) so grouped bubbles stay aligned.
+.voltimax-chat-ai-row--grouped {
+    .voltimax-chat-ai-row__avatar {
+        visibility: hidden;
+        height: 0;
+        margin-top: 0;
+    }
+    .voltimax-chat-ai-row__name { display: none; }
+}
+
 // ── Group spacing ─────────────────────────────────────────────────────────────
 
 .voltimax-chat-message--user + .voltimax-chat-message--user { margin-top: 2px; }
@@ -322,7 +333,9 @@
         ul { list-style: disc; }
         ol { list-style: decimal; }
 
-        &.is-streaming::after {
+        // Streaming cursor — appended by JS as the last inline of the last block,
+        // so it blinks at the end of the text instead of on its own line.
+        .vtx-stream-cursor::after {
             content: '▋';
             display: inline;
             margin-left: 2px;
@@ -331,6 +344,12 @@
             vertical-align: middle;
             opacity: 0.6;
             animation: vtx-blink 0.7s steps(1) infinite;
+        }
+
+        p.vtx-msg-heading {
+            font-size: 13px;
+            margin: 8px 0 4px;
+            &:first-child { margin-top: 0; }
         }
     }
 }

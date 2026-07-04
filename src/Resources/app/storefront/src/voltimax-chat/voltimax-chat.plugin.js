@@ -321,7 +321,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const btn = document.createElement('button');
         btn.className = 'voltimax-chat-bubble__button';
-        btn.setAttribute('aria-label', 'Open chat');
+        btn.setAttribute('aria-label', 'Chat öffnen');
         // Safe: hardcoded SVG
         btn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
 
@@ -683,7 +683,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const expandBtn = document.createElement('button');
         expandBtn.className = 'voltimax-chat-widget__expand';
-        expandBtn.setAttribute('aria-label', 'Expand');
+        expandBtn.setAttribute('aria-label', 'Vergrößern');
         expandBtn.title = 'Vergr\u00f6\u00dfern';
         expandBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/><line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/></svg>';
         expandBtn.addEventListener('click', () => this._toggleExpand());
@@ -769,13 +769,13 @@ export default class VoltimaxChatPlugin extends Plugin {
         });
 
         const minBtn = document.createElement('button');
-        minBtn.setAttribute('aria-label', 'Minimize');
+        minBtn.setAttribute('aria-label', 'Minimieren');
         minBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14"/></svg>';
         minBtn.addEventListener('click', () => this._minimize());
         actions.appendChild(minBtn);
 
         const closeBtn = document.createElement('button');
-        closeBtn.setAttribute('aria-label', 'Close');
+        closeBtn.setAttribute('aria-label', 'Schließen');
         closeBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 6L6 18M6 6l12 12"/></svg>';
         closeBtn.addEventListener('click', () => this._close());
         actions.appendChild(closeBtn);
@@ -922,7 +922,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
             const resumeText = document.createElement('div');
             resumeText.className = 'vtx-resume-bar__info';
-            resumeText.textContent = 'Welcome back, ' + firstName + '!';
+            resumeText.textContent = 'Willkommen zurück, ' + firstName + '!';
             resumeBar.appendChild(resumeText);
 
             const resumeActions = document.createElement('div');
@@ -930,14 +930,14 @@ export default class VoltimaxChatPlugin extends Plugin {
 
             const continueBtn = document.createElement('button');
             continueBtn.className = 'vtx-resume-bar__btn vtx-resume-bar__btn--primary';
-            continueBtn.textContent = 'Continue';
+            continueBtn.textContent = 'Weiter';
             continueBtn.addEventListener('click', () => {
                 resumeBar.remove();
             });
 
             const newChatBtn2 = document.createElement('button');
             newChatBtn2.className = 'vtx-resume-bar__btn vtx-resume-bar__btn--secondary';
-            newChatBtn2.textContent = 'New chat';
+            newChatBtn2.textContent = 'Neuer Chat';
             newChatBtn2.addEventListener('click', () => {
                 try { localStorage.removeItem('voltimax_chat_user'); } catch (e) {}
                 this.token = null;
@@ -1241,7 +1241,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const title = document.createElement('div');
         title.className = 'vtx-verify-form__title';
-        title.textContent = 'To look up your order:';
+        title.textContent = 'So finden wir deine Bestellung:';
         form.appendChild(title);
 
         const fields = document.createElement('div');
@@ -1250,13 +1250,13 @@ export default class VoltimaxChatPlugin extends Plugin {
         const orderInput = document.createElement('input');
         orderInput.className = 'vtx-verify-form__input';
         orderInput.type = 'text';
-        orderInput.placeholder = 'Order #';
+        orderInput.placeholder = 'Bestellnummer';
         orderInput.required = true;
 
         const postcodeInput = document.createElement('input');
         postcodeInput.className = 'vtx-verify-form__input';
         postcodeInput.type = 'text';
-        postcodeInput.placeholder = 'Postcode';
+        postcodeInput.placeholder = 'PLZ';
         postcodeInput.required = true;
 
         fields.appendChild(orderInput);
@@ -1265,7 +1265,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const submitBtn = document.createElement('button');
         submitBtn.className = 'vtx-verify-form__submit';
-        submitBtn.textContent = 'Look up \u2192';
+        submitBtn.textContent = 'Suchen \u2192';
         form.appendChild(submitBtn);
 
         const errorDiv = document.createElement('div');
@@ -1277,12 +1277,12 @@ export default class VoltimaxChatPlugin extends Plugin {
             const postcode = postcodeInput.value.trim();
 
             if (!orderNum || !postcode) {
-                errorDiv.textContent = 'Please enter order number and postcode.';
+                errorDiv.textContent = 'Bitte Bestellnummer und PLZ eingeben.';
                 return;
             }
 
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Looking up...';
+            submitBtn.textContent = 'Wird gesucht \u2026';
             errorDiv.textContent = '';
 
             const name = (this._homeNameInput ? this._homeNameInput.value.trim() : '') || 'Guest';
@@ -1299,7 +1299,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                         if (result.error) {
                             errorDiv.textContent = result.message || 'Order not found. Please check your details.';
                             submitBtn.disabled = false;
-                            submitBtn.textContent = 'Look up \u2192';
+                            submitBtn.textContent = 'Suchen \u2192';
                             return;
                         }
                         this.token = result.token;
@@ -1316,9 +1316,9 @@ export default class VoltimaxChatPlugin extends Plugin {
 
                         this._startChat(topicId);
                     } catch (e) {
-                        errorDiv.textContent = 'Verification failed. Please try again.';
+                        errorDiv.textContent = '\u00dcberpr\u00fcfung fehlgeschlagen. Bitte versuche es erneut.';
                         submitBtn.disabled = false;
-                        submitBtn.textContent = 'Look up \u2192';
+                        submitBtn.textContent = 'Suchen \u2192';
                     }
                 });
             });
@@ -1344,7 +1344,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const title = document.createElement('div');
         title.className = 'vtx-verify-form__title';
-        title.textContent = 'To access your account:';
+        title.textContent = 'F\u00fcr Zugriff auf dein Konto:';
         form.appendChild(title);
 
         const fields = document.createElement('div');
@@ -1359,7 +1359,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         const emailInput = document.createElement('input');
         emailInput.className = 'vtx-verify-form__input';
         emailInput.type = 'email';
-        emailInput.placeholder = 'Your email';
+        emailInput.placeholder = 'Deine E-Mail';
         emailInput.required = true;
 
         // Pre-fill name from home identity field
@@ -1373,7 +1373,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const submitBtn = document.createElement('button');
         submitBtn.className = 'vtx-verify-form__submit';
-        submitBtn.textContent = 'Continue \u2192';
+        submitBtn.textContent = 'Weiter \u2192';
         form.appendChild(submitBtn);
 
         const errorDiv = document.createElement('div');
@@ -1390,7 +1390,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             }
 
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Verifying...';
+            submitBtn.textContent = 'Wird gepr\u00fcft \u2026';
             errorDiv.textContent = '';
 
             this._verifyAndStart(topicId, name, email, '');
@@ -1419,9 +1419,9 @@ export default class VoltimaxChatPlugin extends Plugin {
                         // Show error in form if it exists
                         const errorDiv = document.querySelector('.vtx-verify-form__error');
                         if (errorDiv) {
-                            errorDiv.textContent = 'Verification failed. Please try again.';
+                            errorDiv.textContent = '\u00dcberpr\u00fcfung fehlgeschlagen. Bitte versuche es erneut.';
                             const btn = document.querySelector('.vtx-verify-form__submit');
-                            if (btn) { btn.disabled = false; btn.textContent = 'Continue \u2192'; }
+                            if (btn) { btn.disabled = false; btn.textContent = 'Weiter \u2192'; }
                         }
                         return;
                     }
@@ -1439,9 +1439,9 @@ export default class VoltimaxChatPlugin extends Plugin {
                 } catch (e) {
                     const errorDiv = document.querySelector('.vtx-verify-form__error');
                     if (errorDiv) {
-                        errorDiv.textContent = 'Verification failed. Please try again.';
+                        errorDiv.textContent = '\u00dcberpr\u00fcfung fehlgeschlagen. Bitte versuche es erneut.';
                         const btn = document.querySelector('.vtx-verify-form__submit');
-                        if (btn) { btn.disabled = false; btn.textContent = 'Continue \u2192'; }
+                        if (btn) { btn.disabled = false; btn.textContent = 'Weiter \u2192'; }
                     }
                 }
             });
@@ -1488,52 +1488,52 @@ export default class VoltimaxChatPlugin extends Plugin {
     _getDefaultTopics() {
         return [
             {
-                id: 'orders', title: 'Orders', icon: '\uD83D\uDCE6',
-                description: 'Track, return or report issues',
+                id: 'orders', title: 'Bestellungen', icon: '\uD83D\uDCE6',
+                description: 'Verfolgen, zur\u00FCcksenden oder Problem melden',
                 tier: 2,
                 sub_cards: [
-                    { id: 'order_status', title: 'Track Shipment', icon: '\uD83D\uDE9A' },
-                    { id: 'returns', title: 'Return / Refund', icon: '\u21A9\uFE0F' },
-                    { id: 'order_issue', title: 'Order Problem', icon: '\u26A0\uFE0F' },
+                    { id: 'order_status', title: 'Sendung verfolgen', icon: '\uD83D\uDE9A' },
+                    { id: 'returns', title: 'R\u00FCckgabe / Erstattung', icon: '\u21A9\uFE0F' },
+                    { id: 'order_issue', title: 'Problem mit Bestellung', icon: '\u26A0\uFE0F' },
                 ],
             },
             {
-                id: 'products', title: 'Products', icon: '\uD83D\uDECD\uFE0F',
-                description: 'Find the right product',
+                id: 'products', title: 'Produkte', icon: '\uD83D\uDECD\uFE0F',
+                description: 'Finde das passende Produkt',
                 tier: 0,
                 sub_cards: [
-                    { id: 'product_help', title: 'Product Question', icon: '\u2753' },
-                    { id: 'stock', title: 'Stock & Availability', icon: '\uD83D\uDCCA' },
-                    { id: 'compatibility', title: 'Vehicle Compatibility', icon: '\uD83D\uDE97' },
+                    { id: 'product_help', title: 'Produktfrage', icon: '\u2753' },
+                    { id: 'stock', title: 'Lager & Verf\u00FCgbarkeit', icon: '\uD83D\uDCCA' },
+                    { id: 'compatibility', title: 'Fahrzeug-Kompatibilit\u00E4t', icon: '\uD83D\uDE97' },
                 ],
             },
             {
-                id: 'shipping', title: 'Shipping', icon: '\uD83D\uDE9B',
-                description: 'Delivery times and options',
+                id: 'shipping', title: 'Versand', icon: '\uD83D\uDE9B',
+                description: 'Lieferzeiten und Optionen',
                 tier: 0,
                 sub_cards: [
-                    { id: 'delivery_time', title: 'Delivery Times', icon: '\u23F1\uFE0F' },
-                    { id: 'shipping_costs', title: 'Shipping Costs', icon: '\uD83D\uDCB0' },
+                    { id: 'delivery_time', title: 'Lieferzeiten', icon: '\u23F1\uFE0F' },
+                    { id: 'shipping_costs', title: 'Versandkosten', icon: '\uD83D\uDCB0' },
                     { id: 'express_delivery', title: 'Express', icon: '\u26A1' },
                 ],
             },
             {
-                id: 'account', title: 'Account', icon: '\uD83D\uDC64',
-                description: 'Payments, addresses, invoices',
+                id: 'account', title: 'Konto', icon: '\uD83D\uDC64',
+                description: 'Zahlungen, Adressen, Rechnungen',
                 tier: 1,
                 sub_cards: [
-                    { id: 'payment', title: 'Payment', icon: '\uD83D\uDCB3' },
-                    { id: 'address', title: 'Addresses', icon: '\uD83D\uDCCD' },
-                    { id: 'invoice', title: 'Invoices', icon: '\uD83E\uDDFE' },
+                    { id: 'payment', title: 'Zahlung', icon: '\uD83D\uDCB3' },
+                    { id: 'address', title: 'Adressen', icon: '\uD83D\uDCCD' },
+                    { id: 'invoice', title: 'Rechnungen', icon: '\uD83E\uDDFE' },
                 ],
             },
             {
-                id: 'others', title: 'More', icon: '\uD83D\uDCAC',
-                description: 'FAQ, complaints, contact',
+                id: 'others', title: 'Mehr', icon: '\uD83D\uDCAC',
+                description: 'FAQ, Beschwerden, Kontakt',
                 tier: 1,
                 sub_cards: [
                     { id: 'faq', title: 'FAQ', icon: '\uD83D\uDCD6' },
-                    { id: 'complaint', title: 'Complaint', icon: '\uD83D\uDCE2' },
+                    { id: 'complaint', title: 'Beschwerde', icon: '\uD83D\uDCE2' },
                 ],
             },
         ];
@@ -1620,7 +1620,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         // Scroll-to-bottom button
         const scrollBtn = document.createElement('button');
         scrollBtn.className = 'voltimax-chat-scroll-btn';
-        scrollBtn.setAttribute('aria-label', 'Scroll to bottom');
+        scrollBtn.setAttribute('aria-label', 'Nach unten scrollen');
         // Safe: hardcoded SVG
         scrollBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>';
         scrollBtn.style.display = 'none';
@@ -1656,7 +1656,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const textarea = document.createElement('textarea');
         textarea.className = 'voltimax-chat-window__input form-control';
-        textarea.placeholder = 'Type a message...';
+        textarea.placeholder = 'Schreib eine Nachricht …';
         textarea.rows = 1;
 
         let qrRemoved = false;
@@ -1676,7 +1676,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const sendBtn = document.createElement('button');
         sendBtn.className = 'voltimax-chat-window__send btn btn-primary';
-        sendBtn.setAttribute('aria-label', 'Send');
+        sendBtn.setAttribute('aria-label', 'Senden');
         // Safe: hardcoded SVG
         sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>';
         inputArea.appendChild(sendBtn);
@@ -1727,7 +1727,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const scrollBtn = document.createElement('button');
         scrollBtn.className = 'voltimax-chat-scroll-btn';
-        scrollBtn.setAttribute('aria-label', 'Scroll to bottom');
+        scrollBtn.setAttribute('aria-label', 'Nach unten scrollen');
         scrollBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>';
         scrollBtn.style.display = 'none';
         scrollBtn.addEventListener('click', () => { messages.scrollTop = messages.scrollHeight; });
@@ -1745,7 +1745,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const textarea = document.createElement('textarea');
         textarea.className = 'voltimax-chat-window__input form-control';
-        textarea.placeholder = 'Type a message...';
+        textarea.placeholder = 'Schreib eine Nachricht …';
         textarea.rows = 1;
         textarea.addEventListener('input', () => {
             textarea.style.height = 'auto';
@@ -1755,7 +1755,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const sendBtn = document.createElement('button');
         sendBtn.className = 'voltimax-chat-window__send btn btn-primary';
-        sendBtn.setAttribute('aria-label', 'Send');
+        sendBtn.setAttribute('aria-label', 'Senden');
         sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>';
         inputArea.appendChild(sendBtn);
 
@@ -1957,21 +1957,27 @@ export default class VoltimaxChatPlugin extends Plugin {
                 }, 500);
             }
         } else if (data.type === 'stream_chunk') {
-            // Buffer tokens silently — show typing indicator instead of real-time streaming
+            // Render tokens live into a streaming bubble (progressive reveal)
             this._streamingRaw = (this._streamingRaw || '') + data.content;
-            this._showTypingIndicator();
+            this._renderStreaming();
         } else if (data.type === 'stream_end') {
-            // Remove typing indicator and show the full buffered message at once
             if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
 
             const aiMessageId = data.message_id || null;
             const fullText = this._streamingRaw || '';
+            const live = this._streamingRow;
             this._streamingRaw = '';
             this._streamingRow = null;
 
             if (!aiMessageId) {
-                // No message_id = discard signal (card response coming via ai_card type)
+                // No message_id = discard signal (card response coming via ai_card
+                // type) — remove the live bubble, the card replaces it
+                if (live) live.row.remove();
+            } else if (live) {
+                this._finalizeStreamingRow(live, fullText, aiMessageId);
+                if (this._minimized) this._incrementBadge();
             } else if (fullText) {
+                // No chunks were rendered (chat UI not built yet) — add at once
                 this._addMessage('ai', fullText, aiMessageId);
                 if (this._minimized) this._incrementBadge();
             }
@@ -2019,6 +2025,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 // Same row structure as _addMessage: avatar | rowBody
                 var row = document.createElement('div');
                 row.className = 'voltimax-chat-ai-row';
+                this._applyAiGrouping(row, messages);
 
                 var avatarEl = this._buildAvatarEl();
 
@@ -2078,7 +2085,11 @@ export default class VoltimaxChatPlugin extends Plugin {
                 row.appendChild(avatarEl);
                 row.appendChild(rowBody);
                 messages.appendChild(row);
-                messages.scrollTop = messages.scrollHeight;
+                if (this._restoring) {
+                    messages.scrollTop = messages.scrollHeight;
+                } else {
+                    this._scrollMessageIntoView(messages, row);
+                }
             }
             if (this._minimized) this._incrementBadge();
             this._unlockInput();
@@ -2209,7 +2220,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         var banner = document.querySelector('.voltimax-chat-reconnect');
         if (banner) banner.remove();
         var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
-        if (input && !this._inputLocked) { input.disabled = false; input.placeholder = 'Schreib eine Nachricht...'; }
+        if (input && !this._inputLocked) { input.disabled = false; input.placeholder = 'Schreib eine Nachricht …'; }
     }
 
     _sendMessage(input) {
@@ -2249,8 +2260,112 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (this._lockTimer) { clearTimeout(this._lockTimer); this._lockTimer = null; }
         var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
         var sendBtn = document.querySelector('.voltimax-chat-window__send-btn');
-        if (input) { input.disabled = false; input.placeholder = 'Schreib eine Nachricht...'; input.focus(); }
+        if (input) { input.disabled = false; input.placeholder = 'Schreib eine Nachricht …'; input.focus(); }
         if (sendBtn) sendBtn.disabled = false;
+    }
+
+    // ── Live streaming ────────────────────────────────────────────────────────
+    // stream_chunk tokens render progressively into a live bubble with the same
+    // row structure as _addMessage. stream_end finalizes it in place — or
+    // removes it when the backend discards the stream (card response follows).
+
+    _renderStreaming() {
+        const messages = document.querySelector('.voltimax-chat-window__messages');
+        if (!messages) return;
+
+        if (!this._streamingRow) {
+            if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
+
+            // The AI started answering — mark the last user message as read
+            if (this._lastUserStatusEl) {
+                this._lastUserStatusEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/><polyline points="14 6 3 17"/></svg> Gelesen';
+                this._lastUserStatusEl.classList.add('is-read');
+                this._lastUserStatusEl = null;
+            }
+
+            const row = document.createElement('div');
+            row.className = 'voltimax-chat-ai-row';
+            this._applyAiGrouping(row, messages);
+
+            const rowBody = document.createElement('div');
+            rowBody.className = 'voltimax-chat-ai-row__body';
+
+            const nameLabel = document.createElement('div');
+            nameLabel.className = 'voltimax-chat-ai-row__name';
+            nameLabel.textContent = 'Groot';
+            rowBody.appendChild(nameLabel);
+
+            const msg = document.createElement('div');
+            msg.className = 'voltimax-chat-message voltimax-chat-message--ai is-streaming';
+
+            const textWrap = document.createElement('div');
+            msg.appendChild(textWrap);
+
+            rowBody.appendChild(msg);
+            row.appendChild(this._buildAvatarEl());
+            row.appendChild(rowBody);
+            messages.appendChild(row);
+            this._streamingRow = { row, msg, textWrap };
+        }
+
+        // Re-render the accumulated text (messages are small; this is cheap)
+        const wrap = this._streamingRow.textWrap;
+        const followStream = messages.scrollHeight - messages.clientHeight - messages.scrollTop < 140;
+        wrap.textContent = '';
+        wrap.appendChild(this._buildMessageNodes(this._streamingRaw || ''));
+
+        // Blinking cursor at the end of the last text block
+        let lastBlock = wrap.lastElementChild;
+        if (lastBlock && (lastBlock.tagName === 'UL' || lastBlock.tagName === 'OL')) {
+            lastBlock = lastBlock.lastElementChild || lastBlock;
+        }
+        const cursor = document.createElement('span');
+        cursor.className = 'vtx-stream-cursor';
+        (lastBlock || wrap).appendChild(cursor);
+
+        // Follow the stream only while the user is near the bottom
+        if (followStream) messages.scrollTop = messages.scrollHeight;
+    }
+
+    _finalizeStreamingRow(live, fullText, aiMessageId) {
+        const cursor = live.msg.querySelector('.vtx-stream-cursor');
+        if (cursor) cursor.remove();
+        live.msg.classList.remove('is-streaming');
+        live.msg.dataset.messageId = aiMessageId;
+
+        const timeEl = document.createElement('span');
+        timeEl.className = 'voltimax-chat-message__time';
+        timeEl.textContent = this._formatTime(new Date());
+        live.msg.appendChild(timeEl);
+
+        const rowBody = live.msg.parentElement;
+        if (rowBody) rowBody.appendChild(this._buildFeedbackRow(aiMessageId));
+
+        if (!this._restoring && fullText) {
+            this._history.push({ kind: 'ai', text: fullText });
+            if (this._history.length > 60) this._history.shift();
+        }
+        this._saveSession();
+    }
+
+    // Consecutive AI rows: show avatar + name only on the first of a burst
+    _applyAiGrouping(row, messages) {
+        const last = messages.lastElementChild;
+        if (last && last.classList && last.classList.contains('voltimax-chat-ai-row')) {
+            row.classList.add('voltimax-chat-ai-row--grouped');
+        }
+    }
+
+    // Long answers anchor to their top so the customer reads from the start;
+    // short ones keep the classic pin-to-bottom.
+    _scrollMessageIntoView(messages, row) {
+        if (row.offsetHeight > messages.clientHeight * 0.7) {
+            const top = row.getBoundingClientRect().top
+                - messages.getBoundingClientRect().top + messages.scrollTop;
+            messages.scrollTop = Math.max(0, top - 8);
+        } else {
+            messages.scrollTop = messages.scrollHeight;
+        }
     }
 
     _addMessage(sender, content, messageId = null) {
@@ -2280,6 +2395,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             // Row structure: avatar | [name + bubble + feedback]
             const row = document.createElement('div');
             row.className = 'voltimax-chat-ai-row';
+            this._applyAiGrouping(row, messages);
 
             const avatarEl = this._buildAvatarEl();
 
@@ -2307,7 +2423,11 @@ export default class VoltimaxChatPlugin extends Plugin {
             row.appendChild(avatarEl);
             row.appendChild(rowBody);
             messages.appendChild(row);
-            messages.scrollTop = messages.scrollHeight;
+            if (this._restoring) {
+                messages.scrollTop = messages.scrollHeight;
+            } else {
+                this._scrollMessageIntoView(messages, row);
+            }
 
             if (this._minimized) this._incrementBadge();
             this._saveSession();
@@ -2315,11 +2435,15 @@ export default class VoltimaxChatPlugin extends Plugin {
             return msg;
         } else {
             const wrapper = document.createElement('div');
+            wrapper.className = 'voltimax-chat-user-row';
             wrapper.style.cssText = 'display:flex;flex-direction:column;align-items:flex-end;';
 
-            // Customer name
+            // Customer name — only on the first message of a burst
+            const prevIsUser = messages.lastElementChild
+                && messages.lastElementChild.classList
+                && messages.lastElementChild.classList.contains('voltimax-chat-user-row');
             const customerName = (this.customerContext && this.customerContext.name) || '';
-            if (customerName) {
+            if (customerName && !prevIsUser) {
                 const nameEl = document.createElement('div');
                 nameEl.style.cssText = 'font-size:11px;font-weight:700;color:#6366f1;padding-right:4px;margin-bottom:2px;';
                 nameEl.textContent = customerName.split(' ')[0];
@@ -2636,7 +2760,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const cancelBtn = document.createElement('button');
         cancelBtn.className = 'voltimax-chat-confirm__btn voltimax-chat-confirm__btn--cancel';
-        cancelBtn.textContent = 'Cancel';
+        cancelBtn.textContent = 'Abbrechen';
         cancelBtn.addEventListener('click', () => {
             card.remove();
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -2646,7 +2770,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const confirmBtn = document.createElement('button');
         confirmBtn.className = 'voltimax-chat-confirm__btn voltimax-chat-confirm__btn--confirm';
-        confirmBtn.textContent = 'Confirm \u2192';
+        confirmBtn.textContent = 'Bestätigen \u2192';
         confirmBtn.addEventListener('click', () => {
             // Collect field values
             const fields = {};
@@ -2839,7 +2963,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             }
 
             submitBtn.disabled = true;
-            submitBtn.textContent = 'Verifying...';
+            submitBtn.textContent = 'Wird gepr\u00fcft \u2026';
             Object.values(fieldInputs).forEach(inp => { inp.disabled = true; });
 
             // Determine the primary value (first field) and send all as fields
@@ -2938,7 +3062,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (card.card_type !== 'dynamic' && card.card_type !== 'close_chat' && card.card_type !== 'batteriepfand_upload') {
             c = Object.assign({}, card, card.data || {});
             if (!c.style) c.style = 'blue';
-            if (!c.title && c.order_number) c.title = 'Order #' + c.order_number;
+            if (!c.title && c.order_number) c.title = 'Bestellung #' + c.order_number;
         }
 
         // Special: close chat card
@@ -3071,19 +3195,47 @@ export default class VoltimaxChatPlugin extends Plugin {
                         card.addEventListener('mouseleave', function() { card.style.borderColor = theme.border + '30'; card.style.boxShadow = 'none'; });
                     }
 
+                    // Layout: [thumbnail?] [name + detail] [chevron]
+                    var inner = document.createElement('div');
+                    inner.style.cssText = 'display:flex;align-items:center;gap:10px';
+
+                    var imgUrl = link.image ? self._safeUrl(link.image) : '#';
+                    if (!isAlt && imgUrl !== '#') {
+                        var thumb = document.createElement('img');
+                        thumb.src = imgUrl;
+                        thumb.alt = '';
+                        thumb.loading = 'lazy';
+                        thumb.style.cssText = 'width:44px;height:44px;object-fit:contain;border-radius:8px;background:#fff;border:1px solid rgba(0,0,0,0.06);flex-shrink:0';
+                        thumb.addEventListener('error', function() { thumb.remove(); });
+                        inner.appendChild(thumb);
+                    }
+
+                    var textCol = document.createElement('div');
+                    textCol.style.cssText = 'flex:1;min-width:0';
+
                     var nameEl = document.createElement('div');
                     nameEl.style.cssText = 'font-size:' + (isAlt ? '12px' : '13px') + ';font-weight:600;color:#3b82f6;margin-bottom:4px;line-height:1.3';
                     nameEl.textContent = link.label;
-                    card.appendChild(nameEl);
+                    textCol.appendChild(nameEl);
 
                     var lines = link.detail.split('\n');
                     lines.forEach(function(line) {
                         var lineEl = document.createElement('div');
-                        lineEl.style.cssText = 'font-size:11px;color:' + theme.muted + ';line-height:1.4';
+                        lineEl.style.cssText = 'font-size:11px;color:#6b7280;line-height:1.4';
                         lineEl.textContent = line;
-                        card.appendChild(lineEl);
+                        textCol.appendChild(lineEl);
                     });
+                    inner.appendChild(textCol);
 
+                    if (!isAlt) {
+                        var chevron = document.createElement('div');
+                        chevron.style.cssText = 'flex-shrink:0;color:#9ca3af;display:flex;align-items:center';
+                        // Safe: hardcoded SVG
+                        chevron.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>';
+                        inner.appendChild(chevron);
+                    }
+
+                    card.appendChild(inner);
                     linksDiv.appendChild(card);
                 } else {
                     // Standard link (tracking, ticket copy, etc.)
@@ -3103,12 +3255,12 @@ export default class VoltimaxChatPlugin extends Plugin {
                         var copyBtn = document.createElement('button');
                         copyBtn.className = 'vtx-choice-btn vtx-choice-btn--secondary';
                         copyBtn.style.cssText = 'padding:5px 8px;font-size:11px';
-                        copyBtn.textContent = '\uD83D\uDCCB Copy';
+                        copyBtn.textContent = '\uD83D\uDCCB Kopieren';
                         var copyText = link.copy;
                         copyBtn.addEventListener('click', function() {
                             navigator.clipboard.writeText(copyText).then(function() {
-                                copyBtn.textContent = '\u2713 Copied';
-                                setTimeout(function() { copyBtn.textContent = '\uD83D\uDCCB Copy'; }, 1500);
+                                copyBtn.textContent = '\u2713 Kopiert';
+                                setTimeout(function() { copyBtn.textContent = '\uD83D\uDCCB Kopieren'; }, 1500);
                             });
                         });
                         row.appendChild(copyBtn);
@@ -3762,9 +3914,24 @@ export default class VoltimaxChatPlugin extends Plugin {
         const fragment = document.createDocumentFragment();
 
         const applyInline = (parent, str) => {
-            const parts = str.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*|\[[^\]\n]+\]\(https?:\/\/[^)\n]+\))/g);
+            const parts = str.split(/(\*\*[^*\n]+\*\*|\*[^*\n]+\*|\[[^\]\n]+\]\(https?:\/\/[^)\n]+\)|https?:\/\/[^\s<>"')\]]+)/g);
             parts.forEach((part) => {
-                if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
+                if (/^https?:\/\//i.test(part)) {
+                    // Bare URL — auto-link. Trailing sentence punctuation stays as text.
+                    let url = part, trail = '';
+                    const punct = url.match(/[.,;:!?]+$/);
+                    if (punct) { trail = punct[0]; url = url.slice(0, -trail.length); }
+                    const a = document.createElement('a');
+                    let label = url.replace(/^https?:\/\/(www\.)?/i, '');
+                    if (label.length > 40) label = label.slice(0, 37) + '…';
+                    a.textContent = label;
+                    a.href = this._safeUrl(url);
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.className = 'voltimax-chat-link';
+                    parent.appendChild(a);
+                    if (trail) parent.appendChild(document.createTextNode(trail));
+                } else if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
                     const strong = document.createElement('strong');
                     applyInline(strong, part.slice(2, -2));
                     parent.appendChild(strong);
@@ -3796,8 +3963,8 @@ export default class VoltimaxChatPlugin extends Plugin {
 
                             const copyBtn = document.createElement('button');
                             copyBtn.className = 'voltimax-chat-tracking__copy';
-                            copyBtn.setAttribute('aria-label', 'Copy tracking number');
-                            copyBtn.setAttribute('title', 'Copy');
+                            copyBtn.setAttribute('aria-label', 'Sendungsnummer kopieren');
+                            copyBtn.setAttribute('title', 'Kopieren');
                             // Safe: hardcoded SVG
                             copyBtn.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>';
                             copyBtn.addEventListener('click', () => {
@@ -3856,6 +4023,19 @@ export default class VoltimaxChatPlugin extends Plugin {
             };
 
             lines.forEach((line) => {
+                const hMatch = line.match(/^#{1,4}\s+(.+)/);
+                if (hMatch) {
+                    flushPending();
+                    closeList();
+                    const h = document.createElement('p');
+                    h.className = 'vtx-msg-heading';
+                    const strong = document.createElement('strong');
+                    applyInline(strong, hMatch[1]);
+                    h.appendChild(strong);
+                    fragment.appendChild(h);
+                    return;
+                }
+
                 const ulMatch = line.match(/^[-*]\s+(.+)/);
                 const olMatch = line.match(/^\d+\.\s+(.+)/);
 
