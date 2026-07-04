@@ -2812,7 +2812,10 @@ export default class VoltimaxChatPlugin extends Plugin {
         // Special: close chat card
         if (c.card_type === 'close_chat') {
             var closeEl = document.createElement('div');
-            closeEl.style.cssText = 'border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;background:#fff;margin-bottom:6px';
+            // flex-shrink:0 is critical: the messages container is a flex column,
+            // and without it this card gets compressed to a sliver once the chat
+            // is taller than the window (observed in prod as 'a line').
+            closeEl.style.cssText = 'flex-shrink:0;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;background:#fff;margin-bottom:6px';
 
             var closeHeader = document.createElement('div');
             closeHeader.style.cssText = 'padding:14px 16px;text-align:center;border-bottom:1px solid #f3f4f6';

@@ -1,5 +1,6 @@
 /* ── Confirmation card ─────────────────────────────────────────────────── */
 .voltimax-chat-confirm {
+    flex-shrink: 0; // messages container is a flex column — without this the card gets squashed
     margin: 6px 2px;
     background: #fff !important;
     border: 1px solid rgba(67, 56, 202, 0.12);
