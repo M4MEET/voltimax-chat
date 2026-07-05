@@ -1,4 +1,21 @@
 /* ── Confirmation card ─────────────────────────────────────────────────── */
+
+// Terminal state of a resolved form: closed, superseded, or submitted (is-ok)
+.voltimax-chat-confirm__status {
+    padding: 10px 14px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    text-align: center;
+    border-top: 1px solid #f3f4f6;
+
+    &.is-ok { color: #15803d; }
+}
+
+.voltimax-chat-confirm[data-state="done"] {
+    opacity: 0.75;
+}
+
 .voltimax-chat-confirm {
     flex-shrink: 0; // messages container is a flex column — without this the card gets squashed
     margin: 6px 2px;

@@ -2308,8 +2308,29 @@ export default class VoltimaxChatPlugin extends Plugin {
                     this._resetChat();
                 });
             }
+        } else if (data.type === 'confirmation_done') {
+            // Ticket created — turn the submitting form into a receipt with the
+            // real ticket number
+            if (this._pendingConfirmCard) {
+                var tidSuffix = data.ticket_id ? ' — Ticket #' + data.ticket_id : '';
+                this._finalizeConfirmCard(this._pendingConfirmCard, '✓ Anfrage übermittelt' + tidSuffix, true);
+                this._pendingConfirmCard = null;
+            }
         } else if (data.type === 'error') {
             var errMsg = data.message || 'An error occurred.';
+
+            // Ticket creation failed — re-open the submitting form instead of
+            // faking a receipt
+            if (this._pendingConfirmCard) {
+                var pc = this._pendingConfirmCard;
+                this._pendingConfirmCard = null;
+                if (pc.dataset.state === 'submitting') {
+                    pc.dataset.state = 'live';
+                    pc.querySelectorAll('input, textarea, select, button').forEach(function(el) { el.disabled = false; });
+                    var retryBtn = pc.querySelector('.voltimax-chat-confirm__btn--confirm');
+                    if (retryBtn) retryBtn.textContent = 'Bestätigen →';
+                }
+            }
 
             // Auth/token errors: stop reconnecting, clear stale session, go back to home
             if (errMsg.indexOf('401') !== -1 || errMsg.indexOf('Authentication') !== -1 || errMsg.indexOf('Token') !== -1) {
@@ -2838,9 +2859,33 @@ export default class VoltimaxChatPlugin extends Plugin {
         this._addMessage('ai', data.message || 'Would you like to speak with a team member?');
     }
 
+    // A confirmation form is state, not decoration: once resolved it becomes an
+    // inert receipt, so stale copies in the scrollback can never fire actions
+    // again (a cancel on an old form once "cancelled" an already-created ticket).
+    _finalizeConfirmCard(card, statusText, ok) {
+        if (!card || (card.dataset.state !== 'live' && card.dataset.state !== 'submitting')) return;
+        card.dataset.state = 'done';
+        card.querySelectorAll('input, textarea, select, button').forEach(el => { el.disabled = true; });
+        const actions = card.querySelector('.voltimax-chat-confirm__actions');
+        if (actions) {
+            const status = document.createElement('div');
+            status.className = 'voltimax-chat-confirm__status' + (ok ? ' is-ok' : '');
+            status.textContent = statusText;
+            actions.replaceWith(status);
+        }
+    }
+
     _buildConfirmationDOM(confirmation) {
+        // A new form supersedes any older still-open one — exactly one live
+        // confirmation form per conversation.
+        const self = this;
+        document.querySelectorAll('.voltimax-chat-confirm[data-state="live"]').forEach(old => {
+            self._finalizeConfirmCard(old, '↓ Ersetzt durch ein neues Formular', false);
+        });
+
         const card = document.createElement('div');
         card.className = 'voltimax-chat-confirm';
+        card.dataset.state = 'live';
 
         // Header with icon and title
         const header = document.createElement('div');
@@ -2848,7 +2893,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         // Safe: hardcoded SVG (shield check icon)
         header.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>';
         const titleEl = document.createElement('span');
-        titleEl.textContent = confirmation.title || 'Please Confirm';
+        titleEl.textContent = confirmation.title || 'Bitte bestätigen';
         header.appendChild(titleEl);
         card.appendChild(header);
 
@@ -2928,7 +2973,9 @@ export default class VoltimaxChatPlugin extends Plugin {
         cancelBtn.className = 'voltimax-chat-confirm__btn voltimax-chat-confirm__btn--cancel';
         cancelBtn.textContent = 'Abbrechen';
         cancelBtn.addEventListener('click', () => {
-            card.remove();
+            // Collapse to a receipt instead of removing — the transcript stays
+            // readable and the form can never be interacted with again.
+            this._finalizeConfirmCard(card, 'Formular geschlossen', false);
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                 this.ws.send(JSON.stringify({ type: 'cancel_action', action: confirmation.action }));
             }
@@ -2963,7 +3010,8 @@ export default class VoltimaxChatPlugin extends Plugin {
             // Disable buttons, show loading
             confirmBtn.disabled = true;
             cancelBtn.disabled = true;
-            confirmBtn.textContent = 'Processing...';
+            confirmBtn.textContent = 'Wird gesendet \u2026';
+            card.dataset.state = 'submitting';
 
             if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                 this.ws.send(JSON.stringify({
@@ -2973,15 +3021,16 @@ export default class VoltimaxChatPlugin extends Plugin {
                 }));
             }
 
-            // Replace card with a confirmed status after short delay
-            setTimeout(() => {
-                card.className = 'voltimax-chat-confirm voltimax-chat-confirm--done';
-                card.textContent = '';
-                const doneMsg = document.createElement('div');
-                doneMsg.className = 'voltimax-chat-confirm__done';
-                doneMsg.textContent = '\u2713 Request confirmed and submitted';
-                card.appendChild(doneMsg);
-            }, 500);
+            if (confirmation.action === 'create_ticket') {
+                // Ack-driven: 'confirmation_done' carries the real ticket number;
+                // 'error' re-enables the form instead of faking success.
+                this._pendingConfirmCard = card;
+            } else {
+                // Other actions have no ack channel \u2014 optimistic receipt
+                setTimeout(() => {
+                    this._finalizeConfirmCard(card, '\u2713 Anfrage \u00fcbermittelt', true);
+                }, 500);
+            }
         });
 
         actions.appendChild(cancelBtn);
