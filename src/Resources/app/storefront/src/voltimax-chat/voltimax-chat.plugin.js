@@ -86,6 +86,10 @@ export default class VoltimaxChatPlugin extends Plugin {
     // ownership is handled in the "connection ownership" section below.
 
     _saveSession() {
+        // A yielded tab mirrors the owner's transcript — it must never write
+        // the shared session (its copy may lag and would clobber newer history,
+        // e.g. via the beforeunload save when the tab is closed).
+        if (this._yielded) return;
         try {
             var data = {
                 chatId: this._chatId,
@@ -152,11 +156,12 @@ export default class VoltimaxChatPlugin extends Plugin {
 
             if (data.minimized) {
                 // The customer had collapsed the chat — restore to the bubble,
-                // not a surprise-open window on every new tab.
+                // not a surprise-open window on every new tab. The bubble
+                // itself is rendered by _loadConfig after we return; it keys
+                // its visibility off this._minimized.
                 this._minimized = true;
                 var widget = document.querySelector('.voltimax-chat-widget');
                 if (widget) widget.style.display = 'none';
-                if (this._bubbleEl) this._bubbleEl.style.display = '';
             }
 
             if (document.visibilityState === 'visible') {
@@ -446,9 +451,10 @@ export default class VoltimaxChatPlugin extends Plugin {
     _loadConfig() {
         // Try to restore an active session first (page navigation)
         if (this._restoreSession()) {
-            // Session restored — render bubble but hide it (widget is open)
+            // Session restored — bubble hidden while the window is open,
+            // visible when the chat was restored minimized.
             this._renderBubble();
-            if (this._bubbleEl) this._bubbleEl.style.display = 'none';
+            if (this._bubbleEl && !this._minimized) this._bubbleEl.style.display = 'none';
             return;
         }
 
