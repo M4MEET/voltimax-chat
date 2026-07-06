@@ -295,14 +295,14 @@ export default class VoltimaxChatPlugin extends Plugin {
         banner.appendChild(btn);
         messages.appendChild(banner);
         messages.scrollTop = messages.scrollHeight;
-        var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
+        var input = this._chatInputEl();
         if (input) { input.disabled = true; input.placeholder = 'Chat in anderem Tab aktiv'; }
     }
 
     _hideHandoffNotice() {
         var banner = document.querySelector('.voltimax-chat-handoff');
         if (banner) banner.remove();
-        var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
+        var input = this._chatInputEl();
         if (input && !this._inputLocked) { input.disabled = false; input.placeholder = 'Schreib eine Nachricht …'; }
     }
 
@@ -2002,6 +2002,8 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({ type: 'message', content: text }));
         }
+        // Chip clicks trigger an AI response too — same lock as typed messages
+        this._lockInput();
     }
 
     // ── Server B connection ───────────────────────────────────────────────────
@@ -2262,6 +2264,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             this._showTypingIndicator();
         } else if (data.type === 'escalation') {
             this._showEscalation(data);
+            this._unlockInput();
         } else if (data.type === 'play_sound') {
             this._playSound(data.message);
         } else if (data.type === 'confirmation_request' && data.confirmation) {
@@ -2269,8 +2272,10 @@ export default class VoltimaxChatPlugin extends Plugin {
             this._unlockInput();
         } else if (data.type === 'choices' && data.choices) {
             this._renderChoices(data.message || '', data.choices);
+            this._unlockInput();
         } else if (data.type === 'input_prompt' && data.input_prompt) {
             this._renderInputPrompt(data.input_prompt);
+            this._unlockInput();
         } else if (data.type === 'info_card' && data.info_card) {
             this._renderInfoCard(data.info_card);
             this._unlockInput();
@@ -2287,7 +2292,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 input.disabled = true;
                 input.placeholder = 'Sitzung beendet';
             }
-            var sendBtn = document.querySelector('.voltimax-chat-window__send-btn');
+            var sendBtn = this._chatSendBtnEl();
             if (sendBtn) sendBtn.disabled = true;
 
             // Show "Start new chat" button
@@ -2318,6 +2323,9 @@ export default class VoltimaxChatPlugin extends Plugin {
             }
         } else if (data.type === 'error') {
             var errMsg = data.message || 'An error occurred.';
+            // Now that the lock really disables the field, an error must
+            // always release it — otherwise the customer is frozen for 30s
+            this._unlockInput();
 
             // Ticket creation failed — re-open the submitting form instead of
             // faking a receipt
@@ -2398,15 +2406,26 @@ export default class VoltimaxChatPlugin extends Plugin {
         banner.appendChild(btn);
         messages.appendChild(banner);
         messages.scrollTop = messages.scrollHeight;
-        var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
+        var input = this._chatInputEl();
         if (input) { input.disabled = true; input.placeholder = 'Verbindung unterbrochen'; }
     }
 
     _hideReconnectBanner() {
         var banner = document.querySelector('.voltimax-chat-reconnect');
         if (banner) banner.remove();
-        var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
+        var input = this._chatInputEl();
         if (input && !this._inputLocked) { input.disabled = false; input.placeholder = 'Schreib eine Nachricht …'; }
+    }
+
+    // The textarea CARRIES the class (it is not a wrapper) — the old selector
+    // '.voltimax-chat-window__input textarea' matched nothing, so the input
+    // was never actually disabled while Groot responded.
+    _chatInputEl() {
+        return document.querySelector('.voltimax-chat-window__input');
+    }
+
+    _chatSendBtnEl() {
+        return document.querySelector('.voltimax-chat-window__send');
     }
 
     _sendMessage(input) {
@@ -2431,8 +2450,8 @@ export default class VoltimaxChatPlugin extends Plugin {
 
     _lockInput() {
         this._inputLocked = true;
-        var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
-        var sendBtn = document.querySelector('.voltimax-chat-window__send-btn');
+        var input = this._chatInputEl();
+        var sendBtn = this._chatSendBtnEl();
         if (input) { input.disabled = true; input.placeholder = 'Groot denkt nach...'; }
         if (sendBtn) sendBtn.disabled = true;
         // Safety timeout — unlock after 30s if no response arrives
@@ -2444,8 +2463,8 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (!this._inputLocked) return;
         this._inputLocked = false;
         if (this._lockTimer) { clearTimeout(this._lockTimer); this._lockTimer = null; }
-        var input = document.querySelector('.voltimax-chat-window__input textarea, .voltimax-chat-window__input input');
-        var sendBtn = document.querySelector('.voltimax-chat-window__send-btn');
+        var input = this._chatInputEl();
+        var sendBtn = this._chatSendBtnEl();
         if (input) { input.disabled = false; input.placeholder = 'Schreib eine Nachricht …'; input.focus(); }
         if (sendBtn) sendBtn.disabled = false;
     }
