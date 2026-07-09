@@ -1,46 +1,50 @@
-// ── Theme: Voltimax Signature ─────────────────────────────────────────────────
-// Deep indigo (#4338CA) → gold (#D4A04A) gradient — brand identity
-// LiveChat-inspired compact, glassmorphic design
+// ── Theme: GrootDesk Clean ────────────────────────────────────────────────────
+// Flat, single-accent, enterprise-clean (Gorgias genre). The accent is the
+// merchant-configured colour (--vtx-primary); we no longer use a second
+// gradient colour. Solid surfaces, hairline borders, subtle shadows.
+// Variable NAMES are unchanged so every component file inherits centrally
+// (e.g. glass tokens are flattened to solid — no markup/JS change needed).
 
 // ── Layout ────────────────────────────────────────────────────────────────────
-$vtx-widget-width:    370px;
-$vtx-widget-height:   600px;
+$vtx-widget-width:    380px;
+$vtx-widget-height:   620px;
 $vtx-bubble-size:     56px;
-$vtx-border-radius:   16px;
-$vtx-msg-radius:      16px;
+$vtx-border-radius:   18px;
+$vtx-msg-radius:      14px;
 $vtx-spacing:         16px;
 $vtx-bottom-offset:   80px;
-$vtx-font-size:       13.5px;
+$vtx-font-size:       14px;
 $vtx-header-height:   56px;
 $vtx-z-index:         99999;
 
-// ── Light palette ─────────────────────────────────────────────────────────────
+// ── Light palette (warm neutral stone) ─────────────────────────────────────────
 $vtx-bg:              #ffffff;
-$vtx-bg-secondary:    #f8f9fc;
-$vtx-bg-hover:        #f1f3f9;
-$vtx-text:            #1a1d26;
-$vtx-text-secondary:  #64748b;
-$vtx-text-muted:      #94a3b8;
-$vtx-border:          #e2e8f0;
-$vtx-shadow-color:    rgba(67, 56, 202, 0.12);
+$vtx-bg-secondary:    #faf9f7;
+$vtx-bg-hover:        #f4f2ef;
+$vtx-text:            #1c1917;
+$vtx-text-secondary:  #78716c;
+$vtx-text-muted:      #a8a29e;
+$vtx-border:          #e7e5e0;
+$vtx-shadow-color:    rgba(28, 25, 23, 0.10);
 
 // ── Message colors ────────────────────────────────────────────────────────────
-$vtx-user-msg-bg:     var(--vtx-primary-start, #4338CA);
+$vtx-user-msg-bg:     var(--vtx-primary, #b0703a);
 $vtx-user-msg-text:   #ffffff;
-$vtx-ai-msg-bg:       rgba(241, 245, 249, 0.75);
-$vtx-ai-msg-text:     #1a1d26;
+$vtx-ai-msg-bg:       #f4f2ef;              // solid (was translucent glass)
+$vtx-ai-msg-text:     #1c1917;
 
-// ── Dark palette ──────────────────────────────────────────────────────────────
-$vtx-dark-bg:         #0c0f1a;
-$vtx-dark-surface:    #151929;
-$vtx-dark-surface2:   #1c2137;
-$vtx-dark-border:     #262d45;
-$vtx-dark-text:       #e8eaf0;
-$vtx-dark-secondary:  #8892a8;
-$vtx-dark-ai-msg:     #171c2e;
+// ── Dark palette (warm charcoal) ────────────────────────────────────────────────
+$vtx-dark-bg:         #17140f;
+$vtx-dark-surface:    #1f1b15;
+$vtx-dark-surface2:   #292219;
+$vtx-dark-border:     #38312a;
+$vtx-dark-text:       #ede6da;
+$vtx-dark-secondary:  #a8a29e;
+$vtx-dark-ai-msg:     #292219;
 
-// ── Glassmorphism tokens ──────────────────────────────────────────────────────
-$vtx-glass-bg:        rgba(255, 255, 255, 0.72);
-$vtx-glass-border:    rgba(255, 255, 255, 0.2);
-$vtx-glass-blur:      20px;
-$vtx-glass-shadow:    0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+// ── Surface tokens (flattened — no glassmorphism) ───────────────────────────────
+// Names kept as "glass-*" for backward compatibility; values are now solid.
+$vtx-glass-bg:        #ffffff;              // solid panel (was rgba + blur)
+$vtx-glass-border:    #e7e5e0;              // hairline border
+$vtx-glass-blur:      0;                     // no blur
+$vtx-glass-shadow:    0 10px 30px rgba(28, 25, 23, 0.10), 0 2px 6px rgba(28, 25, 23, 0.05);

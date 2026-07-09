@@ -67,15 +67,11 @@
         align-items: center;
         justify-content: center;
         flex-shrink: 0;
-        background: linear-gradient(
-            135deg,
-            var(--vtx-primary-start, #4338CA) 0%,
-            var(--vtx-primary-end, #D4A04A) 100%
-        );
+        background: var(--vtx-primary, #b0703a);
         color: #fff;
         cursor: pointer;
         transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.2s;
-        box-shadow: 0 2px 6px rgba(67,56,202,0.2);
+        box-shadow: 0 2px 6px $vtx-shadow-color;
 
         &:hover {
             transform: scale(1.08);
@@ -229,21 +225,17 @@
     &--user {
         align-self: flex-end;
         max-width: 82%;
-        background: linear-gradient(
-            135deg,
-            var(--vtx-primary-start, #4338CA) 0%,
-            color-mix(in srgb, var(--vtx-primary-start, #4338CA) 65%, var(--vtx-primary-end, #D4A04A) 35%) 100%
-        );
+        background: var(--vtx-primary, #b0703a);
         color: $vtx-user-msg-text;
         border-radius: $vtx-msg-radius $vtx-msg-radius 4px $vtx-msg-radius;
-        box-shadow: 0 2px 8px rgba(67,56,202,0.2);
+        box-shadow: 0 1px 2px $vtx-shadow-color;
     }
 
     &--ai {
         background: $vtx-ai-msg-bg;
         color: $vtx-ai-msg-text;
         border-radius: $vtx-msg-radius $vtx-msg-radius $vtx-msg-radius 4px;
-        border: 1px solid rgba(0,0,0,0.04);
+        border: 1px solid $vtx-border;
 
         p {
             margin: 0;
