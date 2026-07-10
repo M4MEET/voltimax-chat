@@ -608,26 +608,27 @@
     flex-shrink: 0;
     margin: 4px 0 4px 2px;
     isolation: isolate;
+    background: #17111f;   // dark base showing through the swirl gaps
     box-shadow:
-        0 0 14px rgba(217, 154, 78, 0.4),
-        0 0 4px rgba(139, 124, 246, 0.3);
+        0 0 12px rgba(109, 40, 217, 0.35),
+        0 0 4px rgba(180, 83, 9, 0.35);
     animation: vtx-orb-breathe 2.6s ease-in-out infinite;
 
     &__swirl {
         position: absolute;
         inset: -35%;
         border-radius: 50%;
-        filter: blur(4px) saturate(1.35);
+        filter: blur(4px) saturate(1.4) brightness(0.85);
     }
 
     &__swirl--1 {
         background: conic-gradient(
             from 0deg,
-            #f5b04e,
-            #f277a8,
-            #8b7cf6,
-            #5ad0c8,
-            #f5b04e
+            #b45309,
+            #be2f6f,
+            #5b21b6,
+            #0f766e,
+            #b45309
         );
         animation: vtx-orb-spin 2.8s linear infinite;
     }
@@ -636,9 +637,9 @@
         background: conic-gradient(
             from 180deg,
             rgba(255, 255, 255, 0) 0deg,
-            rgba(255, 255, 255, 0.85) 90deg,
+            rgba(255, 226, 180, 0.55) 90deg,
             rgba(255, 255, 255, 0) 180deg,
-            rgba(90, 208, 200, 0.7) 270deg,
+            rgba(13, 148, 136, 0.6) 270deg,
             rgba(255, 255, 255, 0) 360deg
         );
         mix-blend-mode: screen;
@@ -647,12 +648,12 @@
 
     &__core {
         position: absolute;
-        inset: 22%;
+        inset: 30%;
         border-radius: 50%;
         background: radial-gradient(
             circle at 38% 32%,
-            rgba(255, 255, 255, 0.95),
-            rgba(255, 255, 255, 0.3) 55%,
+            rgba(255, 255, 255, 0.75),
+            rgba(255, 255, 255, 0.15) 55%,
             rgba(255, 255, 255, 0) 78%
         );
         filter: blur(1px);
