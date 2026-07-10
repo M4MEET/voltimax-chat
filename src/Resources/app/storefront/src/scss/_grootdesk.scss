@@ -357,6 +357,47 @@ $g-btn-ink-hover: #1c140b;
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--vtx-primary, #d99a4e) 12%, transparent);
 }
 
+// ── Verification & submission cards: quiet headers, warm fields ──────────────
+// Header carries ink text on a faint neutral wash — no colored title blocks.
+.voltimax-chat-widget .voltimax-chat-confirm__header {
+    background: #fbfaf8;
+    border-bottom: 1px solid #f0eeea;
+    color: $g-ink;
+    font-weight: 600;
+
+    svg { color: $g-ink-soft; }
+}
+
+.voltimax-chat-widget .voltimax-chat-confirm__summary { color: $g-ink-soft; }
+
+.voltimax-chat-widget .voltimax-chat-confirm__input {
+    border-color: $g-line;
+    border-radius: 10px;
+
+    &:focus {
+        border-color: color-mix(in srgb, var(--vtx-primary, #d99a4e) 45%, #fff);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--vtx-primary, #d99a4e) 12%, transparent);
+    }
+}
+
+// Read-only values render as quiet filled pills (like the home name field)
+.voltimax-chat-widget .voltimax-chat-confirm__value {
+    background: #f4f2ef;
+    border: none;
+    border-radius: 10px;
+}
+
+.voltimax-chat-widget .vtx-verify-form__input,
+.voltimax-chat-widget .voltimax-chat-verify-bar__input {
+    border-color: $g-line;
+    border-radius: 10px;
+
+    &:focus {
+        border-color: color-mix(in srgb, var(--vtx-primary, #d99a4e) 45%, #fff);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--vtx-primary, #d99a4e) 12%, transparent);
+    }
+}
+
 // ── Launcher: soft gradient pill, icon in a dark circle, ink label ────────────
 // Brand colour fades from a deeper left edge to a light right edge; the
 // chat icon sits in a dark round chip so the pill reads instantly.

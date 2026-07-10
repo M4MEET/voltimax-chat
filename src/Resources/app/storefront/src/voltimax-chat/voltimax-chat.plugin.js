@@ -3028,7 +3028,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     const prefixRow = document.createElement('div');
                     prefixRow.style.cssText = 'display:flex;align-items:center;gap:0;';
                     const prefixEl = document.createElement('span');
-                    prefixEl.style.cssText = 'font-size:12px;font-weight:600;color:#6b7280;white-space:nowrap;padding:6px 4px 6px 10px;background:#f8f9fc;border:1px solid #e2e8f0;border-right:none;border-radius:8px 0 0 8px;';
+                    prefixEl.style.cssText = 'font-size:12px;font-weight:600;color:#78716c;white-space:nowrap;padding:6px 4px 6px 10px;background:#f8f9fc;border:1px solid #e2e8f0;border-right:none;border-radius:8px 0 0 8px;';
                     prefixEl.textContent = field.prefix;
                     input.style.borderRadius = '0 8px 8px 0';
                     prefixRow.appendChild(prefixEl);
@@ -3355,7 +3355,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             blue:   { bg: '#fdfaf6', border: '#b0703a', headerColor: '#8f5a2e' },
             amber:  { bg: '#fffbeb', border: '#f59e0b', headerColor: '#b45309' },
             red:    { bg: '#fef2f2', border: '#ef4444', headerColor: '#dc2626' },
-            gray:   { bg: '#f8f9fa', border: '#6b7280', headerColor: '#374151' },
+            gray:   { bg: '#f8f9fa', border: '#78716c', headerColor: '#57534e' },
             purple: { bg: '#f5f3ff', border: '#8b5cf6', headerColor: '#6d28d9' },
         };
 
@@ -3373,21 +3373,21 @@ export default class VoltimaxChatPlugin extends Plugin {
             // flex-shrink:0 is critical: the messages container is a flex column,
             // and without it this card gets compressed to a sliver once the chat
             // is taller than the window (observed in prod as 'a line').
-            closeEl.style.cssText = 'flex-shrink:0;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;background:#fff;margin-bottom:6px';
+            closeEl.style.cssText = 'flex-shrink:0;border-radius:14px;overflow:hidden;border:1px solid #e7e5e0;background:#fff;margin-bottom:6px';
 
             var closeHeader = document.createElement('div');
-            closeHeader.style.cssText = 'padding:14px 16px;text-align:center;border-bottom:1px solid #f3f4f6';
+            closeHeader.style.cssText = 'padding:14px 16px;text-align:center;border-bottom:1px solid #f4f2ef';
             var closeIcon = document.createElement('div');
             closeIcon.style.cssText = 'font-size:24px;margin-bottom:6px';
             closeIcon.textContent = '\uD83D\uDC4B';
             closeHeader.appendChild(closeIcon);
             var closeTitle = document.createElement('div');
-            closeTitle.style.cssText = 'font-size:14px;font-weight:600;color:#374151;margin-bottom:4px';
+            closeTitle.style.cssText = 'font-size:14px;font-weight:600;color:#57534e;margin-bottom:4px';
             closeTitle.textContent = c.title || 'Kann ich noch etwas f\u00fcr dich tun?';
             closeHeader.appendChild(closeTitle);
             if (c.description) {
                 var closeDesc = document.createElement('div');
-                closeDesc.style.cssText = 'font-size:12px;color:#6b7280';
+                closeDesc.style.cssText = 'font-size:12px;color:#78716c';
                 closeDesc.textContent = c.description;
                 closeHeader.appendChild(closeDesc);
             }
@@ -3576,7 +3576,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     var lines = link.detail.split('\n');
                     lines.forEach(function(line) {
                         var lineEl = document.createElement('div');
-                        lineEl.style.cssText = 'font-size:11px;color:#6b7280;line-height:1.4';
+                        lineEl.style.cssText = 'font-size:11px;color:#78716c;line-height:1.4';
                         lineEl.textContent = line;
                         textCol.appendChild(lineEl);
                     });
@@ -3584,7 +3584,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
                     if (!isAlt) {
                         var chevron = document.createElement('div');
-                        chevron.style.cssText = 'flex-shrink:0;color:#9ca3af;display:flex;align-items:center';
+                        chevron.style.cssText = 'flex-shrink:0;color:#a8a29e;display:flex;align-items:center';
                         // Safe: hardcoded SVG
                         chevron.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>';
                         inner.appendChild(chevron);
@@ -3631,7 +3631,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         // Inline form (e.g. order lookup, compatibility check)
         if (c.form) {
             var formDiv = document.createElement('div');
-            formDiv.style.cssText = 'padding:12px 16px;border-top:1px solid #f3f4f6';
+            formDiv.style.cssText = 'padding:12px 16px;border-top:1px solid #f4f2ef';
             var formInputs = {};
             var cascadeUrl = c.form.cascade_url || null;
             var self = this;
@@ -3641,7 +3641,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 fieldRow.style.cssText = 'margin-bottom:8px';
 
                 var label = document.createElement('label');
-                label.style.cssText = 'display:block;font-size:11px;font-weight:600;color:#6b7280;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.03em';
+                label.style.cssText = 'display:block;font-size:11px;font-weight:600;color:#78716c;margin-bottom:4px;text-transform:uppercase;letter-spacing:0.03em';
                 label.textContent = field.label;
                 fieldRow.appendChild(label);
 
@@ -3649,7 +3649,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 if (field.type === 'select') {
                     // Dropdown select
                     inputEl = document.createElement('select');
-                    inputEl.style.cssText = 'width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box;background:#fff;appearance:auto';
+                    inputEl.style.cssText = 'width:100%;padding:8px 12px;border:1.5px solid #e7e5e0;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box;background:#fff;appearance:auto';
                     inputEl.dataset.name = field.name;
 
                     var placeholder = document.createElement('option');
@@ -3746,7 +3746,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     inputEl = document.createElement('input');
                     inputEl.type = field.type || 'text';
                     inputEl.placeholder = field.placeholder || '';
-                    inputEl.style.cssText = 'width:100%;padding:8px 12px;border:1.5px solid #e5e7eb;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box';
+                    inputEl.style.cssText = 'width:100%;padding:8px 12px;border:1.5px solid #e7e5e0;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box';
                     inputEl.dataset.name = field.name;
                 }
 
@@ -3809,7 +3809,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         // Description
         if (c.description) {
             var desc = document.createElement('div');
-            desc.style.cssText = 'padding:10px 16px;font-size:12px;color:#6b7280;border-top:1px solid #f3f4f6;white-space:pre-line';
+            desc.style.cssText = 'padding:10px 16px;font-size:12px;color:#78716c;border-top:1px solid #f4f2ef;white-space:pre-line';
             desc.textContent = c.description;
             el.appendChild(desc);
         }
@@ -3817,20 +3817,20 @@ export default class VoltimaxChatPlugin extends Plugin {
         // Steps (full-width paragraphs — used by Batteriepfand)
         if (c.steps && c.steps.length > 0) {
             var stepsDiv = document.createElement('div');
-            stepsDiv.style.cssText = 'padding:12px 16px;border-top:1px solid #f3f4f6';
+            stepsDiv.style.cssText = 'padding:12px 16px;border-top:1px solid #f4f2ef';
 
             c.steps.forEach(function(step) {
                 var stepEl = document.createElement('div');
                 var isWarning = step.style === 'warning';
-                stepEl.style.cssText = 'margin-bottom:12px;padding:10px 12px;border-radius:8px;background:' + (isWarning ? '#fefce8' : '#f9fafb') + ';border-left:3px solid ' + (isWarning ? '#f59e0b' : '#22c55e');
+                stepEl.style.cssText = 'margin-bottom:12px;padding:10px 12px;border-radius:8px;background:' + (isWarning ? '#fefce8' : '#faf9f7') + ';border-left:3px solid ' + (isWarning ? '#f59e0b' : '#22c55e');
 
                 var titleEl = document.createElement('div');
-                titleEl.style.cssText = 'font-size:12px;font-weight:700;color:' + (isWarning ? '#92400e' : '#374151') + ';margin-bottom:4px';
+                titleEl.style.cssText = 'font-size:12px;font-weight:700;color:' + (isWarning ? '#92400e' : '#57534e') + ';margin-bottom:4px';
                 titleEl.textContent = step.title;
                 stepEl.appendChild(titleEl);
 
                 var textEl = document.createElement('div');
-                textEl.style.cssText = 'font-size:12px;color:#6b7280;line-height:1.5';
+                textEl.style.cssText = 'font-size:12px;color:#78716c;line-height:1.5';
                 textEl.textContent = step.text;
                 stepEl.appendChild(textEl);
 
@@ -3844,7 +3844,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         var self = this;
         if (c.card_type === 'batteriepfand_upload' && c.upload_options) {
             var uploadDiv = document.createElement('div');
-            uploadDiv.style.cssText = 'padding:12px 16px;border-top:1px solid #f3f4f6';
+            uploadDiv.style.cssText = 'padding:12px 16px;border-top:1px solid #f4f2ef';
 
             // Radio selector for form type
             var selectedType = { value: '' };
@@ -3853,9 +3853,9 @@ export default class VoltimaxChatPlugin extends Plugin {
 
             c.upload_options.forEach(function(opt) {
                 var radioRow = document.createElement('label');
-                radioRow.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:4px;border:1px solid #d1d5db;border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:13px;color:#374151';
+                radioRow.style.cssText = 'display:flex;align-items:center;gap:8px;padding:8px 12px;margin-bottom:4px;border:1px solid #e0ddd7;border-radius:8px;cursor:pointer;transition:all 0.2s;font-size:13px;color:#57534e';
                 radioRow.addEventListener('mouseenter', function() { radioRow.style.borderColor = '#22c55e'; });
-                radioRow.addEventListener('mouseleave', function() { if (selectedType.value !== opt.key) radioRow.style.borderColor = '#d1d5db'; });
+                radioRow.addEventListener('mouseleave', function() { if (selectedType.value !== opt.key) radioRow.style.borderColor = '#e0ddd7'; });
 
                 var radio = document.createElement('input');
                 radio.type = 'radio';
@@ -3864,7 +3864,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 radio.style.cssText = 'accent-color:#22c55e';
                 radio.addEventListener('change', function() {
                     selectedType.value = opt.key;
-                    radioGroup.querySelectorAll('label').forEach(function(l) { l.style.borderColor = '#d1d5db'; l.style.background = '#fff'; });
+                    radioGroup.querySelectorAll('label').forEach(function(l) { l.style.borderColor = '#e0ddd7'; l.style.background = '#fff'; });
                     radioRow.style.borderColor = '#22c55e';
                     radioRow.style.background = '#f0fdf4';
                 });
@@ -3882,13 +3882,13 @@ export default class VoltimaxChatPlugin extends Plugin {
             var fileRow = document.createElement('div');
             fileRow.style.cssText = 'margin-bottom:10px';
             var fileLabel = document.createElement('label');
-            fileLabel.style.cssText = 'display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:4px';
+            fileLabel.style.cssText = 'display:block;font-size:12px;font-weight:600;color:#57534e;margin-bottom:4px';
             fileLabel.textContent = 'PDF hochladen oder hierher ziehen *';
             fileRow.appendChild(fileLabel);
             var fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.accept = '.pdf';
-            fileInput.style.cssText = 'display:block;width:100%;font-size:12px;padding:6px;border:1px solid #d1d5db;border-radius:6px;background:#f9fafb';
+            fileInput.style.cssText = 'display:block;width:100%;font-size:12px;padding:6px;border:1px solid #e0ddd7;border-radius:6px;background:#faf9f7';
             fileRow.appendChild(fileInput);
             // Drag & drop support
             fileRow.addEventListener('dragover', function(e) {
@@ -3897,13 +3897,13 @@ export default class VoltimaxChatPlugin extends Plugin {
                 fileInput.style.background = '#eef2ff';
             });
             fileRow.addEventListener('dragleave', function() {
-                fileInput.style.borderColor = '#d1d5db';
-                fileInput.style.background = '#f9fafb';
+                fileInput.style.borderColor = '#e0ddd7';
+                fileInput.style.background = '#faf9f7';
             });
             fileRow.addEventListener('drop', function(e) {
                 e.preventDefault();
-                fileInput.style.borderColor = '#d1d5db';
-                fileInput.style.background = '#f9fafb';
+                fileInput.style.borderColor = '#e0ddd7';
+                fileInput.style.background = '#faf9f7';
                 if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
                     fileInput.files = e.dataTransfer.files;
                     fileInput.dispatchEvent(new Event('change', { bubbles: true }));
@@ -3917,13 +3917,13 @@ export default class VoltimaxChatPlugin extends Plugin {
                 var row = document.createElement('div');
                 row.style.cssText = 'margin-bottom:10px';
                 var label = document.createElement('label');
-                label.style.cssText = 'display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:4px';
+                label.style.cssText = 'display:block;font-size:12px;font-weight:600;color:#57534e;margin-bottom:4px';
                 label.textContent = f.label;
                 row.appendChild(label);
                 if (f.editable === false) {
                     // Read-only field (e.g. subject)
                     var readOnly = document.createElement('div');
-                    readOnly.style.cssText = 'font-size:12px;padding:8px 10px;border:1px solid #e5e7eb;border-radius:6px;background:#f3f4f6;color:#6b7280';
+                    readOnly.style.cssText = 'font-size:12px;padding:8px 10px;border:1px solid #e7e5e0;border-radius:6px;background:#f4f2ef;color:#78716c';
                     readOnly.textContent = f.value || '';
                     row.appendChild(readOnly);
                     textInputs[f.key] = { value: f.value || '' };
@@ -3932,7 +3932,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     input.type = f.type || 'text';
                     input.value = f.value || '';
                     input.placeholder = f.label + '...';
-                    input.style.cssText = 'display:block;width:100%;font-size:12px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;background:#fff';
+                    input.style.cssText = 'display:block;width:100%;font-size:12px;padding:8px 10px;border:1px solid #e0ddd7;border-radius:6px;background:#fff';
                     row.appendChild(input);
                     textInputs[f.key] = input;
                 }
@@ -3943,13 +3943,13 @@ export default class VoltimaxChatPlugin extends Plugin {
             var infoRow = document.createElement('div');
             infoRow.style.cssText = 'margin-bottom:10px';
             var infoLabel = document.createElement('label');
-            infoLabel.style.cssText = 'display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:4px';
+            infoLabel.style.cssText = 'display:block;font-size:12px;font-weight:600;color:#57534e;margin-bottom:4px';
             infoLabel.textContent = 'Zusätzliche Informationen (optional)';
             infoRow.appendChild(infoLabel);
             var infoTextarea = document.createElement('textarea');
             infoTextarea.rows = 3;
             infoTextarea.placeholder = 'z.B. Bestellnummer, Anmerkungen...';
-            infoTextarea.style.cssText = 'display:block;width:100%;font-size:12px;padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;background:#fff;resize:vertical';
+            infoTextarea.style.cssText = 'display:block;width:100%;font-size:12px;padding:8px 10px;border:1px solid #e0ddd7;border-radius:6px;background:#fff;resize:vertical';
             infoRow.appendChild(infoTextarea);
             uploadDiv.appendChild(infoRow);
 
@@ -3996,12 +3996,12 @@ export default class VoltimaxChatPlugin extends Plugin {
             function clearFieldError(key) {
                 if (errorEls[key]) { errorEls[key].style.display = 'none'; }
                 if (key === 'form_type') {
-                    radioGroup.querySelectorAll('label').forEach(function(l) { l.style.borderColor = '#d1d5db'; l.style.background = '#fff'; });
+                    radioGroup.querySelectorAll('label').forEach(function(l) { l.style.borderColor = '#e0ddd7'; l.style.background = '#fff'; });
                 } else if (key === 'file') {
-                    fileInput.style.borderColor = '#d1d5db'; fileInput.style.background = '#f9fafb';
+                    fileInput.style.borderColor = '#e0ddd7'; fileInput.style.background = '#faf9f7';
                     fileInput.removeAttribute('aria-invalid');
                 } else if (textInputs[key] && textInputs[key].style) {
-                    textInputs[key].style.borderColor = '#d1d5db'; textInputs[key].style.background = '#fff';
+                    textInputs[key].style.borderColor = '#e0ddd7'; textInputs[key].style.background = '#fff';
                     textInputs[key].removeAttribute('aria-invalid');
                 }
             }
@@ -4083,12 +4083,12 @@ export default class VoltimaxChatPlugin extends Plugin {
                         ticketRow.style.cssText = 'display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px';
 
                         var ticketLabel = document.createElement('span');
-                        ticketLabel.style.cssText = 'font-size:13px;color:#374151';
+                        ticketLabel.style.cssText = 'font-size:13px;color:#57534e';
                         ticketLabel.textContent = 'Ticket #' + result.ticket_id;
                         ticketRow.appendChild(ticketLabel);
 
                         var copyBtn = document.createElement('button');
-                        copyBtn.style.cssText = 'padding:4px 10px;font-size:11px;border:1px solid #d1d5db;border-radius:6px;background:#fff;cursor:pointer;color:#374151';
+                        copyBtn.style.cssText = 'padding:4px 10px;font-size:11px;border:1px solid #e0ddd7;border-radius:6px;background:#fff;cursor:pointer;color:#57534e';
                         copyBtn.textContent = '\uD83D\uDCCB Kopieren';
                         copyBtn.addEventListener('click', function() {
                             navigator.clipboard.writeText(result.ticket_id).then(function() {
@@ -4097,8 +4097,8 @@ export default class VoltimaxChatPlugin extends Plugin {
                                 copyBtn.style.color = '#16a34a';
                                 setTimeout(function() {
                                     copyBtn.textContent = '\uD83D\uDCCB Kopieren';
-                                    copyBtn.style.borderColor = '#d1d5db';
-                                    copyBtn.style.color = '#374151';
+                                    copyBtn.style.borderColor = '#e0ddd7';
+                                    copyBtn.style.color = '#57534e';
                                 }, 2000);
                             });
                         });
@@ -4134,7 +4134,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (c.actions && c.actions.length > 0) {
             var actionsDiv = document.createElement('div');
             actionsDiv.className = 'vtx-info-card__actions';
-            actionsDiv.style.cssText = 'flex-wrap:wrap;gap:4px;padding:8px 12px;border-top:1px solid #f3f4f6';
+            actionsDiv.style.cssText = 'flex-wrap:wrap;gap:4px;padding:8px 12px;border-top:1px solid #f4f2ef';
             c.actions.forEach(function(action) {
                 var btn = document.createElement('button');
                 btn.className = 'vtx-choice-btn';
@@ -4154,7 +4154,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (c.meta_actions && c.meta_actions.length > 0) {
             var metaDiv = document.createElement('div');
             metaDiv.className = 'vtx-info-card__actions';
-            metaDiv.style.cssText = 'border-top:1px solid #f3f4f6;padding-top:8px';
+            metaDiv.style.cssText = 'border-top:1px solid #f4f2ef;padding-top:8px';
             c.meta_actions.forEach(function(action) {
                 var btn = document.createElement('button');
                 btn.className = 'vtx-choice-btn vtx-choice-btn--secondary';
