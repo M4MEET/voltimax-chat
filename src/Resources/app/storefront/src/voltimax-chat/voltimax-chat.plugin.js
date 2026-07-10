@@ -1227,27 +1227,34 @@ export default class VoltimaxChatPlugin extends Plugin {
         inputRow.appendChild(sendBtn);
         container.appendChild(inputRow);
 
+        // Quiet section caption above the suggestion cloud
+        const suggestionsLabel = document.createElement('div');
+        suggestionsLabel.className = 'vtx-home__suggestions-label';
+        suggestionsLabel.textContent = 'Beliebte Themen';
+        container.appendChild(suggestionsLabel);
+
         // Smart suggestion chips — populated from server after auth, with defaults as fallback
         const suggestionsContainer = document.createElement('div');
         suggestionsContainer.className = 'vtx-home__suggestions';
         this._homeSuggestionsContainer = suggestionsContainer;
 
-        // Show default suggestions immediately; server suggestions replace them after auth
+        // Show default suggestions immediately; server suggestions replace them
+        // after auth. Text-only \u2014 emoji chips read as playful, not professional.
         const defaultSuggestions = [
-            '\uD83D\uDCE6 Bestellstatus',
-            '\uD83D\uDD0B Produktsuche',
-            '\uD83D\uDE97 Fahrzeug-Batterie',
-            '\u21A9\uFE0F Retoure & Erstattung',
-            '\uD83D\uDE9A Versand & Lieferzeit',
-            '\uD83E\uDDFE Rechnung anfordern',
-            '\u267B\uFE0F Batteriepfand',
-            '\uD83C\uDFAB Ticket-Status',
-            '\uD83D\uDCC4 R\u00fcckgaberecht',
-            '\uD83D\uDCAC Support kontaktieren',
-            '\uD83D\uDCB3 Zahlungsstatus',
-            '\uD83D\uDD12 Mein Konto',
-            '\u26A0\uFE0F Problem melden',
-            '\uD83D\uDD0C Zubeh\u00f6r',
+            'Bestellstatus',
+            'Produktsuche',
+            'Fahrzeug-Batterie',
+            'Retoure & Erstattung',
+            'Versand & Lieferzeit',
+            'Rechnung anfordern',
+            'Batteriepfand',
+            'Ticket-Status',
+            'R\u00fcckgaberecht',
+            'Support kontaktieren',
+            'Zahlungsstatus',
+            'Mein Konto',
+            'Problem melden',
+            'Zubeh\u00f6r',
         ];
         this._renderHomeSuggestions(suggestionsContainer, defaultSuggestions, mainInput, doFreeText);
         container.appendChild(suggestionsContainer);
@@ -1281,7 +1288,10 @@ export default class VoltimaxChatPlugin extends Plugin {
 
     _renderHomeSuggestions(container, suggestions, inputEl, submitFn) {
         container.textContent = '';
-        suggestions.forEach(text => {
+        suggestions.forEach(rawText => {
+            // Server suggestions may still carry a leading emoji; strip it for a
+            // clean, professional chip label.
+            const text = String(rawText).replace(/^[^\p{L}\p{N}]+\s*/u, '') || rawText;
             const chip = document.createElement('button');
             chip.className = 'vtx-topic-chip';
             chip.textContent = text;
@@ -1305,11 +1315,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             chip.className = 'vtx-topic-chip';
             chip.dataset.topicId = t.id;
 
-            const icon = document.createElement('span');
-            icon.className = 'vtx-topic-chip__icon';
-            icon.textContent = t.icon || '\uD83D\uDCAC';
-            chip.appendChild(icon);
-
+            // Text-only chips \u2014 emoji icons read as playful, not professional.
             const label = document.createTextNode(t.title);
             chip.appendChild(label);
 
