@@ -356,6 +356,60 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (label) label.textContent = 'Gelesen';
     }
 
+    // ── Verification progress indicator ──────────────────────────────────────
+    // Shown while the server checks an order/ticket lookup; flips to a green
+    // success state when the resulting card arrives.
+    _showVerifyingCard(text) {
+        this._resolveVerifyingCard(false);
+        var messages = document.querySelector('.voltimax-chat-window__messages');
+        if (!messages) return;
+        var el = document.createElement('div');
+        el.className = 'vtx-verifying-card';
+        var row = document.createElement('div');
+        row.className = 'vtx-verifying-card__row';
+        var spinner = document.createElement('span');
+        spinner.className = 'vtx-verifying-card__spinner';
+        var label = document.createElement('span');
+        label.className = 'vtx-verifying-card__text';
+        label.textContent = text;
+        row.appendChild(spinner);
+        row.appendChild(label);
+        el.appendChild(row);
+        var track = document.createElement('div');
+        track.className = 'vtx-verifying-card__track';
+        var bar = document.createElement('div');
+        bar.className = 'vtx-verifying-card__bar';
+        track.appendChild(bar);
+        el.appendChild(track);
+        messages.appendChild(el);
+        messages.scrollTop = messages.scrollHeight;
+        this._verifyingEl = el;
+    }
+
+    _resolveVerifyingCard(success) {
+        var el = this._verifyingEl;
+        if (!el) return;
+        this._verifyingEl = null;
+        if (!success) { el.remove(); return; }
+        el.classList.add('is-success');
+        el.textContent = '';
+        var row = document.createElement('div');
+        row.className = 'vtx-verifying-card__row';
+        var check = document.createElement('span');
+        check.className = 'vtx-verifying-card__check';
+        check.textContent = '\u2713';
+        var label = document.createElement('span');
+        label.className = 'vtx-verifying-card__text';
+        label.textContent = 'Erfolgreich verifiziert';
+        row.appendChild(check);
+        row.appendChild(label);
+        el.appendChild(row);
+        setTimeout(function() {
+            el.classList.add('is-leaving');
+            setTimeout(function() { el.remove(); }, 350);
+        }, 1200);
+    }
+
     _formatTime(date) {
         return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
     }
@@ -2109,6 +2163,17 @@ export default class VoltimaxChatPlugin extends Plugin {
         var data;
         try { data = JSON.parse(event.data); } catch (e) { return; }
 
+        // Resolve a pending verification indicator: an incoming card means
+        // success (green flash); a plain reply or error means the flow
+        // answered differently, so the indicator leaves quietly.
+        if (this._verifyingEl) {
+            if (data.type === 'ai_card' || data.type === 'info_card') {
+                this._resolveVerifyingCard(true);
+            } else if (data.type === 'message' || data.type === 'stream_chunk' || data.type === 'error') {
+                this._resolveVerifyingCard(false);
+            }
+        }
+
         if (data.type === 'auth_success') {
             // WebSocket auth_success includes session_id; SSE early auth does not
             if (data.session_id) {
@@ -3649,7 +3714,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 if (field.type === 'select') {
                     // Dropdown select
                     inputEl = document.createElement('select');
-                    inputEl.style.cssText = 'width:100%;padding:9px 13px;border:1px solid #e7e5e0;border-radius:10px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box;background:#fff;appearance:auto;transition:border-color 0.2s';
+                    inputEl.style.cssText = 'width:100%;padding:9px 16px;border:1px solid #e7e5e0;border-radius:999px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box;background:#fff;appearance:auto;transition:border-color 0.2s';
                     inputEl.dataset.name = field.name;
 
                     var placeholder = document.createElement('option');
@@ -3746,7 +3811,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     inputEl = document.createElement('input');
                     inputEl.type = field.type || 'text';
                     inputEl.placeholder = field.placeholder || '';
-                    inputEl.style.cssText = 'width:100%;padding:9px 13px;border:1px solid #e7e5e0;border-radius:10px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box;transition:border-color 0.2s, box-shadow 0.2s';
+                    inputEl.style.cssText = 'width:100%;padding:9px 16px;border:1px solid #e7e5e0;border-radius:999px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box;transition:border-color 0.2s, box-shadow 0.2s';
                     inputEl.addEventListener('focus', function() { this.style.borderColor = 'color-mix(in srgb, var(--vtx-primary, #d99a4e) 45%, #fff)'; this.style.boxShadow = '0 0 0 3px color-mix(in srgb, var(--vtx-primary, #d99a4e) 12%, transparent)'; });
                     inputEl.addEventListener('blur', function() { this.style.borderColor = '#e7e5e0'; this.style.boxShadow = 'none'; });
                     inputEl.dataset.name = field.name;
@@ -3795,6 +3860,14 @@ export default class VoltimaxChatPlugin extends Plugin {
                         input_value: lastValue.replace(/^#/, ''),
                         fields: values,
                     }));
+                    // Verification lookups get a progress card that flips
+                    // green when the verified card arrives.
+                    var lookupField = String(c.form.field || (c.form.fields[0] && c.form.fields[0].name) || '');
+                    if (/verify|order|ticket/i.test(lookupField)) {
+                        self._showVerifyingCard(/ticket/i.test(lookupField)
+                            ? 'Ticket wird gepr\u00fcft \u2026'
+                            : 'Bestellung wird \u00fcberpr\u00fcft \u2026');
+                    }
                 }
                 setTimeout(function() { submitBtn.disabled = false; submitBtn.textContent = c.form.submit_label || 'Submit'; }, 8000);
             };

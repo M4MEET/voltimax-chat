@@ -372,12 +372,19 @@ $g-btn-ink-hover: #1c140b;
 
 .voltimax-chat-widget .voltimax-chat-confirm__input {
     border-color: $g-line;
-    border-radius: 10px;
+    border-radius: 999px;
+    padding-left: 14px;
+    padding-right: 14px;
 
     &:focus {
         border-color: color-mix(in srgb, var(--vtx-primary, #d99a4e) 45%, #fff);
         box-shadow: 0 0 0 3px color-mix(in srgb, var(--vtx-primary, #d99a4e) 12%, transparent);
     }
+}
+
+// Textareas keep soft rectangles — a pill textarea reads wrong
+.voltimax-chat-widget .voltimax-chat-confirm__textarea {
+    border-radius: 14px;
 }
 
 // Read-only values render as quiet filled pills (like the home name field)
@@ -390,7 +397,9 @@ $g-btn-ink-hover: #1c140b;
 .voltimax-chat-widget .vtx-verify-form__input,
 .voltimax-chat-widget .voltimax-chat-verify-bar__input {
     border-color: $g-line;
-    border-radius: 10px;
+    border-radius: 999px;
+    padding-left: 14px;
+    padding-right: 14px;
 
     &:focus {
         border-color: color-mix(in srgb, var(--vtx-primary, #d99a4e) 45%, #fff);

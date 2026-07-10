@@ -524,3 +524,95 @@
         }
     }
 }
+
+/* ── Verification progress card ─────────────────────────────── */
+// Spinner + indeterminate bar while the server checks a lookup;
+// flips to a green check when the verified card arrives.
+.vtx-verifying-card {
+    flex-shrink: 0;
+    margin: 6px 2px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 1px solid $vtx-border;
+    border-radius: 14px;
+    animation: vtx-fade-slide-in 0.3s ease;
+
+    &__row {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-size: 12.5px;
+        font-weight: 500;
+        color: $vtx-text;
+    }
+
+    &__spinner {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid #eceae5;
+        border-top-color: var(--vtx-primary, #d99a4e);
+        animation: vtx-verify-spin 0.8s linear infinite;
+        flex-shrink: 0;
+    }
+
+    &__track {
+        margin-top: 10px;
+        height: 3px;
+        border-radius: 999px;
+        background: #f0eeea;
+        overflow: hidden;
+    }
+
+    &__bar {
+        height: 100%;
+        width: 40%;
+        border-radius: 999px;
+        background: var(--vtx-primary, #d99a4e);
+        animation: vtx-verify-indeterminate 1.4s ease-in-out infinite;
+    }
+
+    &__check {
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #16a34a;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        flex-shrink: 0;
+        animation: vtx-verify-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    &.is-success {
+        border-color: rgba(22, 163, 74, 0.35);
+
+        .vtx-verifying-card__text {
+            color: #15803d;
+            font-weight: 600;
+        }
+    }
+
+    &.is-leaving {
+        opacity: 0;
+        transform: translateY(-4px);
+        transition: opacity 0.3s, transform 0.3s;
+    }
+}
+
+@keyframes vtx-verify-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes vtx-verify-indeterminate {
+    0%   { transform: translateX(-110%); }
+    100% { transform: translateX(360%); }
+}
+
+@keyframes vtx-verify-pop {
+    from { transform: scale(0); }
+    to   { transform: scale(1); }
+}
