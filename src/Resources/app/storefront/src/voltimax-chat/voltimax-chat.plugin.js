@@ -2983,16 +2983,16 @@ export default class VoltimaxChatPlugin extends Plugin {
         orb.setAttribute('role', 'status');
         orb.setAttribute('aria-label', 'GrootDesk denkt nach …');
 
-        const swirl1 = document.createElement('span');
-        swirl1.className = 'vtx-orb__swirl vtx-orb__swirl--1';
-        const swirl2 = document.createElement('span');
-        swirl2.className = 'vtx-orb__swirl vtx-orb__swirl--2';
-        const core = document.createElement('span');
-        core.className = 'vtx-orb__core';
-
-        orb.appendChild(swirl1);
-        orb.appendChild(swirl2);
-        orb.appendChild(core);
+        // Three translucent light-petals crossing over a dark glassy sphere,
+        // with a white flare where they intersect (screen blending).
+        ['r', 'b', 'c'].forEach(function(tone) {
+            const petal = document.createElement('span');
+            petal.className = 'vtx-orb__petal vtx-orb__petal--' + tone;
+            orb.appendChild(petal);
+        });
+        const flare = document.createElement('span');
+        flare.className = 'vtx-orb__flare';
+        orb.appendChild(flare);
         typing.appendChild(orb);
         messages.appendChild(typing);
         messages.scrollTop = messages.scrollHeight;
