@@ -211,18 +211,26 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
         box-shadow: 0 0 0 3px color-mix(in srgb, var(--vtx-primary, #d99a4e) 13%, transparent);
     }
 
-    // Ghost send button: quiet neutral, ink arrow — no colored block
+    // The send button hosts the mini amber orb — no button chrome
     button {
         width: 34px;
         height: 34px;
         min-width: 34px;
-        background: #f4f2ef;
+        background: transparent;
         color: $g-ink-soft;
         box-shadow: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
         &:hover {
-            background: #ece9e4;
-            color: $g-ink;
+            background: transparent;
+
+            .vtx-orb--send {
+                box-shadow:
+                    inset 0 0 4px rgba(255, 255, 255, 0.25),
+                    0 0 12px rgba(217, 154, 78, 0.65);
+            }
         }
     }
 }

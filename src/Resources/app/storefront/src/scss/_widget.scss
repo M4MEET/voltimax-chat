@@ -661,13 +661,14 @@
 .voltimax-chat-teaser {
     position: fixed;
     z-index: $vtx-z-index;
-    bottom: calc(#{$vtx-bottom-offset} + #{$vtx-bubble-size} / 2 - 21px);
+    // Sits ABOVE the "Chat mit uns" launcher pill (48px tall) with a gap
+    bottom: calc(#{$vtx-bottom-offset} + 48px + 12px);
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 10px 12px 10px 14px;
     background: #fff;
-    border: 1px solid rgba(67, 56, 202, 0.18);
+    border: 1px solid #e7e5e0;
     border-radius: 14px;
     box-shadow: 0 8px 28px rgba(0, 0, 0, 0.14), 0 2px 8px rgba(0, 0, 0, 0.06);
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
@@ -678,19 +679,19 @@
     animation: vtx-teaser-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both,
                vtx-teaser-nudge 4.5s ease-in-out 2.5s infinite;
 
-    &--bottom-right { right: calc(#{$vtx-spacing} + 4px + #{$vtx-bubble-size} + 14px); }
-    &--bottom-left  { left:  calc(#{$vtx-spacing} + 4px + #{$vtx-bubble-size} + 14px); }
+    &--bottom-right { right: calc(#{$vtx-spacing} + 4px); }
+    &--bottom-left  { left:  calc(#{$vtx-spacing} + 4px); }
 
-    // speech tail pointing at the bubble
+    // speech tail pointing DOWN at the launcher pill
     &::after {
         content: '';
         position: absolute;
-        top: 50%;
-        margin-top: -6px;
+        bottom: -12px;
         border: 6px solid transparent;
+        border-top-color: #fff;
     }
-    &--bottom-right::after { right: -12px; border-left-color: #fff; }
-    &--bottom-left::after  { left: -12px;  border-right-color: #fff; }
+    &--bottom-right::after { right: 22px; }
+    &--bottom-left::after  { left: 22px; }
 
     &__close {
         border: none;

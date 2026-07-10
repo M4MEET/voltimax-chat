@@ -1240,7 +1240,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const sendBtn = document.createElement('button');
         sendBtn.setAttribute('aria-label', 'Nachricht senden');
-        sendBtn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>';
+        sendBtn.innerHTML = '<span class="vtx-orb vtx-orb--send" aria-hidden="true"><span class="vtx-orb__petal vtx-orb__petal--r"></span><span class="vtx-orb__petal vtx-orb__petal--b"></span><span class="vtx-orb__petal vtx-orb__petal--c"></span><span class="vtx-orb__flare"></span></span>';
 
         const doFreeText = () => {
             const text = mainInput.value.trim();
@@ -2162,6 +2162,21 @@ export default class VoltimaxChatPlugin extends Plugin {
     _onMessage(event) {
         var data;
         try { data = JSON.parse(event.data); } catch (e) { return; }
+
+        // Orb policy: ANY content-bearing reply (text, stream, every card
+        // type — info, form, confirmation, choices, prompts — and errors)
+        // dismisses the docked orb and restores the input field. Only pure
+        // status signals ('typing', sounds, suggestion refreshes, auth)
+        // keep the orb thinking. This guarantees cards that ask for input
+        // (e.g. the battery-finder cascade) always arrive with the input
+        // bar back and never race a hidden composer.
+        if (this._typingEl
+            && data.type !== 'typing'
+            && data.type !== 'play_sound'
+            && data.type !== 'suggestions'
+            && data.type !== 'auth_success') {
+            this._hideTypingIndicator();
+        }
 
         // Resolve a pending verification indicator: an incoming card means
         // success (green flash); a plain reply or error means the flow
