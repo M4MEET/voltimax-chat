@@ -537,8 +537,8 @@ export default class VoltimaxChatPlugin extends Plugin {
         const btn = document.createElement('button');
         btn.className = 'voltimax-chat-bubble__button';
         btn.setAttribute('aria-label', 'Chat öffnen');
-        // Safe: hardcoded SVG
-        btn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>';
+        // Safe: hardcoded SVG — chat bubble with three typing dots inside
+        btn.innerHTML = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path><circle class="vtx-ldot" cx="8" cy="10" r="1.4" fill="currentColor" stroke="none"></circle><circle class="vtx-ldot" cx="12" cy="10" r="1.4" fill="currentColor" stroke="none"></circle><circle class="vtx-ldot" cx="16" cy="10" r="1.4" fill="currentColor" stroke="none"></circle></svg>';
 
         const badge = document.createElement('span');
         badge.className = 'voltimax-chat-bubble__badge';

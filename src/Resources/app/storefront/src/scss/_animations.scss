@@ -164,3 +164,28 @@
 @media (prefers-reduced-motion: reduce) {
     .voltimax-chat-bubble__button--attention { animation: none; }
 }
+
+// Idle loop for the launcher: mostly at rest, then a small bounce with a
+// shake near the end of each cycle — lively without being annoying.
+@keyframes vtx-bubble-idle-bounce {
+    0%, 72%, 100% { transform: translateY(0) rotate(0deg); }
+    76%  { transform: translateY(-10px); }
+    80%  { transform: translateY(0) scaleY(0.95); }
+    83%  { transform: translateY(-5px); }
+    86%  { transform: translateY(0) scaleY(0.97); }
+    90%  { transform: rotate(-2.5deg); }
+    94%  { transform: rotate(2.5deg); }
+    97%  { transform: rotate(-1.5deg); }
+}
+
+// Slow gradient drift across the launcher pill (background-position only)
+@keyframes vtx-gradient-flow {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+}
+
+// Typing dots inside the launcher chat icon
+@keyframes vtx-ldot-blink {
+    0%, 60%, 100% { opacity: 0.35; }
+    30%           { opacity: 1; }
+}

@@ -74,6 +74,9 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
 .voltimax-chat-message__time,
 .voltimax-chat-message__status { color: $g-ink-faint; }
 
+// No avatar tile next to bubbles — cleaner reading column (Gorgias style)
+.voltimax-chat-widget .voltimax-chat-ai-row__avatar { display: none; }
+
 // ── Input: bordered pill with the online dot inside it ───────────────────────
 .voltimax-chat-window__input-area {
     background: #fff;
@@ -221,8 +224,12 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
     background: linear-gradient(
         100deg,
         color-mix(in srgb, var(--vtx-primary, #d99a4e) 88%, #fff) 0%,
-        color-mix(in srgb, var(--vtx-primary, #d99a4e) 30%, #fff) 100%
+        color-mix(in srgb, var(--vtx-primary, #d99a4e) 30%, #fff) 50%,
+        color-mix(in srgb, var(--vtx-primary, #d99a4e) 88%, #fff) 100%
     );
+    // Oversized gradient so it can drift left↔right across the pill
+    background-size: 250% 100%;
+    background-position: 0% 50%;
 
     svg {
         width: 30px;
@@ -233,6 +240,14 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
         color: #fff;
         border-radius: 50%;
         flex-shrink: 0;
+    }
+
+    // Typing dots inside the chat icon blink in sequence
+    svg .vtx-ldot {
+        animation: vtx-ldot-blink 1.6s ease-in-out infinite;
+
+        &:nth-of-type(2) { animation-delay: 0.25s; }
+        &:nth-of-type(3) { animation-delay: 0.5s; }
     }
 
     &::after {
@@ -251,5 +266,25 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
         height: 48px;
         border-radius: 999px;
         transform: translateY(-2px);
+    }
+
+    // Idle bounce+shake loop plus a slow gradient drift (pauses under the
+    // cursor; the one-time --attention jump takes over via :not()).
+    &:not(.voltimax-chat-bubble__button--attention) {
+        animation:
+            vtx-bubble-idle-bounce 5s ease-in-out 4s infinite,
+            vtx-gradient-flow 6s ease-in-out infinite;
+        transform-origin: bottom center;
+    }
+
+    &:hover,
+    &:focus-visible {
+        animation-play-state: paused;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        animation: none !important;
+
+        svg .vtx-ldot { animation: none !important; }
     }
 }
