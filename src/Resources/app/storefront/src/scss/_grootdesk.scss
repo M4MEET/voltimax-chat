@@ -168,6 +168,48 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
     }
 }
 
+// ── Home fields: quiet name pill, prominent ask pill ─────────────────────────
+// Hierarchy through weight, not color: the name field is a filled soft pill,
+// the ask field is a white pill with a hairline and gentle depth. Brand
+// colour appears only as the focus ring and the send button.
+.voltimax-chat-widget .vtx-home .vtx-home__identity-input {
+    background: #f4f2ef;
+    border: none;
+    box-shadow: none;
+    padding: 11px 16px;
+    font-size: 13px;
+
+    &:focus {
+        background: #fff;
+        border: none;
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--vtx-primary, #d99a4e) 16%, transparent);
+    }
+}
+
+.voltimax-chat-widget .vtx-home__input-row {
+    border: 1px solid $g-line;
+    border-radius: 999px;
+    background: #fff;
+    padding: 5px 5px 5px 16px;
+    box-shadow:
+        0 1px 2px rgba(28, 25, 23, 0.04),
+        0 6px 18px rgba(28, 25, 23, 0.05);
+
+    &:focus-within {
+        border-color: color-mix(in srgb, var(--vtx-primary, #d99a4e) 55%, #fff);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--vtx-primary, #d99a4e) 13%, transparent);
+    }
+
+    button {
+        width: 34px;
+        height: 34px;
+        min-width: 34px;
+        background: var(--vtx-primary, #d99a4e);
+        color: #231a10;
+        box-shadow: none;
+    }
+}
+
 // Home suggestions: quiet caption + editorial left-aligned chip cloud
 .voltimax-chat-widget .vtx-home__suggestions-label {
     font-size: 10px;
