@@ -117,9 +117,14 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
 }
 
 .voltimax-chat-widget .voltimax-chat-window__send {
-    background: var(--vtx-primary, #d99a4e);
-    color: #231a10;
+    background: #f4f2ef;
+    color: $g-ink-soft;
     box-shadow: none;
+
+    &:hover {
+        background: #ece9e4;
+        color: $g-ink;
+    }
 }
 
 // In-chat suggestion chips: borderless soft pills (minimum borders)
@@ -200,13 +205,19 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
         box-shadow: 0 0 0 3px color-mix(in srgb, var(--vtx-primary, #d99a4e) 13%, transparent);
     }
 
+    // Ghost send button: quiet neutral, ink arrow — no colored block
     button {
         width: 34px;
         height: 34px;
         min-width: 34px;
-        background: var(--vtx-primary, #d99a4e);
-        color: #231a10;
+        background: #f4f2ef;
+        color: $g-ink-soft;
         box-shadow: none;
+
+        &:hover {
+            background: #ece9e4;
+            color: $g-ink;
+        }
     }
 }
 
