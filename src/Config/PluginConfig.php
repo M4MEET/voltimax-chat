@@ -43,7 +43,7 @@ class PluginConfig
 
     public function getPrimaryColor(?string $salesChannelId = null): string
     {
-        return $this->get('primaryColor', $salesChannelId) ?? '#4F46E5';
+        return $this->get('primaryColor', $salesChannelId) ?? '#D99A4E';
     }
 
     public function getLogoMediaId(?string $salesChannelId = null): ?string

@@ -24,10 +24,30 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
     color: $g-ink;
 }
 
-// ── Header: the one brand-coloured island on the card ────────────────────────
+// ── Header: a LIGHT brand-tint island with ink text — branded, never loud ────
 .voltimax-chat-widget__header {
-    background: var(--vtx-primary, #b0703a);
+    background: color-mix(in srgb, var(--vtx-primary, #d99a4e) 16%, #fff);
     margin-top: 10px;
+
+    &:hover { background: color-mix(in srgb, var(--vtx-primary, #d99a4e) 24%, #fff); }
+}
+
+.voltimax-chat-widget__compact-title,
+.voltimax-chat-widget__title { color: $g-ink; }
+.voltimax-chat-widget__status { color: $g-ink-soft; }
+.voltimax-chat-widget__chat-id { color: $g-ink-faint; }
+
+// Header action buttons: ink on a subtle dark wash (was white-on-color)
+.voltimax-chat-widget__header-actions button,
+.voltimax-chat-widget__header-left .voltimax-chat-widget__expand {
+    background: rgba(28, 25, 23, 0.05);
+    border-color: transparent;
+    color: $g-ink-soft;
+
+    &:hover {
+        background: rgba(28, 25, 23, 0.10);
+        color: $g-ink;
+    }
 }
 
 // ── Chat area: white, bubbles carry the structure ─────────────────────────────
@@ -94,7 +114,8 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
 }
 
 .voltimax-chat-widget .voltimax-chat-window__send {
-    background: var(--vtx-primary, #b0703a);
+    background: var(--vtx-primary, #d99a4e);
+    color: #231a10;
     box-shadow: none;
 }
 
@@ -187,6 +208,7 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
 }
 
 // ── Launcher: labeled brand-coloured pill ─────────────────────────────────────
+// Dark warm ink text — readable on light ambers as well as deeper coppers.
 .voltimax-chat-bubble__button {
     width: auto;
     min-width: 0;
@@ -194,6 +216,7 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
     padding: 0 18px 0 16px;
     border-radius: 999px;
     gap: 8px;
+    color: #231a10;
 
     svg { width: 20px; height: 20px; }
 

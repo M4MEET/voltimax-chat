@@ -91,7 +91,7 @@
             <name>primaryColor</name>
             <label>Primary color (brand surface)</label>
             <label lang="de-DE">Primärfarbe (Markenfläche)</label>
-            <defaultValue>#B0703A</defaultValue>
+            <defaultValue>#D99A4E</defaultValue>
             <helpText>Brand color for the widget surface, launcher, and user messages.</helpText>
             <helpText lang="de-DE">Markenfarbe für die Widget-Fläche, den Launcher und Nutzernachrichten.</helpText>
         </input-field>
@@ -100,7 +100,7 @@
             <name>secondaryColor</name>
             <label>Secondary color (accents, optional)</label>
             <label lang="de-DE">Sekundärfarbe (Akzente, optional)</label>
-            <defaultValue>#8F5A2E</defaultValue>
+            <defaultValue>#B87F3E</defaultValue>
             <helpText>Optional accent color. The current design uses the primary color as a single brand surface.</helpText>
             <helpText lang="de-DE">Optionale Akzentfarbe. Das aktuelle Design nutzt die Primärfarbe als einheitliche Markenfläche.</helpText>
         </input-field>

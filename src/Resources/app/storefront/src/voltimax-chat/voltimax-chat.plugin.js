@@ -325,7 +325,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         // Professional monogram tile (no mascot imagery).
         var el = document.createElement('div');
         el.className = 'voltimax-chat-ai-row__avatar';
-        el.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:6px;background:var(--vtx-primary, #b0703a);color:#fff;font-family:Georgia, \'Times New Roman\', serif;font-weight:700;font-size:11px;line-height:1">G</span>';
+        el.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:6px;background:var(--vtx-primary, #d99a4e);color:#231a10;font-family:Georgia, \'Times New Roman\', serif;font-weight:700;font-size:11px;line-height:1">G</span>';
         return el;
     }
 
@@ -1111,7 +1111,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         const avatarWrap = document.createElement('div');
         avatarWrap.className = 'vtx-home__avatar';
-        avatarWrap.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#fff;font-family:Georgia, \'Times New Roman\', serif;font-weight:700;font-size:20px;line-height:1">G</span>';
+        avatarWrap.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#231a10;font-family:Georgia, \'Times New Roman\', serif;font-weight:700;font-size:20px;line-height:1">G</span>';
 
         const avatarName = document.createElement('div');
         avatarName.className = 'vtx-home__avatar-name';
@@ -3426,27 +3426,51 @@ export default class VoltimaxChatPlugin extends Plugin {
         };
         var badgeBase = 'flex-shrink:0;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;line-height:1.6;';
 
+        // Tone for a status value: trust an explicit row style, otherwise
+        // derive it from the (real customer) value so live data gets the
+        // same badge treatment as any demo.
+        var statusTone = function(value, style) {
+            if (badgeStyles[style]) return style;
+            var v = String(value || '').toLowerCase();
+            if (/(abgeschlossen|versandt|versendet|geliefert|bezahlt|erstattet|aktiv|bestätigt|completed|shipped|delivered|paid|done|refunded)/.test(v)) return 'success';
+            if (/(offen|in bearbeitung|bearbeitung|ausstehend|wartet|teilweise|angekündigt|open|pending|processing|partial)/.test(v)) return 'warning';
+            if (/(storniert|abgebrochen|fehlgeschlagen|abgelehnt|cancelled|canceled|failed|rejected)/.test(v)) return 'danger';
+            return 'muted';
+        };
+
         // Promote an explicit status row into a header badge (demo style)
         var badgeRow = null;
+        var badgeTone = null;
         if (c.rows && c.rows.length > 0) {
             badgeRow = c.rows.find(function(r) {
-                return r && r.value && /^status$/i.test(String(r.label || '').trim())
-                    && badgeStyles[r.style];
+                return r && r.value && /^status$/i.test(String(r.label || '').trim());
             }) || null;
+            if (badgeRow) badgeTone = statusTone(badgeRow.value, badgeRow.style);
         }
 
+        // "Bestellung #123 — Verifiziert" → clean title + a Verifiziert badge
+        // (only when no status badge occupies the slot).
+        var title = c.title || '';
+        var verifiedMatch = /^(.*?)\s*[—–-]\s*verifiziert\s*$/i.exec(title);
+        if (verifiedMatch) title = verifiedMatch[1];
+
         // Header: title left, badge right
-        if (c.title || badgeRow) {
+        if (title || badgeRow || verifiedMatch) {
             var header = document.createElement('div');
             header.className = 'vtx-info-card__header';
             var titleSpan = document.createElement('span');
-            titleSpan.textContent = (c.icon ? c.icon + ' ' : '') + (c.title || '');
+            titleSpan.textContent = (c.icon ? c.icon + ' ' : '') + title;
             header.appendChild(titleSpan);
-            if (badgeRow) {
+            if (badgeRow || verifiedMatch) {
                 var badge = document.createElement('span');
                 badge.className = 'vtx-info-card__badge';
-                badge.textContent = badgeRow.value;
-                badge.style.cssText = badgeBase + badgeStyles[badgeRow.style];
+                if (badgeRow) {
+                    badge.textContent = badgeRow.value;
+                    badge.style.cssText = badgeBase + badgeStyles[badgeTone];
+                } else {
+                    badge.textContent = 'Verifiziert ✓';
+                    badge.style.cssText = badgeBase + badgeStyles.success;
+                }
                 header.appendChild(badge);
             }
             el.appendChild(header);
