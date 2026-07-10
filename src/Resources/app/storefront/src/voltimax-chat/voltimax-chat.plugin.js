@@ -3649,7 +3649,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 if (field.type === 'select') {
                     // Dropdown select
                     inputEl = document.createElement('select');
-                    inputEl.style.cssText = 'width:100%;padding:8px 12px;border:1.5px solid #e7e5e0;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box;background:#fff;appearance:auto';
+                    inputEl.style.cssText = 'width:100%;padding:9px 13px;border:1px solid #e7e5e0;border-radius:10px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box;background:#fff;appearance:auto;transition:border-color 0.2s';
                     inputEl.dataset.name = field.name;
 
                     var placeholder = document.createElement('option');
@@ -3746,7 +3746,9 @@ export default class VoltimaxChatPlugin extends Plugin {
                     inputEl = document.createElement('input');
                     inputEl.type = field.type || 'text';
                     inputEl.placeholder = field.placeholder || '';
-                    inputEl.style.cssText = 'width:100%;padding:8px 12px;border:1.5px solid #e7e5e0;border-radius:8px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box';
+                    inputEl.style.cssText = 'width:100%;padding:9px 13px;border:1px solid #e7e5e0;border-radius:10px;font-size:13px;outline:none;font-family:inherit;box-sizing:border-box;transition:border-color 0.2s, box-shadow 0.2s';
+                    inputEl.addEventListener('focus', function() { this.style.borderColor = 'color-mix(in srgb, var(--vtx-primary, #d99a4e) 45%, #fff)'; this.style.boxShadow = '0 0 0 3px color-mix(in srgb, var(--vtx-primary, #d99a4e) 12%, transparent)'; });
+                    inputEl.addEventListener('blur', function() { this.style.borderColor = '#e7e5e0'; this.style.boxShadow = 'none'; });
                     inputEl.dataset.name = field.name;
                 }
 
@@ -3756,7 +3758,9 @@ export default class VoltimaxChatPlugin extends Plugin {
             });
 
             var submitBtn = document.createElement('button');
-            submitBtn.style.cssText = 'width:100%;padding:10px;background:#2b2013;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit';
+            submitBtn.style.cssText = 'display:block;margin-left:auto;width:auto;padding:8px 18px;background:#2b2013;color:#fff;border:none;border-radius:999px;font-size:12.5px;font-weight:600;cursor:pointer;font-family:inherit;transition:background 0.15s';
+            submitBtn.addEventListener('mouseenter', function() { submitBtn.style.background = '#1c140b'; });
+            submitBtn.addEventListener('mouseleave', function() { submitBtn.style.background = '#2b2013'; });
             submitBtn.textContent = c.form.submit_label || 'Submit';
 
             var doFormSubmit = function() {

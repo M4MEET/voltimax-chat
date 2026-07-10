@@ -398,6 +398,23 @@ $g-btn-ink-hover: #1c140b;
     }
 }
 
+// Verify form matches the card family: white surface, hairline border,
+// compact right-aligned pill submit (never a full-width dark slab).
+.voltimax-chat-widget .vtx-verify-form {
+    background: #fff;
+    border: 1px solid $g-line;
+}
+
+.voltimax-chat-widget .vtx-verify-form__submit,
+.voltimax-chat-widget .voltimax-chat-verify-bar__submit {
+    width: auto;
+    display: block;
+    margin-left: auto;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-size: 12.5px;
+}
+
 // ── Launcher: soft gradient pill, icon in a dark circle, ink label ────────────
 // Brand colour fades from a deeper left edge to a light right edge; the
 // chat icon sits in a dark round chip so the pill reads instantly.
