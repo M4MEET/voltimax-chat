@@ -2116,6 +2116,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         this._addMessage('user', text);
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({ type: 'message', content: text }));
+            this._showTypingIndicator();
         }
         // Chip clicks trigger an AI response too — same lock as typed messages
         this._lockInput();
@@ -2242,6 +2243,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     this._addMessage('user', text);
                     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                         this.ws.send(JSON.stringify({ type: 'message', content: text }));
+                        this._showTypingIndicator();
                     }
                     // Show server suggestions below the chat input
                     if (this._serverSuggestions) {
@@ -2260,6 +2262,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                         this._showTypingIndicator();
                         this.ws.send(JSON.stringify({ type: 'message', content: resendText }));
+                        this._showTypingIndicator();
                     }
                 }, 500);
             }
@@ -2583,6 +2586,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         if (this.ws && this.ws.readyState === WebSocket.OPEN) {
             this.ws.send(JSON.stringify({ type: 'message', content: text }));
+            this._showTypingIndicator();
         }
 
         // Lock input while AI is processing
@@ -3293,6 +3297,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 // Send as regular message
                 if (this.ws && this.ws.readyState === WebSocket.OPEN) {
                     this.ws.send(JSON.stringify({ type: 'message', content: choice }));
+                    this._showTypingIndicator();
                 }
             });
             row.appendChild(btn);
@@ -4275,6 +4280,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     self._addMessage('user', action);
                     if (self.ws && self.ws.readyState === WebSocket.OPEN) {
                         self.ws.send(JSON.stringify({ type: 'message', content: action }));
+                        self._showTypingIndicator();
                     }
                 });
                 actionsDiv.appendChild(btn);
@@ -4296,6 +4302,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                         el.remove();
                         if (self.ws && self.ws.readyState === WebSocket.OPEN) {
                             self.ws.send(JSON.stringify({ type: 'message', content: 'I want to look up a different order' }));
+                            self._showTypingIndicator();
                         }
                         self._renderInputPrompt({
                             field: 'order_verify',
@@ -4310,6 +4317,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                         el.remove();
                         if (self.ws && self.ws.readyState === WebSocket.OPEN) {
                             self.ws.send(JSON.stringify({ type: 'message', content: 'Yes, I have it' }));
+                            self._showTypingIndicator();
                         }
                     } else if (action.toLowerCase().indexOf('contact support') !== -1) {
                         if (self.config.contactFormUrl) {
@@ -4318,12 +4326,14 @@ export default class VoltimaxChatPlugin extends Plugin {
                             self._addMessage('user', 'I need to speak with support');
                             if (self.ws && self.ws.readyState === WebSocket.OPEN) {
                                 self.ws.send(JSON.stringify({ type: 'message', content: 'I need to speak with support' }));
+                                self._showTypingIndicator();
                             }
                         }
                     } else {
                         self._addMessage('user', action);
                         if (self.ws && self.ws.readyState === WebSocket.OPEN) {
                             self.ws.send(JSON.stringify({ type: 'message', content: action }));
+                            self._showTypingIndicator();
                         }
                     }
                 });
@@ -4377,6 +4387,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 self._addMessage('user', text);
                 if (self.ws && self.ws.readyState === WebSocket.OPEN) {
                     self.ws.send(JSON.stringify({ type: 'message', content: text }));
+                    self._showTypingIndicator();
                 }
             });
             scrollRow.appendChild(chip);
