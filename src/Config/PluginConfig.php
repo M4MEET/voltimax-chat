@@ -53,7 +53,7 @@ class PluginConfig
 
     public function getWidgetTitle(?string $salesChannelId = null): string
     {
-        return $this->get('widgetTitle', $salesChannelId) ?? 'Chat Support';
+        return $this->get('widgetTitle', $salesChannelId) ?? 'GrootDesk Support';
     }
 
     public function getWelcomeMessage(?string $salesChannelId = null): string

@@ -126,7 +126,7 @@
 
     // Identity fields
     &__identity {
-        border-radius: 10px;
+        border-radius: 14px;
 
         &-fields {
             display: flex;
@@ -221,7 +221,7 @@
     padding: 10px;
     background: $vtx-bg-secondary;
     border: 1px solid $vtx-border;
-    border-radius: 10px;
+    border-radius: 14px;
     animation: vtx-fade-slide-in 0.2s ease;
 
     &__title {

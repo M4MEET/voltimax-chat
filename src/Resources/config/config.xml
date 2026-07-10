@@ -117,7 +117,7 @@
             <name>widgetTitle</name>
             <label>Widget title</label>
             <label lang="de-DE">Widget-Titel</label>
-            <defaultValue>Chat Support</defaultValue>
+            <defaultValue>GrootDesk Support</defaultValue>
         </input-field>
 
         <input-field type="textarea">

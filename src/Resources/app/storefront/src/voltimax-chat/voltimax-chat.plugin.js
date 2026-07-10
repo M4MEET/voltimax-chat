@@ -1105,26 +1105,8 @@ export default class VoltimaxChatPlugin extends Plugin {
         const container = document.createElement('div');
         container.className = 'vtx-home';
 
-        // Welcome — monogram tile + GrootDesk wordmark (no mascot imagery)
-        const welcomeWrap = document.createElement('div');
-        welcomeWrap.className = 'vtx-home__welcome';
-
-        const avatarWrap = document.createElement('div');
-        avatarWrap.className = 'vtx-home__avatar';
-        avatarWrap.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#231a10;font-family:Georgia, \'Times New Roman\', serif;font-weight:700;font-size:20px;line-height:1">G</span>';
-
-        const avatarName = document.createElement('div');
-        avatarName.className = 'vtx-home__avatar-name';
-        avatarName.textContent = 'GrootDesk';
-
-        const welcomeSub = document.createElement('div');
-        welcomeSub.className = 'vtx-home__welcome-sub';
-        welcomeSub.textContent = 'Dein KI-Assistent f\u00fcr Voltimax';
-
-        welcomeWrap.appendChild(avatarWrap);
-        welcomeWrap.appendChild(avatarName);
-        welcomeWrap.appendChild(welcomeSub);
-        container.appendChild(welcomeWrap);
+        // Branding lives in the header ("GrootDesk Support") — the home body
+        // stays clean: no logo block, straight to the conversation starter.
 
         // Returning user — show continue/new chat choice
         if (savedUser && savedUser.name) {
@@ -3358,7 +3340,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             // flex-shrink:0 is critical: the messages container is a flex column,
             // and without it this card gets compressed to a sliver once the chat
             // is taller than the window (observed in prod as 'a line').
-            closeEl.style.cssText = 'flex-shrink:0;border-radius:12px;overflow:hidden;border:1px solid #e5e7eb;background:#fff;margin-bottom:6px';
+            closeEl.style.cssText = 'flex-shrink:0;border-radius:14px;overflow:hidden;border:1px solid #e5e7eb;background:#fff;margin-bottom:6px';
 
             var closeHeader = document.createElement('div');
             closeHeader.style.cssText = 'padding:14px 16px;text-align:center;border-bottom:1px solid #f3f4f6';
@@ -3526,11 +3508,11 @@ export default class VoltimaxChatPlugin extends Plugin {
                     })(link, linkIndex++);
 
                     if (isAlt) {
-                        card.style.cssText = 'display:block;text-decoration:none;padding:8px 12px;margin:-2px 0 6px 16px;border:1px solid #22c55e;border-radius:8px;background:' + theme.bg + ';transition:all 0.2s';
+                        card.style.cssText = 'display:block;text-decoration:none;padding:8px 12px;margin:-2px 0 6px 16px;border:1px solid #22c55e;border-radius:10px;background:' + theme.bg + ';transition:all 0.2s';
                         card.addEventListener('mouseenter', function() { card.style.borderColor = '#16a34a'; card.style.boxShadow = '0 2px 8px rgba(34,197,94,0.15)'; });
                         card.addEventListener('mouseleave', function() { card.style.borderColor = '#22c55e'; card.style.boxShadow = 'none'; });
                     } else {
-                        card.style.cssText = 'display:block;text-decoration:none;padding:10px 12px;margin-bottom:6px;border:1px solid ' + theme.border + '30;border-radius:10px;background:' + theme.bg + ';transition:all 0.2s';
+                        card.style.cssText = 'display:block;text-decoration:none;padding:10px 12px;margin-bottom:6px;border:1px solid ' + theme.border + '30;border-radius:14px;background:' + theme.bg + ';transition:all 0.2s';
                         card.addEventListener('mouseenter', function() { card.style.borderColor = 'var(--vtx-primary, #b0703a)'; card.style.boxShadow = '0 2px 8px rgba(28,25,23,0.10)'; });
                         card.addEventListener('mouseleave', function() { card.style.borderColor = theme.border + '30'; card.style.boxShadow = 'none'; });
                     }
