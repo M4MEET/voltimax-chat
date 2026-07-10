@@ -2651,7 +2651,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             const customerName = (this.customerContext && this.customerContext.name) || '';
             if (customerName && !prevIsUser) {
                 const nameEl = document.createElement('div');
-                nameEl.style.cssText = 'font-size:11px;font-weight:700;color:#6366f1;padding-right:4px;margin-bottom:2px;';
+                nameEl.style.cssText = 'font-size:11px;font-weight:700;color:var(--vtx-primary, #8f5a2e);padding-right:4px;margin-bottom:2px;';
                 nameEl.textContent = customerName.split(' ')[0];
                 wrapper.appendChild(nameEl);
             }
@@ -3284,7 +3284,9 @@ export default class VoltimaxChatPlugin extends Plugin {
         // Style themes
         var themes = {
             green:  { bg: '#f0fdf4', border: '#22c55e', headerColor: '#15803d' },
-            blue:   { bg: '#eff6ff', border: '#3b82f6', headerColor: '#1d4ed8' },
+            // "blue" is the default/info style — warm GrootDesk neutral, not blue.
+            // border must stay a hex: card code derives an alpha tint via border + '30'.
+            blue:   { bg: '#fdfaf6', border: '#b0703a', headerColor: '#8f5a2e' },
             amber:  { bg: '#fffbeb', border: '#f59e0b', headerColor: '#b45309' },
             red:    { bg: '#fef2f2', border: '#ef4444', headerColor: '#dc2626' },
             gray:   { bg: '#f8f9fa', border: '#6b7280', headerColor: '#374151' },
@@ -3342,10 +3344,10 @@ export default class VoltimaxChatPlugin extends Plugin {
             closeBtns.appendChild(closeBtn);
 
             var newBtn = document.createElement('button');
-            newBtn.style.cssText = 'flex:1;padding:10px;border:none;background:#3b82f6;color:#fff;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer';
+            newBtn.style.cssText = 'flex:1;padding:10px;border:none;background:var(--vtx-primary, #b0703a);color:#fff;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer';
             newBtn.textContent = 'Neuen Chat starten';
-            newBtn.addEventListener('mouseenter', function() { newBtn.style.background = '#2563eb'; });
-            newBtn.addEventListener('mouseleave', function() { newBtn.style.background = '#3b82f6'; });
+            newBtn.addEventListener('mouseenter', function() { newBtn.style.background = 'color-mix(in srgb, var(--vtx-primary, #b0703a) 85%, #000)'; });
+            newBtn.addEventListener('mouseleave', function() { newBtn.style.background = 'var(--vtx-primary, #b0703a)'; });
             newBtn.addEventListener('click', function() {
                 closeEl.remove();
                 self._resetChat();
@@ -3425,7 +3427,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                         card.addEventListener('mouseleave', function() { card.style.borderColor = '#22c55e'; card.style.boxShadow = 'none'; });
                     } else {
                         card.style.cssText = 'display:block;text-decoration:none;padding:10px 12px;margin-bottom:6px;border:1px solid ' + theme.border + '30;border-radius:10px;background:' + theme.bg + ';transition:all 0.2s';
-                        card.addEventListener('mouseenter', function() { card.style.borderColor = '#3b82f6'; card.style.boxShadow = '0 2px 8px rgba(59,130,246,0.15)'; });
+                        card.addEventListener('mouseenter', function() { card.style.borderColor = 'var(--vtx-primary, #b0703a)'; card.style.boxShadow = '0 2px 8px rgba(28,25,23,0.10)'; });
                         card.addEventListener('mouseleave', function() { card.style.borderColor = theme.border + '30'; card.style.boxShadow = 'none'; });
                     }
 
@@ -3448,7 +3450,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                     textCol.style.cssText = 'flex:1;min-width:0';
 
                     var nameEl = document.createElement('div');
-                    nameEl.style.cssText = 'font-size:' + (isAlt ? '12px' : '13px') + ';font-weight:600;color:#3b82f6;margin-bottom:4px;line-height:1.3';
+                    nameEl.style.cssText = 'font-size:' + (isAlt ? '12px' : '13px') + ';font-weight:600;color:var(--vtx-primary, #8f5a2e);margin-bottom:4px;line-height:1.3';
                     nameEl.textContent = link.label;
                     textCol.appendChild(nameEl);
 

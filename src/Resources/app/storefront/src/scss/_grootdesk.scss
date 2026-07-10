@@ -1,75 +1,74 @@
 // ── GrootDesk Signature skin ──────────────────────────────────────────────────
-// Imported LAST: the GrootDesk messenger design language.
-//   One continuous brand-coloured surface (no separate header bar) with
-//   white fully-rounded pills floating on it — chips, inputs, the message
-//   bar (online dot inside it), white AI reply cards — and a labeled
-//   pill launcher. Elegant, minimal, enterprise-grade.
+// Imported LAST: the GrootDesk messenger design language, matching the
+// grootdesk.com demo widget — a calm white card on which the brand colour
+// appears only as an accent: the header island, user bubbles, the send
+// button, chip borders and the labeled pill launcher. Warm neutrals
+// everywhere else; hairline borders instead of heavy shadows.
 // Brand colour comes from the merchant config via --vtx-primary.
-// Note: assumes a reasonably saturated/dark primary (white text on top).
 
 $g-radius: 24px;
-$g-on-primary: #ffffff;
-$g-on-primary-soft: rgba(255, 255, 255, 0.82);
-$g-on-primary-faint: rgba(255, 255, 255, 0.6);
-$g-white-pill-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+$g-ink: #1c1917;
+$g-ink-soft: #78716c;
+$g-ink-faint: #a8a29e;
+$g-line: #e7e5e0;
+$g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
 
-// ── Panel: one brand-colored surface ─────────────────────────────────────────
+// ── Panel: calm white card ────────────────────────────────────────────────────
 .voltimax-chat-widget {
-    background: var(--vtx-primary, #b0703a);
-    border: none;
+    background: #fff;
+    border: 1px solid $g-line;
     border-radius: $g-radius;
     box-shadow:
-        0 24px 60px -16px rgba(0, 0, 0, 0.28),
-        0 8px 24px -12px rgba(0, 0, 0, 0.14);
-    color: $g-on-primary;
+        0 24px 60px -20px rgba(28, 25, 23, 0.18),
+        0 6px 20px -12px rgba(28, 25, 23, 0.08);
+    color: $g-ink;
 }
 
-// ── Header: no bar — translucent island on the surface ───────────────────────
+// ── Header: the one brand-coloured island on the card ────────────────────────
 .voltimax-chat-widget__header {
-    background: rgba(255, 255, 255, 0.14);
+    background: var(--vtx-primary, #b0703a);
     margin-top: 10px;
-
-    &:hover { background: rgba(255, 255, 255, 0.18); }
 }
 
-.voltimax-chat-widget__compact-title,
-.voltimax-chat-widget__title { color: $g-on-primary; }
-.voltimax-chat-widget__status { color: $g-on-primary-soft; }
-
-// ── Chat area: transparent over the surface ──────────────────────────────────
+// ── Chat area: white, bubbles carry the structure ─────────────────────────────
 .voltimax-chat-messages-wrap,
 .voltimax-chat-window__messages { background: transparent; }
 
-// AI bubbles: solid white cards on the brand surface
+// AI bubbles: white cards with a hairline border (demo style)
 .voltimax-chat-widget .voltimax-chat-message--ai {
     background: #fff;
-    color: #1c1917;
-    border: none;
-    box-shadow: $g-white-pill-shadow;
+    color: $g-ink;
+    border: 1px solid $g-line;
+    box-shadow: $g-card-shadow;
 }
 
-// User bubbles: darkened primary (readable on any brand colour)
+// User bubbles: the brand colour — the accent that answers back
 .voltimax-chat-widget .voltimax-chat-message--user {
-    background: color-mix(in srgb, var(--vtx-primary, #b0703a) 68%, #17130f);
+    background: var(--vtx-primary, #b0703a);
     color: #fff;
     box-shadow: none;
 }
 
-// Meta text on the surface
+// Meta text: warm muted gray
 .voltimax-chat-ai-row__name,
 .voltimax-chat-message__time,
-.voltimax-chat-message__status { color: $g-on-primary-faint; }
+.voltimax-chat-message__status { color: $g-ink-faint; }
 
-// ── Input: white floating pill with the online dot inside it ─────────────────
+// ── Input: bordered pill with the online dot inside it ───────────────────────
 .voltimax-chat-window__input-area {
     background: #fff;
-    border: none;
-    border-top: none;
+    border: 1px solid $g-line;
+    border-top: 1px solid $g-line;
     border-radius: 999px;
     margin: 8px 12px 14px;
     padding: 6px 6px 6px 32px;
     position: relative;
-    box-shadow: $g-white-pill-shadow;
+    box-shadow: $g-card-shadow;
+
+    &:focus-within {
+        border-color: color-mix(in srgb, var(--vtx-primary, #b0703a) 45%, #fff);
+        box-shadow: 0 0 0 3px color-mix(in srgb, var(--vtx-primary, #b0703a) 12%, transparent);
+    }
 
     &::before {
         content: '';
@@ -88,8 +87,9 @@ $g-white-pill-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     background: transparent;
     border: none;
     box-shadow: none;
-    color: #1c1917;
+    color: $g-ink;
 
+    &::placeholder { color: $g-ink-faint; }
     &:focus { border: none; box-shadow: none; outline: none; }
 }
 
@@ -98,65 +98,76 @@ $g-white-pill-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     box-shadow: none;
 }
 
-// In-chat suggestion chips: white pills on the surface
+// In-chat suggestion chips: warm cream pills with a brand-tinted hairline
 .voltimax-chat-widget .vtx-suggestion-chip,
 .voltimax-chat-widget .voltimax-chat-quickreply,
 .voltimax-chat-widget .vtx-subtopic-chip,
 .voltimax-chat-widget .voltimax-chat-subcard-chip {
-    background: #fff;
-    color: #1e242e;
-    border: 1px solid rgba(235, 236, 239, 0.5);
+    background: #fdfaf6;
+    color: $g-ink;
+    border: 1px solid color-mix(in srgb, var(--vtx-primary, #b0703a) 28%, #fff);
     border-radius: 999px;
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: none;
 
-    &:hover { background: #f7f6f4; }
+    &:hover {
+        background: color-mix(in srgb, var(--vtx-primary, #b0703a) 8%, #fff);
+        border-color: color-mix(in srgb, var(--vtx-primary, #b0703a) 45%, #fff);
+    }
 }
 
 .vtx-suggestions-wrap,
 .vtx-suggestions-scroll,
 .vtx-suggestions { background: transparent; border: none; }
-.vtx-suggestions-toggle { color: $g-on-primary-soft; }
+.vtx-suggestions-toggle { color: $g-ink-soft; }
 
-// ── Home screen: white pills floating on the brand surface ───────────────────
+// ── Home screen: warm ink on the white card ──────────────────────────────────
 .voltimax-chat-widget .vtx-home {
     background: transparent;
-    color: $g-on-primary;
+    color: $g-ink;
 
-    &__welcome, &__welcome-back { color: $g-on-primary; }
-    &__identity { color: $g-on-primary-soft; }
-    &__avatar-name { color: $g-on-primary; letter-spacing: 0.14em; }
-    &__welcome-sub { color: $g-on-primary-soft; }
+    &__welcome, &__welcome-back { color: $g-ink; }
+    &__identity { color: $g-ink-soft; }
+    &__avatar-name { color: $g-ink-soft; letter-spacing: 0.14em; }
+    &__welcome-sub { color: $g-ink-soft; }
 
     input,
     textarea {
         background: #fff;
-        border: none;
+        border: 1px solid $g-line;
         border-radius: 999px;
-        color: #1c1917;
-        box-shadow: $g-white-pill-shadow;
+        color: $g-ink;
+        box-shadow: $g-card-shadow;
 
-        &::placeholder { color: #78716c; }
-        &:focus { border: none; box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.35); outline: none; }
+        &::placeholder { color: $g-ink-faint; }
+        &:focus {
+            border-color: color-mix(in srgb, var(--vtx-primary, #b0703a) 45%, #fff);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--vtx-primary, #b0703a) 12%, transparent);
+            outline: none;
+        }
     }
 }
 
-// Topic chips on home: white Gorgias pills
+// Topic chips on home: same cream pills
 .voltimax-chat-widget .vtx-topic-chip {
-    background: #fff;
-    color: #1e242e;
-    border: 1px solid rgba(235, 236, 239, 0.5);
+    background: #fdfaf6;
+    color: $g-ink;
+    border: 1px solid color-mix(in srgb, var(--vtx-primary, #b0703a) 28%, #fff);
     border-radius: 999px;
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.05);
+    box-shadow: none;
 
-    &:hover { background: #f7f6f4; transform: none; }
-    &--active { background: #f0ede8; }
+    &:hover {
+        background: color-mix(in srgb, var(--vtx-primary, #b0703a) 8%, #fff);
+        border-color: color-mix(in srgb, var(--vtx-primary, #b0703a) 45%, #fff);
+        transform: none;
+    }
+    &--active { background: color-mix(in srgb, var(--vtx-primary, #b0703a) 12%, #fff); }
 }
 
-// Consent small-print on the surface
+// Consent small-print
 .voltimax-chat-consent-footer {
-    color: $g-on-primary-faint;
+    color: $g-ink-faint;
 
-    a { color: $g-on-primary; text-decoration: underline; }
+    a { color: var(--vtx-primary, #b0703a); text-decoration: underline; }
 }
 
 // ── Launcher: labeled brand-coloured pill ─────────────────────────────────────
