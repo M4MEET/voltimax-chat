@@ -138,3 +138,29 @@
     60% { transform: translateX(-3px); }
     80% { transform: translateX(3px); }
 }
+
+// Launcher attention cue: a few playful jumps with a squash landing and a
+// tiny wiggle, so visitors spot the chat. Triggered once per session by JS
+// (.voltimax-chat-bubble__button--attention); removed on animationend.
+@keyframes vtx-bubble-jump {
+    0%, 100% { transform: translateY(0); }
+    8%   { transform: translateY(-14px); }
+    16%  { transform: translateY(0) scaleY(0.94); }
+    20%  { transform: translateY(0) scaleY(1); }
+    30%  { transform: translateY(-9px); }
+    38%  { transform: translateY(0) scaleY(0.96); }
+    42%  { transform: translateY(0); }
+    52%  { transform: translateY(-5px) rotate(-3deg); }
+    58%  { transform: translateY(0) rotate(3deg); }
+    64%  { transform: rotate(-2deg); }
+    70%  { transform: rotate(0deg); }
+}
+
+.voltimax-chat-bubble__button--attention {
+    animation: vtx-bubble-jump 1.6s cubic-bezier(0.28, 0.84, 0.42, 1) 2;
+    transform-origin: bottom center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .voltimax-chat-bubble__button--attention { animation: none; }
+}

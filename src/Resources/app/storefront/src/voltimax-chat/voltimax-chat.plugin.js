@@ -322,13 +322,10 @@ export default class VoltimaxChatPlugin extends Plugin {
 
 
     _buildAvatarEl() {
+        // Professional monogram tile (no mascot imagery).
         var el = document.createElement('div');
         el.className = 'voltimax-chat-ai-row__avatar';
-        if (this.config && this.config.logoUrl) {
-            el.innerHTML = '<img src="' + this.config.logoUrl + '" alt="Groot" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-        } else {
-            el.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><path d="M12 8v4"/><path d="M8 12c0 0-1 4 0 7 .5 1.5 2 3 4 3s3.5-1.5 4-3c1-3 0-7 0-7"/><path d="M9 14c-2-1-4 0-4 2"/><path d="M15 14c2-1 4 0 4 2"/><path d="M10 18c-.5 1-1 2.5-1 2.5"/><path d="M14 18c.5 1 1 2.5 1 2.5"/></svg>';
-        }
+        el.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;border-radius:6px;background:var(--vtx-primary, #b0703a);color:#fff;font-family:Georgia, \'Times New Roman\', serif;font-weight:700;font-size:11px;line-height:1">G</span>';
         return el;
     }
 
@@ -467,7 +464,69 @@ export default class VoltimaxChatPlugin extends Plugin {
             if (!this.config.enabled) return;
             this._renderBubble();
             this._renderTeaser();
+            this._scheduleAttention();
         });
+    }
+
+    // ── Attention cue: gentle jump + soft chime shortly after load ───────────
+    // Lets visitors spot the chat. Once per browser session, only while the
+    // chat is closed; motion respects prefers-reduced-motion (CSS side).
+    _scheduleAttention() {
+        try {
+            if (sessionStorage.getItem('voltimax_chat_attention_seen')) return;
+            sessionStorage.setItem('voltimax_chat_attention_seen', '1');
+        } catch (e) { return; }
+        var self = this;
+        setTimeout(function() {
+            if (self.state !== 'CLOSED' || !self._bubbleEl) return;
+            var btn = self._bubbleEl.querySelector('.voltimax-chat-bubble__button');
+            if (!btn) return;
+            btn.classList.add('voltimax-chat-bubble__button--attention');
+            btn.addEventListener('animationend', function() {
+                btn.classList.remove('voltimax-chat-bubble__button--attention');
+            }, { once: true });
+            self._playChime();
+        }, 2500);
+    }
+
+    // Two-note WebAudio chime (C5→G5), quiet and short. Browsers block audio
+    // before a user gesture; if blocked, retry once on the first interaction.
+    _playChime() {
+        var self = this;
+        var play = function() {
+            try {
+                var Ctx = window.AudioContext || window.webkitAudioContext;
+                if (!Ctx) return false;
+                var ctx = new Ctx();
+                if (ctx.state === 'suspended') { ctx.close(); return false; }
+                var now = ctx.currentTime;
+                [523.25, 783.99].forEach(function(freq, i) {
+                    var osc = ctx.createOscillator();
+                    var gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+                    var t = now + i * 0.12;
+                    gain.gain.setValueAtTime(0, t);
+                    gain.gain.linearRampToValueAtTime(0.06, t + 0.02);
+                    gain.gain.exponentialRampToValueAtTime(0.0001, t + 0.5);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start(t);
+                    osc.stop(t + 0.55);
+                });
+                setTimeout(function() { ctx.close(); }, 1200);
+                return true;
+            } catch (e) { return false; }
+        };
+        if (play()) return;
+        var retry = function() {
+            document.removeEventListener('pointerdown', retry);
+            document.removeEventListener('keydown', retry);
+            if (self.state !== 'CLOSED') return;
+            play();
+        };
+        document.addEventListener('pointerdown', retry, { once: true });
+        document.addEventListener('keydown', retry, { once: true });
     }
 
     _renderBubble() {
@@ -1046,25 +1105,17 @@ export default class VoltimaxChatPlugin extends Plugin {
         const container = document.createElement('div');
         container.className = 'vtx-home';
 
-        // Welcome — Groot avatar + greeting
+        // Welcome — monogram tile + GrootDesk wordmark (no mascot imagery)
         const welcomeWrap = document.createElement('div');
         welcomeWrap.className = 'vtx-home__welcome';
 
         const avatarWrap = document.createElement('div');
         avatarWrap.className = 'vtx-home__avatar';
-        if (this.config.logoUrl) {
-            var logoImg = document.createElement('img');
-            logoImg.src = this.config.logoUrl;
-            logoImg.alt = 'Groot';
-            logoImg.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%;';
-            avatarWrap.appendChild(logoImg);
-        } else {
-            avatarWrap.innerHTML = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="3"/><path d="M12 8v4"/><path d="M8 12c0 0-1 4 0 7 .5 1.5 2 3 4 3s3.5-1.5 4-3c1-3 0-7 0-7"/><path d="M9 14c-2-1-4 0-4 2"/><path d="M15 14c2-1 4 0 4 2"/><path d="M10 18c-.5 1-1 2.5-1 2.5"/><path d="M14 18c.5 1 1 2.5 1 2.5"/></svg>';
-        }
+        avatarWrap.innerHTML = '<span style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:#fff;font-family:Georgia, \'Times New Roman\', serif;font-weight:700;font-size:20px;line-height:1">G</span>';
 
         const avatarName = document.createElement('div');
         avatarName.className = 'vtx-home__avatar-name';
-        avatarName.textContent = 'Groot';
+        avatarName.textContent = 'GrootDesk';
 
         const welcomeSub = document.createElement('div');
         welcomeSub.className = 'vtx-home__welcome-sub';
@@ -3360,24 +3411,53 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         var theme = themes[c.style] || themes.blue;
 
+        // Card stays a calm white surface with ONE hairline border (SCSS);
+        // state is expressed by the header badge and value pills, not by
+        // tinting the whole card.
         var el = document.createElement('div');
         el.className = 'vtx-info-card';
-        el.style.cssText = 'background:' + theme.bg + ' !important;border-color:' + theme.border;
 
-        // Header
-        if (c.title) {
+        // Soft badge palette (light tint + readable ink)
+        var badgeStyles = {
+            success: 'color:#15803d;background:#e9f6ee',
+            warning: 'color:#b45309;background:#fdf4e3',
+            danger:  'color:#b91c1c;background:#fdecec',
+            muted:   'color:#78716c;background:#f4f2ef',
+        };
+        var badgeBase = 'flex-shrink:0;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:600;line-height:1.6;';
+
+        // Promote an explicit status row into a header badge (demo style)
+        var badgeRow = null;
+        if (c.rows && c.rows.length > 0) {
+            badgeRow = c.rows.find(function(r) {
+                return r && r.value && /^status$/i.test(String(r.label || '').trim())
+                    && badgeStyles[r.style];
+            }) || null;
+        }
+
+        // Header: title left, badge right
+        if (c.title || badgeRow) {
             var header = document.createElement('div');
             header.className = 'vtx-info-card__header';
-            header.style.color = theme.headerColor;
-            header.textContent = (c.icon ? c.icon + ' ' : '') + c.title;
+            var titleSpan = document.createElement('span');
+            titleSpan.textContent = (c.icon ? c.icon + ' ' : '') + (c.title || '');
+            header.appendChild(titleSpan);
+            if (badgeRow) {
+                var badge = document.createElement('span');
+                badge.className = 'vtx-info-card__badge';
+                badge.textContent = badgeRow.value;
+                badge.style.cssText = badgeBase + badgeStyles[badgeRow.style];
+                header.appendChild(badge);
+            }
             el.appendChild(header);
         }
 
-        // Rows grid
+        // Rows grid (status row lives in the header badge now)
         if (c.rows && c.rows.length > 0) {
             var grid = document.createElement('div');
             grid.className = 'vtx-info-card__grid';
             c.rows.forEach(function(row) {
+                if (row === badgeRow) return;
                 var label = document.createElement('span');
                 label.className = 'vtx-info-card__label';
                 label.textContent = row.label;
@@ -3389,8 +3469,8 @@ export default class VoltimaxChatPlugin extends Plugin {
                 var valueStyles = {
                     success: 'color:#15803d;font-weight:600',
                     warning: 'color:#b45309;font-weight:600',
-                    danger: 'color:#dc2626;font-weight:600',
-                    muted: 'color:#9ca3af',
+                    danger: 'color:#b91c1c;font-weight:600',
+                    muted: 'color:#a8a29e',
                 };
                 if (row.style && valueStyles[row.style]) {
                     value.style.cssText = valueStyles[row.style];

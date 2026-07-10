@@ -34,18 +34,18 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
 .voltimax-chat-messages-wrap,
 .voltimax-chat-window__messages { background: transparent; }
 
-// AI bubbles: white cards with a hairline border (demo style)
+// AI bubbles: soft borderless neutral — the calm Gorgias reading surface
 .voltimax-chat-widget .voltimax-chat-message--ai {
-    background: #fff;
+    background: #f5f4f1;
     color: $g-ink;
-    border: 1px solid $g-line;
-    box-shadow: $g-card-shadow;
+    border: none;
+    box-shadow: none;
 }
 
-// User bubbles: the brand colour — the accent that answers back
+// User bubbles: a light brand tint with dark ink — branded but never loud
 .voltimax-chat-widget .voltimax-chat-message--user {
-    background: var(--vtx-primary, #b0703a);
-    color: #fff;
+    background: color-mix(in srgb, var(--vtx-primary, #b0703a) 12%, #fff);
+    color: $g-ink;
     box-shadow: none;
 }
 
@@ -98,20 +98,19 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
     box-shadow: none;
 }
 
-// In-chat suggestion chips: warm cream pills with a brand-tinted hairline
+// In-chat suggestion chips: borderless soft pills (minimum borders)
 .voltimax-chat-widget .vtx-suggestion-chip,
 .voltimax-chat-widget .voltimax-chat-quickreply,
 .voltimax-chat-widget .vtx-subtopic-chip,
 .voltimax-chat-widget .voltimax-chat-subcard-chip {
-    background: #fdfaf6;
+    background: #f4f2ef;
     color: $g-ink;
-    border: 1px solid color-mix(in srgb, var(--vtx-primary, #b0703a) 28%, #fff);
+    border: none;
     border-radius: 999px;
     box-shadow: none;
 
     &:hover {
-        background: color-mix(in srgb, var(--vtx-primary, #b0703a) 8%, #fff);
-        border-color: color-mix(in srgb, var(--vtx-primary, #b0703a) 45%, #fff);
+        background: color-mix(in srgb, var(--vtx-primary, #b0703a) 10%, #fff);
     }
 }
 
@@ -127,7 +126,24 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
 
     &__welcome, &__welcome-back { color: $g-ink; }
     &__identity { color: $g-ink-soft; }
-    &__avatar-name { color: $g-ink-soft; letter-spacing: 0.14em; }
+
+    // Monogram tile: classic rounded square, no gradient, no mascot
+    &__avatar {
+        border-radius: 12px;
+        background: var(--vtx-primary, #b0703a);
+        box-shadow: none;
+    }
+
+    // "GrootDesk" wordmark — classic serif, like the grootdesk.com logo
+    &__avatar-name {
+        color: $g-ink;
+        font-family: Georgia, 'Times New Roman', serif;
+        font-size: 19px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        text-transform: none;
+    }
+
     &__welcome-sub { color: $g-ink-soft; }
 
     input,

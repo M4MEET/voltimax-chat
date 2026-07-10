@@ -227,19 +227,18 @@
     width: auto;
     flex-shrink: 0;
 
+    // State is conveyed via header badges / value colors, not tinted
+    // surfaces or thicker borders — the card surface stays calm white.
     &--verified {
-        border-color: rgba(16, 185, 129, 0.3);
-        border-width: 1.5px;
-        background: rgba(240, 253, 244, 0.6) !important;
+        border-color: $vtx-border;
     }
 
     &--error {
-        border-color: rgba(239, 68, 68, 0.2);
+        border-color: $vtx-border;
     }
 
     &--error &__header {
-        color: #dc2626;
-        background: rgba(239, 68, 68, 0.04);
+        color: #b91c1c;
     }
 
     &__error-body {
@@ -258,42 +257,57 @@
         li { margin-bottom: 3px; }
     }
 
+    // Demo-style header: title left, status badge right, one hairline below
     &__header {
         padding: 10px 12px;
         font-size: 13px;
-        font-weight: 700;
-        border-bottom: 1px solid rgba(0,0,0,0.04);
-        display: block;
+        font-weight: 600;
+        color: $vtx-text;
+        border-bottom: 1px solid #f0eeea;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
         min-height: 18px;
     }
 
     &--verified &__header {
-        color: #059669;
-        background: rgba(16, 185, 129, 0.06);
-        border-radius: 11px 11px 0 0;
+        color: $vtx-text;
     }
 
+    // Demo-style rows: label left, value right-aligned, hairline separators
     &__grid {
         display: grid;
-        grid-template-columns: 72px 1fr;
-        gap: 3px 10px;
-        padding: 10px 12px;
+        grid-template-columns: auto 1fr;
+        gap: 0 12px;
+        padding: 2px 12px 4px;
     }
 
     &__label {
-        font-size: 10px;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-        color: $vtx-text-muted;
-        padding: 2px 0;
+        font-size: 12px;
+        font-weight: 400;
+        color: $vtx-text-secondary;
+        padding: 7px 0;
+        border-top: 1px solid #f5f3ef;
+        white-space: nowrap;
     }
 
     &__value {
         font-size: 12px;
         font-weight: 500;
         color: $vtx-text;
-        padding: 2px 0;
+        text-align: right;
+        justify-self: end;
+        padding: 7px 0;
+        border-top: 1px solid #f5f3ef;
+        min-width: 0;
+        overflow-wrap: anywhere;
+    }
+
+    // First row sits directly under the header — no separator
+    &__label:first-child,
+    &__label:first-child + &__value {
+        border-top: none;
     }
 
     &__actions {
