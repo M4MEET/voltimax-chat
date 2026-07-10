@@ -89,20 +89,20 @@
 
         <input-field type="colorpicker">
             <name>primaryColor</name>
-            <label>Primary color (gradient start)</label>
-            <label lang="de-DE">Primärfarbe (Verlauf-Start)</label>
-            <defaultValue>#4338CA</defaultValue>
-            <helpText>Main color for header, bubble, and user messages. This is the start of the gradient.</helpText>
-            <helpText lang="de-DE">Hauptfarbe für Header, Bubble und Nutzernachrichten. Dies ist der Anfang des Farbverlaufs.</helpText>
+            <label>Primary color (brand surface)</label>
+            <label lang="de-DE">Primärfarbe (Markenfläche)</label>
+            <defaultValue>#B0703A</defaultValue>
+            <helpText>Brand color for the widget surface, launcher, and user messages.</helpText>
+            <helpText lang="de-DE">Markenfarbe für die Widget-Fläche, den Launcher und Nutzernachrichten.</helpText>
         </input-field>
 
         <input-field type="colorpicker">
             <name>secondaryColor</name>
-            <label>Secondary color (gradient end)</label>
-            <label lang="de-DE">Sekundärfarbe (Verlauf-Ende)</label>
-            <defaultValue>#D4A04A</defaultValue>
-            <helpText>End color for the gradient on header, bubble, and avatar. Leave empty for auto-computed gradient.</helpText>
-            <helpText lang="de-DE">Endfarbe für den Verlauf auf Header, Bubble und Avatar. Leer lassen für automatisch berechneten Verlauf.</helpText>
+            <label>Secondary color (accents, optional)</label>
+            <label lang="de-DE">Sekundärfarbe (Akzente, optional)</label>
+            <defaultValue>#8F5A2E</defaultValue>
+            <helpText>Optional accent color. The current design uses the primary color as a single brand surface.</helpText>
+            <helpText lang="de-DE">Optionale Akzentfarbe. Das aktuelle Design nutzt die Primärfarbe als einheitliche Markenfläche.</helpText>
         </input-field>
 
         <component name="sw-media-field">
