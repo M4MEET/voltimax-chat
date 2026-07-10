@@ -1955,7 +1955,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         sendBtn.className = 'voltimax-chat-window__send btn btn-primary';
         sendBtn.setAttribute('aria-label', 'Senden');
         // Safe: hardcoded SVG
-        sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>';
+        sendBtn.innerHTML = '<span class="vtx-orb vtx-orb--send" aria-hidden="true"><span class="vtx-orb__petal vtx-orb__petal--r"></span><span class="vtx-orb__petal vtx-orb__petal--b"></span><span class="vtx-orb__petal vtx-orb__petal--c"></span><span class="vtx-orb__flare"></span></span>';
         inputArea.appendChild(sendBtn);
 
         chatWindow.appendChild(inputArea);
@@ -2033,7 +2033,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         const sendBtn = document.createElement('button');
         sendBtn.className = 'voltimax-chat-window__send btn btn-primary';
         sendBtn.setAttribute('aria-label', 'Senden');
-        sendBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2z"/></svg>';
+        sendBtn.innerHTML = '<span class="vtx-orb vtx-orb--send" aria-hidden="true"><span class="vtx-orb__petal vtx-orb__petal--r"></span><span class="vtx-orb__petal vtx-orb__petal--b"></span><span class="vtx-orb__petal vtx-orb__petal--c"></span><span class="vtx-orb__flare"></span></span>';
         inputArea.appendChild(sendBtn);
 
         chatWindow.appendChild(inputArea);
@@ -2253,7 +2253,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             this._streamingRaw = (this._streamingRaw || '') + data.content;
             this._renderStreaming();
         } else if (data.type === 'stream_end') {
-            if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
+            this._hideTypingIndicator();
 
             const aiMessageId = data.message_id || null;
             const fullText = this._streamingRaw || '';
@@ -2283,7 +2283,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             }
         } else if (data.type === 'message') {
             // Clear typing indicator
-            if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
+            this._hideTypingIndicator();
             // Skip the topic greeting if user typed free-text (their message is already queued)
             if (this._skipNextGreeting) {
                 this._skipNextGreeting = false;
@@ -2300,7 +2300,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             }
         } else if (data.type === 'ai_card') {
             // AI intro text + card as one message — uses same structure as _addMessage('ai')
-            if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
+            this._hideTypingIndicator();
             var messages = document.querySelector('.voltimax-chat-window__messages');
             if (!messages) {
                 this._buildChatUI(this.currentTopic || 'general');
@@ -2605,7 +2605,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (!messages) return;
 
         if (!this._streamingRow) {
-            if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
+            this._hideTypingIndicator();
 
             // The AI started answering — mark the last user message as read
             if (this._lastUserStatusEl) {
@@ -2925,10 +2925,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         const messages = document.querySelector('.voltimax-chat-window__messages');
         if (!messages) return;
 
-        if (this._typingEl) {
-            this._typingEl.remove();
-            this._typingEl = null;
-        }
+        this._hideTypingIndicator();
 
         let streamBubble = messages.querySelector('.voltimax-chat-message--ai.is-streaming');
         if (!streamBubble) {
@@ -2972,11 +2969,12 @@ export default class VoltimaxChatPlugin extends Plugin {
         }
 
         const messages = document.querySelector('.voltimax-chat-window__messages');
-        if (!messages || messages.querySelector('.voltimax-chat-typing')) return;
+        if (!messages || document.querySelector('.voltimax-chat-widget .voltimax-chat-typing')) return;
 
-        // Siri-style oracle orb — no avatar, no "is typing" text
+        // Siri-style oracle orb — docks centered IN PLACE of the input bar;
+        // _hideTypingIndicator() brings the input back when the answer starts.
         const typing = document.createElement('div');
-        typing.className = 'voltimax-chat-typing';
+        typing.className = 'voltimax-chat-typing voltimax-chat-typing--dock';
 
         const orb = document.createElement('div');
         orb.className = 'vtx-orb';
@@ -2993,11 +2991,58 @@ export default class VoltimaxChatPlugin extends Plugin {
         const flare = document.createElement('span');
         flare.className = 'vtx-orb__flare';
         orb.appendChild(flare);
-        typing.appendChild(orb);
-        messages.appendChild(typing);
+
+        // Flight wrapper carries the travel transform so the orb's own
+        // breathe animation (also transform-based) keeps running inside it.
+        const flight = document.createElement('span');
+        flight.className = 'vtx-orb-flight';
+        flight.appendChild(orb);
+        typing.appendChild(flight);
+
+        // Measure the send-button orb BEFORE hiding the input, so the big
+        // orb can fly out of it (morph: amber send orb -> thinking orb).
+        const sendOrb = document.querySelector('.voltimax-chat-window__send .vtx-orb');
+        const fromRect = sendOrb ? sendOrb.getBoundingClientRect() : null;
+
+        const inputArea = document.querySelector('.voltimax-chat-window__input-area');
+        if (inputArea && inputArea.parentElement) {
+            inputArea.style.display = 'none';
+            inputArea.parentElement.insertBefore(typing, inputArea);
+        } else {
+            messages.appendChild(typing);
+        }
         messages.scrollTop = messages.scrollHeight;
 
+        if (fromRect) {
+            const toRect = flight.getBoundingClientRect();
+            if (toRect.width > 0) {
+                const dx = (fromRect.left + fromRect.width / 2) - (toRect.left + toRect.width / 2);
+                const dy = (fromRect.top + fromRect.height / 2) - (toRect.top + toRect.height / 2);
+                const scale = fromRect.width / toRect.width;
+                flight.style.transition = 'none';
+                flight.style.transform = 'translate(' + dx + 'px, ' + dy + 'px) scale(' + scale + ')';
+                orb.classList.add('vtx-orb--arriving');
+                requestAnimationFrame(function() {
+                    requestAnimationFrame(function() {
+                        flight.style.transition = 'transform 0.5s cubic-bezier(0.22, 1, 0.36, 1)';
+                        flight.style.transform = 'translate(0, 0) scale(1)';
+                        orb.classList.remove('vtx-orb--arriving');
+                        setTimeout(function() { flight.style.transition = ''; }, 550);
+                    });
+                });
+            }
+        }
+
         this._typingEl = typing;
+    }
+
+    _hideTypingIndicator() {
+        if (this._typingEl) {
+            this._typingEl.remove();
+            this._typingEl = null;
+        }
+        const inputArea = document.querySelector('.voltimax-chat-window__input-area');
+        if (inputArea) inputArea.style.display = '';
     }
 
     _showEscalation(data) {
@@ -3192,7 +3237,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             messages = document.querySelector('.voltimax-chat-window__messages');
         }
         if (!messages) return;
-        if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
+        this._hideTypingIndicator();
         var card = this._buildConfirmationDOM(confirmation);
         if (card) {
             messages.appendChild(card);
@@ -3211,7 +3256,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (!messages) return;
 
         // Remove typing indicator
-        if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
+        this._hideTypingIndicator();
 
         // Show message text as AI message if provided
         if (message) {
@@ -3253,7 +3298,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         }
         if (!messages) return;
 
-        if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
+        this._hideTypingIndicator();
 
         const card = document.createElement('div');
         card.className = 'vtx-input-prompt';
@@ -3376,7 +3421,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         }
         if (!messages) return;
 
-        if (this._typingEl) { this._typingEl.remove(); this._typingEl = null; }
+        this._hideTypingIndicator();
         messages.querySelectorAll('.vtx-input-prompt').forEach(function(el) { el.remove(); });
 
         if (!this._restoring && card) {
