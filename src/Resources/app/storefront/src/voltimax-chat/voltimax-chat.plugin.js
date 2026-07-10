@@ -346,6 +346,16 @@ export default class VoltimaxChatPlugin extends Plugin {
         return '#' + Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
     }
 
+
+    // Mark the last user message as read: double check + 'Gelesen'
+    _markLastUserRead() {
+        const el = this._lastUserStatusEl;
+        if (!el) return;
+        el.classList.add('is-read');
+        const label = el.querySelector('.vtx-status-label');
+        if (label) label.textContent = 'Gelesen';
+    }
+
     _formatTime(date) {
         return date.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
     }
@@ -1239,22 +1249,22 @@ export default class VoltimaxChatPlugin extends Plugin {
         this._homeSuggestionsContainer = suggestionsContainer;
 
         // Show default suggestions immediately; server suggestions replace them
-        // after auth. Text-only \u2014 emoji chips read as playful, not professional.
+        // after auth. Icon first, then the label.
         const defaultSuggestions = [
-            'Bestellstatus',
-            'Produktsuche',
-            'Fahrzeug-Batterie',
-            'Retoure & Erstattung',
-            'Versand & Lieferzeit',
-            'Rechnung anfordern',
-            'Batteriepfand',
-            'Ticket-Status',
-            'R\u00fcckgaberecht',
-            'Support kontaktieren',
-            'Zahlungsstatus',
-            'Mein Konto',
-            'Problem melden',
-            'Zubeh\u00f6r',
+            '\ud83d\udce6 Bestellstatus',
+            '\ud83d\udd0b Produktsuche',
+            '\ud83d\ude97 Fahrzeug-Batterie',
+            '\u21a9\ufe0f Retoure & Erstattung',
+            '\ud83d\ude9a Versand & Lieferzeit',
+            '\ud83e\uddfe Rechnung anfordern',
+            '\u267b\ufe0f Batteriepfand',
+            '\ud83c\udfab Ticket-Status',
+            '\ud83d\udcc4 R\u00fcckgaberecht',
+            '\ud83d\udcac Support kontaktieren',
+            '\ud83d\udcb3 Zahlungsstatus',
+            '\ud83d\udd12 Mein Konto',
+            '\u26a0\ufe0f Problem melden',
+            '\ud83d\udd0c Zubeh\u00f6r',
         ];
         this._renderHomeSuggestions(suggestionsContainer, defaultSuggestions, mainInput, doFreeText);
         container.appendChild(suggestionsContainer);
@@ -1289,14 +1299,22 @@ export default class VoltimaxChatPlugin extends Plugin {
     _renderHomeSuggestions(container, suggestions, inputEl, submitFn) {
         container.textContent = '';
         suggestions.forEach(rawText => {
-            // Server suggestions may still carry a leading emoji; strip it for a
-            // clean, professional chip label.
-            const text = String(rawText).replace(/^[^\p{L}\p{N}]+\s*/u, '') || rawText;
+            // Icon before the text: split a leading emoji/symbol into its own span
+            const raw = String(rawText);
+            const m = /^([^\p{L}\p{N}]+)\s*(.*)$/u.exec(raw);
             const chip = document.createElement('button');
             chip.className = 'vtx-topic-chip';
-            chip.textContent = text;
+            if (m && m[2]) {
+                const iconSpan = document.createElement('span');
+                iconSpan.className = 'vtx-topic-chip__icon';
+                iconSpan.textContent = m[1].trim();
+                chip.appendChild(iconSpan);
+                chip.appendChild(document.createTextNode(m[2]));
+            } else {
+                chip.textContent = raw;
+            }
             chip.addEventListener('click', () => {
-                inputEl.value = text;
+                inputEl.value = (m && m[2]) ? m[2] : raw;
                 submitFn();
             });
             container.appendChild(chip);
@@ -1315,7 +1333,11 @@ export default class VoltimaxChatPlugin extends Plugin {
             chip.className = 'vtx-topic-chip';
             chip.dataset.topicId = t.id;
 
-            // Text-only chips \u2014 emoji icons read as playful, not professional.
+            const icon = document.createElement('span');
+            icon.className = 'vtx-topic-chip__icon';
+            icon.textContent = t.icon || '\ud83d\udcac';
+            chip.appendChild(icon);
+
             const label = document.createTextNode(t.title);
             chip.appendChild(label);
 
@@ -2522,8 +2544,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
             // The AI started answering — mark the last user message as read
             if (this._lastUserStatusEl) {
-                this._lastUserStatusEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/><polyline points="14 6 3 17"/></svg> Gelesen';
-                this._lastUserStatusEl.classList.add('is-read');
+                this._markLastUserRead();
                 this._lastUserStatusEl = null;
             }
 
@@ -2629,8 +2650,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (sender === 'ai') {
             // Update last user message status to "Read"
             if (this._lastUserStatusEl) {
-                this._lastUserStatusEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/><polyline points="14 6 3 17"/></svg> Gelesen';
-                this._lastUserStatusEl.classList.add('is-read');
+                this._markLastUserRead();
                 this._lastUserStatusEl = null;
             }
 
@@ -2702,13 +2722,17 @@ export default class VoltimaxChatPlugin extends Plugin {
             const timeEl = document.createElement('span');
             timeEl.className = 'voltimax-chat-message__time';
             timeEl.textContent = this._formatTime(new Date());
-            msg.appendChild(timeEl);
 
-            // Delivery status
+            // Delivery status: one check when sent, double green check once read
             const statusEl = document.createElement('span');
             statusEl.className = 'voltimax-chat-message__status';
-            statusEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Gesendet';
-            msg.appendChild(statusEl);
+            statusEl.innerHTML = '<svg class="vtx-check" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><svg class="vtx-check vtx-check--second" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg><span class="vtx-status-label">Gesendet</span>';
+            // Time and checks sit side by side in one meta row
+            const metaEl = document.createElement('span');
+            metaEl.className = 'voltimax-chat-message__meta';
+            metaEl.appendChild(timeEl);
+            metaEl.appendChild(statusEl);
+            msg.appendChild(metaEl);
             this._lastUserStatusEl = statusEl;
 
             wrapper.appendChild(msg);
@@ -2876,7 +2900,10 @@ export default class VoltimaxChatPlugin extends Plugin {
     _showTypingIndicator() {
         // Update last user message status to "Delivered"
         if (this._lastUserStatusEl) {
-            this._lastUserStatusEl.innerHTML = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/><polyline points="14 6 3 17" opacity="0.4"/></svg> Zugestellt';
+            // Delivered: second check appears (still navy); 'read' turns both green
+            this._lastUserStatusEl.classList.add('is-delivered');
+            const deliveredLabel = this._lastUserStatusEl.querySelector('.vtx-status-label');
+            if (deliveredLabel) deliveredLabel.textContent = 'Zugestellt';
         }
 
         const messages = document.querySelector('.voltimax-chat-window__messages');

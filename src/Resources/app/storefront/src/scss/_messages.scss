@@ -346,6 +346,17 @@
     }
 }
 
+// ── Message meta row (time + delivery status side by side) ───────────────────
+
+.voltimax-chat-message__meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 4px;
+    line-height: 1;
+}
+
 // ── Message timestamp ─────────────────────────────────────────────────────────
 
 .voltimax-chat-message__time {
@@ -356,21 +367,28 @@
     text-align: right;
     line-height: 1;
     user-select: none;
+
+    // Inside the meta row the flex container owns spacing/alignment
+    .voltimax-chat-message__meta & {
+        margin-top: 0;
+    }
 }
 
+// Navy so it stays readable on the light-tint user bubble
 .voltimax-chat-message--user .voltimax-chat-message__time {
-    color: rgba(255,255,255,0.55);
+    color: rgba(61, 90, 128, 0.85);
 }
 
 // ── Delivery status ──────────────────────────────────────────────────────────
+// Navy single check when sent; double green check + 'Gelesen' once read.
 
 .voltimax-chat-message__status {
     display: flex;
     align-items: center;
     gap: 3px;
     font-size: 9px;
-    color: rgba(255,255,255,0.5);
-    margin-top: 2px;
+    color: #3d5a80;
+    margin-top: 0;
     text-align: right;
     justify-content: flex-end;
     line-height: 1;
@@ -381,8 +399,20 @@
         flex-shrink: 0;
     }
 
+    // Second check hidden until delivered/read; overlaps WhatsApp-style
+    .vtx-check--second {
+        display: none;
+        margin-left: -9px;
+    }
+
+    // Delivered: both checks visible, still navy
+    &.is-delivered .vtx-check--second { display: inline; }
+
+    // Read: both checks green
     &.is-read {
-        color: rgba(255,255,255,0.7);
+        color: #16a34a;
+
+        .vtx-check--second { display: inline; }
     }
 }
 

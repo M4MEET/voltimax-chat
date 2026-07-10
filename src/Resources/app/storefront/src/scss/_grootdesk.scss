@@ -238,7 +238,7 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
     margin-top: 8px;
 }
 
-// Topic chips on home: borderless soft pills, text-only
+// Topic chips on home: borderless soft pills, icon before the label
 .voltimax-chat-widget .vtx-topic-chip {
     background: #f4f2ef;
     color: $g-ink;
@@ -248,6 +248,9 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
     font-size: 12px;
     font-weight: 500;
     padding: 7px 13px;
+    gap: 5px;
+
+    .vtx-topic-chip__icon { font-size: 12px; line-height: 1; }
 
     &:hover {
         background: color-mix(in srgb, var(--vtx-primary, #d99a4e) 12%, #fff);
