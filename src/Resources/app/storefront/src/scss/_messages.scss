@@ -594,3 +594,83 @@
         &:hover { background: color-mix(in srgb, var(--vtx-primary, #b0703a) 85%, #000); }
     }
 }
+
+// ── Oracle orb (Siri-style thinking indicator) ────────────────────────────────
+// Two counter-rotating blurred conic gradients under a glowing core, with a
+// gentle breathing scale — replaces the "is typing" text row entirely.
+
+.vtx-orb {
+    position: relative;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    margin: 4px 0 4px 2px;
+    isolation: isolate;
+    box-shadow:
+        0 0 14px rgba(217, 154, 78, 0.4),
+        0 0 4px rgba(139, 124, 246, 0.3);
+    animation: vtx-orb-breathe 2.6s ease-in-out infinite;
+
+    &__swirl {
+        position: absolute;
+        inset: -35%;
+        border-radius: 50%;
+        filter: blur(4px) saturate(1.35);
+    }
+
+    &__swirl--1 {
+        background: conic-gradient(
+            from 0deg,
+            #f5b04e,
+            #f277a8,
+            #8b7cf6,
+            #5ad0c8,
+            #f5b04e
+        );
+        animation: vtx-orb-spin 2.8s linear infinite;
+    }
+
+    &__swirl--2 {
+        background: conic-gradient(
+            from 180deg,
+            rgba(255, 255, 255, 0) 0deg,
+            rgba(255, 255, 255, 0.85) 90deg,
+            rgba(255, 255, 255, 0) 180deg,
+            rgba(90, 208, 200, 0.7) 270deg,
+            rgba(255, 255, 255, 0) 360deg
+        );
+        mix-blend-mode: screen;
+        animation: vtx-orb-spin 1.9s linear infinite reverse;
+    }
+
+    &__core {
+        position: absolute;
+        inset: 22%;
+        border-radius: 50%;
+        background: radial-gradient(
+            circle at 38% 32%,
+            rgba(255, 255, 255, 0.95),
+            rgba(255, 255, 255, 0.3) 55%,
+            rgba(255, 255, 255, 0) 78%
+        );
+        filter: blur(1px);
+        animation: vtx-orb-breathe 2.6s ease-in-out infinite reverse;
+    }
+}
+
+@keyframes vtx-orb-spin {
+    to { transform: rotate(360deg); }
+}
+
+@keyframes vtx-orb-breathe {
+    0%, 100% { transform: scale(1); }
+    50%      { transform: scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .vtx-orb,
+    .vtx-orb__core { animation: none; }
+    .vtx-orb__swirl { animation: none; }
+}

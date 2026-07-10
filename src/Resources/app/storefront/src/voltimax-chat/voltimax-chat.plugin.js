@@ -2974,31 +2974,26 @@ export default class VoltimaxChatPlugin extends Plugin {
         const messages = document.querySelector('.voltimax-chat-window__messages');
         if (!messages || messages.querySelector('.voltimax-chat-typing')) return;
 
+        // Siri-style oracle orb — no avatar, no "is typing" text
         const typing = document.createElement('div');
         typing.className = 'voltimax-chat-typing';
 
-        // Avatar — use uploaded logo or SVG fallback
-        const avatarEl = this._buildAvatarEl();
-        avatarEl.className = 'voltimax-chat-typing__avatar';
-        typing.appendChild(avatarEl);
+        const orb = document.createElement('div');
+        orb.className = 'vtx-orb';
+        orb.setAttribute('role', 'status');
+        orb.setAttribute('aria-label', 'GrootDesk denkt nach …');
 
-        // Bubble with text + dots
-        const bubble = document.createElement('div');
-        bubble.className = 'voltimax-chat-typing__bubble';
+        const swirl1 = document.createElement('span');
+        swirl1.className = 'vtx-orb__swirl vtx-orb__swirl--1';
+        const swirl2 = document.createElement('span');
+        swirl2.className = 'vtx-orb__swirl vtx-orb__swirl--2';
+        const core = document.createElement('span');
+        core.className = 'vtx-orb__core';
 
-        const textEl = document.createElement('span');
-        textEl.className = 'voltimax-chat-typing__text';
-        textEl.textContent = 'Groot is typing';
-        bubble.appendChild(textEl);
-
-        const dotsEl = document.createElement('span');
-        dotsEl.className = 'voltimax-chat-typing__dots';
-        dotsEl.appendChild(document.createElement('span'));
-        dotsEl.appendChild(document.createElement('span'));
-        dotsEl.appendChild(document.createElement('span'));
-        bubble.appendChild(dotsEl);
-
-        typing.appendChild(bubble);
+        orb.appendChild(swirl1);
+        orb.appendChild(swirl2);
+        orb.appendChild(core);
+        typing.appendChild(orb);
         messages.appendChild(typing);
         messages.scrollTop = messages.scrollHeight;
 
