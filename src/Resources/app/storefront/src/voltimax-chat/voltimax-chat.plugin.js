@@ -3410,10 +3410,10 @@ export default class VoltimaxChatPlugin extends Plugin {
             closeBtns.appendChild(closeBtn);
 
             var newBtn = document.createElement('button');
-            newBtn.style.cssText = 'flex:1;padding:10px;border:none;background:var(--vtx-primary, #b0703a);color:#fff;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer';
+            newBtn.style.cssText = 'flex:1;padding:10px;border:none;background:#2b2013;color:#fff;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer';
             newBtn.textContent = 'Neuen Chat starten';
-            newBtn.addEventListener('mouseenter', function() { newBtn.style.background = 'color-mix(in srgb, var(--vtx-primary, #b0703a) 85%, #000)'; });
-            newBtn.addEventListener('mouseleave', function() { newBtn.style.background = 'var(--vtx-primary, #b0703a)'; });
+            newBtn.addEventListener('mouseenter', function() { newBtn.style.background = '#1c140b'; });
+            newBtn.addEventListener('mouseleave', function() { newBtn.style.background = '#2b2013'; });
             newBtn.addEventListener('click', function() {
                 closeEl.remove();
                 self._resetChat();
@@ -3756,7 +3756,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             });
 
             var submitBtn = document.createElement('button');
-            submitBtn.style.cssText = 'width:100%;padding:10px;background:var(--vtx-primary,#6366f1);color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit';
+            submitBtn.style.cssText = 'width:100%;padding:10px;background:#2b2013;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit';
             submitBtn.textContent = c.form.submit_label || 'Submit';
 
             var doFormSubmit = function() {
@@ -4015,7 +4015,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
             // Submit button
             var submitBtn = document.createElement('button');
-            submitBtn.style.cssText = 'width:100%;padding:10px;background:#22c55e;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px';
+            submitBtn.style.cssText = 'width:100%;padding:10px;background:#2b2013;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;margin-top:4px';
             submitBtn.textContent = 'Formular einreichen \u2192';
             // Notice next to the submit button — feedback exactly where the
             // customer clicked, pointing them at the highlighted fields above.

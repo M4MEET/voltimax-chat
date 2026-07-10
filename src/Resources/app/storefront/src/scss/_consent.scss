@@ -26,11 +26,7 @@
     padding: 10px;
     border: none;
     border-radius: 10px;
-    background: linear-gradient(
-        135deg,
-        var(--vtx-primary-start, #4338CA) 0%,
-        var(--vtx-primary-end, #D4A04A) 100%
-    );
+    background: #2b2013;
     color: #fff;
     font-size: 13px;
     font-weight: 600;
@@ -192,11 +188,7 @@
             height: 30px;
             min-width: 30px;
             padding: 0;
-            background: linear-gradient(
-                135deg,
-                var(--vtx-primary-start, #4338CA) 0%,
-                var(--vtx-primary-end, #D4A04A) 100%
-            );
+            background: #2b2013;
             color: #fff;
             border: none;
             border-radius: 50%;

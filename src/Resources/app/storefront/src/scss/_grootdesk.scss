@@ -267,6 +267,96 @@ $g-card-shadow: 0 1px 2px rgba(28, 25, 23, 0.04);
     a { color: var(--vtx-primary, #b0703a); text-decoration: underline; }
 }
 
+// ── Cards: one clean action system across every card ─────────────────────────
+// Primary actions: solid warm ink (like the launcher chip). Secondary and
+// cancel: soft neutral pills. Danger: soft red tint. No gradients, no
+// brand-colored blocks, no indigo leftovers.
+
+$g-btn-ink: #2b2013;
+$g-btn-ink-hover: #1c140b;
+
+// Confirmation card (returns / cancellations)
+.voltimax-chat-widget .voltimax-chat-confirm__btn--confirm {
+    background: $g-btn-ink;
+    color: #fff;
+    box-shadow: none;
+
+    &:hover {
+        background: $g-btn-ink-hover;
+        transform: none;
+        box-shadow: none;
+    }
+}
+
+.voltimax-chat-widget .voltimax-chat-confirm__btn--cancel {
+    background: #f4f2ef;
+    color: $g-ink-soft;
+
+    &:hover { background: #ece9e4; color: $g-ink; }
+}
+
+// Primary submits across cards and verify bars
+.voltimax-chat-widget .vtx-input-prompt__submit,
+.voltimax-chat-widget .vtx-resume-bar__btn--primary,
+.voltimax-chat-widget .vtx-verify-form__submit,
+.voltimax-chat-widget .voltimax-chat-verify-bar__submit {
+    background: $g-btn-ink;
+    color: #fff;
+    box-shadow: none;
+
+    &:hover {
+        background: $g-btn-ink-hover;
+        transform: none;
+        opacity: 1;
+        box-shadow: none;
+    }
+}
+
+// Resume bar: warm neutral surface (was indigo-tinted)
+.voltimax-chat-widget .vtx-resume-bar {
+    background: #faf9f7;
+    border: 1px solid $g-line;
+
+    .vtx-resume-bar__info { color: $g-ink; }
+}
+
+// Choice buttons (in-card actions, links, copy buttons): quiet neutral pills
+.voltimax-chat-widget .vtx-choice-btn {
+    border: 1px solid transparent;
+    background: #f4f2ef;
+    color: $g-ink;
+
+    &:hover {
+        background: color-mix(in srgb, var(--vtx-primary, #d99a4e) 12%, #fff);
+        border-color: transparent;
+        color: $g-ink;
+        transform: none;
+        box-shadow: none;
+    }
+
+    &--secondary {
+        border-color: transparent;
+        background: #f4f2ef;
+        color: $g-ink-soft;
+
+        &:hover { background: #ece9e4; color: $g-ink; border-color: transparent; }
+    }
+
+    &--danger {
+        border-color: transparent;
+        background: #fdecec;
+        color: #b91c1c;
+
+        &:hover { background: #fbdcdc; border-color: transparent; }
+    }
+}
+
+// Input-prompt fields: warm focus instead of indigo
+.voltimax-chat-widget .vtx-input-prompt__input:focus {
+    border-color: color-mix(in srgb, var(--vtx-primary, #d99a4e) 45%, #fff);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--vtx-primary, #d99a4e) 12%, transparent);
+}
+
 // ── Launcher: soft gradient pill, icon in a dark circle, ink label ────────────
 // Brand colour fades from a deeper left edge to a light right edge; the
 // chat icon sits in a dark round chip so the pill reads instantly.
