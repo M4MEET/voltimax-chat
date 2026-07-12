@@ -616,6 +616,41 @@
         0 0 12px rgba(120, 90, 220, 0.3);
     animation: vtx-orb-breathe 3s ease-in-out infinite;
 
+    // Glass shell: crisp crescent highlight top-left, shaded lower rim and a
+    // faint colored under-glow — turns the flat disc into a 3D glass ball.
+    &::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        z-index: 3;
+        pointer-events: none;
+        background:
+            radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.12) 18%, transparent 34%),
+            radial-gradient(circle at 50% 118%, rgba(120, 90, 220, 0.35), transparent 46%);
+        box-shadow:
+            inset 0 0 3px rgba(255, 255, 255, 0.22),
+            inset -1px -2px 4px rgba(0, 0, 0, 0.45);
+    }
+
+    // Three tiny star glints twinkling and slowly orbiting the sphere
+    &::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        border-radius: 50%;
+        z-index: 4;
+        pointer-events: none;
+        background:
+            radial-gradient(circle 1.2px at 68% 30%, rgba(255, 255, 255, 0.95), transparent 100%),
+            radial-gradient(circle 1px at 30% 62%, rgba(255, 255, 255, 0.8), transparent 100%),
+            radial-gradient(circle 0.8px at 58% 74%, rgba(255, 255, 255, 0.7), transparent 100%);
+        mix-blend-mode: screen;
+        animation:
+            vtx-orb-glint 3.4s ease-in-out infinite,
+            vtx-orb-drift 9s linear infinite;
+    }
+
     &__petal {
         position: absolute;
         left: 50%;
@@ -671,6 +706,30 @@
         filter: blur(1px);
         mix-blend-mode: screen;
         animation: vtx-orb-flare 2.2s ease-in-out infinite;
+
+        // Four-point starburst: two crossed light rays through the core
+        &::before,
+        &::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            width: 240%;
+            height: 18%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255, 255, 255, 0.85) 50%,
+                transparent
+            );
+            border-radius: 999px;
+            filter: blur(0.8px);
+        }
+
+        &::after {
+            transform: translate(-50%, -50%) rotate(90deg);
+        }
     }
 }
 
@@ -694,12 +753,23 @@
     50%      { transform: scale(1.1); }
 }
 
+@keyframes vtx-orb-glint {
+    0%, 100% { opacity: 0.35; }
+    50%      { opacity: 1; }
+}
+
+@keyframes vtx-orb-drift {
+    to { transform: rotate(360deg); }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .vtx-orb,
     .vtx-orb__petal,
     .vtx-orb__flare {
         animation: none;
     }
+
+    .vtx-orb::after { animation: none; }
 
     // Static but still recognizable: petals rest at distinct angles
     .vtx-orb__petal--r { transform: translate(-50%, -50%) rotate(20deg); }
@@ -748,6 +818,13 @@
     height: 26px;
     margin: 0;
     background: radial-gradient(circle at 50% 40%, #3a2a12 0%, #201607 60%, #0f0a04 100%);
+
+    // Warm under-glow in the glass shell (base uses violet)
+    &::before {
+        background:
+            radial-gradient(circle at 32% 24%, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.12) 18%, transparent 34%),
+            radial-gradient(circle at 50% 118%, rgba(217, 154, 78, 0.4), transparent 46%);
+    }
     box-shadow:
         inset 0 0 4px rgba(255, 255, 255, 0.2),
         0 0 8px rgba(217, 154, 78, 0.45);
