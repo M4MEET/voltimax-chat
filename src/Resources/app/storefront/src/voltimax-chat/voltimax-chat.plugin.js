@@ -2171,11 +2171,17 @@ export default class VoltimaxChatPlugin extends Plugin {
         // keep the orb thinking. This guarantees cards that ask for input
         // (e.g. the battery-finder cascade) always arrive with the input
         // bar back and never race a hidden composer.
+        // Streaming does NOT dismiss: 'stream_start' fires ~seconds before
+        // the first token (backend announces the stream, then fetches shop
+        // data), and chunks are still mid-generation. The orb keeps thinking
+        // centered until stream_end or a full reply/card arrives.
         if (this._typingEl
             && data.type !== 'typing'
             && data.type !== 'play_sound'
             && data.type !== 'suggestions'
-            && data.type !== 'auth_success') {
+            && data.type !== 'auth_success'
+            && data.type !== 'stream_start'
+            && data.type !== 'stream_chunk') {
             this._hideTypingIndicator();
         }
 
@@ -2605,6 +2611,7 @@ export default class VoltimaxChatPlugin extends Plugin {
     }
 
     _unlockInput() {
+        this._hideTypingIndicator();
         if (!this._inputLocked) return;
         this._inputLocked = false;
         if (this._lockTimer) { clearTimeout(this._lockTimer); this._lockTimer = null; }
@@ -2624,7 +2631,11 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (!messages) return;
 
         if (!this._streamingRow) {
-            this._hideTypingIndicator();
+            // A docked orb stays centered while tokens stream (it leaves on
+            // stream_end); only a legacy in-flow indicator must make way.
+            if (this._typingEl && !this._typingEl.classList.contains('voltimax-chat-typing--dock')) {
+                this._hideTypingIndicator();
+            }
 
             // The AI started answering — mark the last user message as read
             if (this._lastUserStatusEl) {
@@ -2944,7 +2955,12 @@ export default class VoltimaxChatPlugin extends Plugin {
         const messages = document.querySelector('.voltimax-chat-window__messages');
         if (!messages) return;
 
-        this._hideTypingIndicator();
+        // A docked orb stays visible while tokens stream; only a legacy
+        // in-flow indicator (no input slot available) must make way for
+        // the streaming bubble.
+        if (this._typingEl && !this._typingEl.classList.contains('voltimax-chat-typing--dock')) {
+            this._hideTypingIndicator();
+        }
 
         let streamBubble = messages.querySelector('.voltimax-chat-message--ai.is-streaming');
         if (!streamBubble) {
