@@ -5,6 +5,8 @@
 @import 'consent';
 @import 'confirmation';
 @import 'interactive';
-@import 'dark-mode';
+// Dark mode temporarily disabled for 2.10.0: the dark palette predates
+// the GrootDesk light redesign and clashes with it. Redesign lands in 2.11.
+// @import 'dark-mode';
 @import 'animations';
 @import 'grootdesk';

@@ -1089,7 +1089,11 @@ export default class VoltimaxChatPlugin extends Plugin {
         if (!widget) return;
 
         const applyDark = (dark) => {
-            widget.classList.toggle('voltimax-chat-widget--dark', dark);
+            // 2.10.0: dark mode disabled — the dark palette predates the
+            // GrootDesk light redesign. The admin option stays but is inert
+            // until the 2.11 dark redesign.
+            void dark;
+            widget.classList.remove('voltimax-chat-widget--dark');
         };
 
         if (mode === 'dark') {
