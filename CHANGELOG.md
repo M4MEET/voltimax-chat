@@ -1,5 +1,12 @@
 # Changelog
 
+> **Release rule:** every release section MUST declare its minimum compatible
+> backend directly under the version heading, in the form
+> `**Backend:** requires voltimax-ai-service >= vX.Y.Z`.
+> The backend version refers to a git tag of the `voltimax-ai-service`
+> repository (also reported by its `/health` endpoint). CI enforces this for
+> all versions after 2.9.1.
+
 ## 1.0.0
 
 ### Added

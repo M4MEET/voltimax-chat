@@ -1,0 +1,14 @@
+name: Changelog backend-compat gate
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify CHANGELOG declares minimum backend version
+        run: bash scripts/check-changelog-compat.sh
