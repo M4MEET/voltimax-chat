@@ -38,6 +38,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         this._pendingFreeText   = null;
         this._expandedTopicId   = null;
         this._sessionClosed     = false;
+        this._resumeRequested   = false;
         this._inputLocked       = false;
         // Cross-tab: unique id per tab; _yielded = another tab owns the socket
         this._tabId             = Math.random().toString(36).slice(2) + Date.now().toString(36);
@@ -2439,33 +2440,33 @@ export default class VoltimaxChatPlugin extends Plugin {
             // Server closed the session (idle timeout, escalation, etc.)
             this._sessionClosed = true;
             this._reconnectAttempts = 999; // prevent auto-reconnect
-
-            // Disable input
-            var input = document.querySelector('.voltimax-chat-window__input input');
-            if (input) {
-                input.disabled = true;
-                input.placeholder = 'Sitzung beendet';
+            this._lockChatClosed();
+            // Idle closes stay resumable for a while (server enforces the window)
+            this._renderClosedBanner(data.message === 'idle_timeout');
+        } else if (data.type === 'session_resumable') {
+            // Reconnected to an idle-closed session within the resume window
+            if (this._resumeRequested && this.ws && this.ws.readyState === WebSocket.OPEN) {
+                // Customer already clicked "Weiterführen" — resume immediately
+                this.ws.send(JSON.stringify({ type: 'resume_session' }));
+            } else {
+                // Returning visitor: locked chat + explicit choice
+                this._sessionClosed = true;
+                this._lockChatClosed();
+                this._renderClosedBanner(true);
             }
-            var sendBtn = this._chatSendBtnEl();
-            if (sendBtn) sendBtn.disabled = true;
-
-            // Show "Start new chat" button
-            var messagesEl = document.querySelector('.voltimax-chat-window__messages');
-            if (messagesEl) {
-                var banner = document.createElement('div');
-                banner.className = 'voltimax-chat-session-closed';
-                banner.style.cssText = 'text-align:center;padding:12px 16px;margin:8px 0;background:#f5f5f5;border-radius:8px;font-size:13px;color:#666;';
-                var reason = data.message === 'idle_timeout' ? 'Inaktivität' : 'Sitzung beendet';
-                banner.innerHTML = '<div style="margin-bottom:8px;">Sitzung geschlossen (' + reason + ')</div>'
-                    + '<button class="vtx-new-chat-btn" style="padding:6px 16px;border:1px solid #2196F3;background:#fff;color:#2196F3;border-radius:16px;cursor:pointer;font-size:13px;">Neuen Chat starten</button>';
-                messagesEl.appendChild(banner);
-                messagesEl.scrollTop = messagesEl.scrollHeight;
-
-                banner.querySelector('.vtx-new-chat-btn').addEventListener('click', () => {
-                    this._sessionClosed = false;
-                    this._reconnectAttempts = 0;
-                    this._resetChat();
-                });
+        } else if (data.type === 'session_resumed') {
+            this._resumeRequested = false;
+            this._sessionClosed = false;
+            this._reconnectAttempts = 0;
+            this._unlockChatClosed();
+        } else if (data.type === 'session_expired') {
+            // Resume window is over — the restored transcript is read-only
+            // history now; only a new chat remains ("closed forever").
+            if (this._history && this._history.length) {
+                this._resumeRequested = false;
+                this._sessionClosed = true;
+                this._lockChatClosed();
+                this._renderClosedBanner(false);
             }
         } else if (data.type === 'confirmation_done') {
             // Ticket created — turn the submitting form into a receipt with the
@@ -2582,9 +2583,79 @@ export default class VoltimaxChatPlugin extends Plugin {
         return document.querySelector('.voltimax-chat-window__send');
     }
 
+    // ── Closed-session state (idle timeout) ─────────────────────────────────
+    // The chat locks visibly; within the server's resume window the customer
+    // chooses "Weiterführen" (same session, full context) or "Neuen Chat
+    // starten". After the window only a new chat is offered.
+
+    _lockChatClosed() {
+        this._hideTypingIndicator();
+        var input = this._chatInputEl();
+        if (input) { input.disabled = true; input.placeholder = 'Sitzung beendet'; input.value = ''; }
+        var sendBtn = this._chatSendBtnEl();
+        if (sendBtn) sendBtn.disabled = true;
+        var win = document.querySelector('.voltimax-chat-window');
+        if (win) win.classList.add('voltimax-chat-window--closed');
+    }
+
+    _unlockChatClosed() {
+        this._removeClosedBanner();
+        var win = document.querySelector('.voltimax-chat-window');
+        if (win) win.classList.remove('voltimax-chat-window--closed');
+        var input = this._chatInputEl();
+        if (input) { input.disabled = false; input.placeholder = 'Schreib eine Nachricht …'; input.focus(); }
+        var sendBtn = this._chatSendBtnEl();
+        if (sendBtn) sendBtn.disabled = false;
+    }
+
+    _removeClosedBanner() {
+        var old = document.querySelector('.vtx-closed-banner');
+        if (old) old.remove();
+    }
+
+    _renderClosedBanner(resumable) {
+        this._removeClosedBanner();
+        var messagesEl = document.querySelector('.voltimax-chat-window__messages');
+        if (!messagesEl) return;
+
+        var banner = document.createElement('div');
+        banner.className = 'vtx-closed-banner';
+        banner.innerHTML =
+            '<div class="vtx-closed-banner__title">Diese Sitzung wurde beendet</div>'
+            + '<div class="vtx-closed-banner__actions">'
+            + (resumable ? '<button type="button" class="vtx-closed-banner__btn vtx-closed-banner__btn--resume">Weiterführen</button>' : '')
+            + '<button type="button" class="vtx-closed-banner__btn vtx-closed-banner__btn--new">Neuen Chat starten</button>'
+            + '</div>';
+        messagesEl.appendChild(banner);
+        messagesEl.scrollTop = messagesEl.scrollHeight;
+
+        var resumeBtn = banner.querySelector('.vtx-closed-banner__btn--resume');
+        if (resumeBtn) {
+            resumeBtn.addEventListener('click', () => {
+                if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+                    // Socket still up (returning visitor) — resume directly
+                    this.ws.send(JSON.stringify({ type: 'resume_session' }));
+                } else {
+                    // Live idle close ended the socket — reconnect, then the
+                    // session_resumable handler auto-sends resume_session
+                    this._resumeRequested = true;
+                    this._sessionClosed = false;
+                    this._reconnectAttempts = 0;
+                    this._connectToServerB(this._currentTopicId || 'general');
+                }
+            });
+        }
+        banner.querySelector('.vtx-closed-banner__btn--new').addEventListener('click', () => {
+            this._sessionClosed = false;
+            this._resumeRequested = false;
+            this._reconnectAttempts = 0;
+            this._resetChat();
+        });
+    }
+
     _sendMessage(input) {
         const text = input.value.trim();
-        if (!text || this._inputLocked) return;
+        if (!text || this._inputLocked || this._sessionClosed) return;
         input.value = '';
         input.style.height = 'auto'; // reset auto-grow
 
@@ -2616,6 +2687,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
     _unlockInput() {
         this._hideTypingIndicator();
+        if (this._sessionClosed) return; // a stray lock timer must not reopen a closed chat
         if (!this._inputLocked) return;
         this._inputLocked = false;
         if (this._lockTimer) { clearTimeout(this._lockTimer); this._lockTimer = null; }

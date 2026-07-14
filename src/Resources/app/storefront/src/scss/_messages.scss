@@ -842,3 +842,69 @@
     }
 }
 
+
+// ── Closed-session state (idle timeout) ─────────────────────────────────────
+// Locked chat: dimmed input + orb, banner offering Weiterführen (while the
+// server's resume window is open) and Neuen Chat starten.
+.voltimax-chat-window--closed {
+    .voltimax-chat-window__input {
+        background: #f4f2ef;
+        color: #a8a29e;
+        cursor: not-allowed;
+    }
+    .voltimax-chat-window__send {
+        pointer-events: none;
+        .vtx-orb, .vtx-orb--send {
+            filter: grayscale(1);
+            opacity: 0.35;
+        }
+    }
+}
+
+.vtx-closed-banner {
+    margin: 12px 4px 4px;
+    padding: 14px 16px;
+    text-align: center;
+    background: #faf9f7;
+    border: 1px solid #e7e5e0;
+    border-radius: 14px;
+
+    .vtx-closed-banner__title {
+        font-size: 13px;
+        font-weight: 500;
+        color: #78716c;
+        margin-bottom: 10px;
+    }
+
+    .vtx-closed-banner__actions {
+        display: flex;
+        gap: 8px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .vtx-closed-banner__btn {
+        padding: 8px 18px;
+        border-radius: 999px;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.15s ease, color 0.15s ease;
+
+        &--resume {
+            border: none;
+            background: #2b2013;
+            color: #fdfcfb;
+
+            &:hover { background: #43331e; }
+        }
+
+        &--new {
+            border: 1px solid #e7e5e0;
+            background: #f4f2ef;
+            color: #57534e;
+
+            &:hover { background: #ebe8e3; }
+        }
+    }
+}
