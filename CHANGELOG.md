@@ -7,6 +7,27 @@
 > repository (also reported by its `/health` endpoint). CI enforces this for
 > all versions after 2.9.1.
 
+## 2.11.0
+
+**Backend:** requires voltimax-ai-service >= v1.3.0
+
+### Added
+- Closed-session state: after an idle timeout the chat locks visibly
+  (disabled input "Sitzung beendet", dimmed send orb) and shows a
+  GrootDesk-styled banner with **Weiterführen** and **Neuen Chat starten**.
+- Weiterführen resumes the same session with full AI context — directly over
+  the open connection, or via reconnect after a live idle close. The resume
+  window is enforced by the backend (default 30 minutes).
+- After the resume window only "Neuen Chat starten" remains; the stale
+  transcript is locked for good (`session_expired`).
+
+### Fixed
+- The idle-close handler still used a pre-redesign input selector, so the
+  chat looked fully open after the session ended: messages typed there were
+  silently lost, and a page reload resurrected the closed session
+  (prod session #5FFFED47). Stray unlock timers and Enter presses can no
+  longer reopen a closed chat.
+
 ## 2.10.0
 
 **Backend:** requires voltimax-ai-service >= v1.2.0
