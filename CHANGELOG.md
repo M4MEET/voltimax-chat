@@ -7,6 +7,16 @@
 > repository (also reported by its `/health` endpoint). CI enforces this for
 > all versions after 2.9.1.
 
+## 2.11.1
+
+**Backend:** requires voltimax-ai-service >= v1.3.0
+
+### Added
+- The order API now includes the payment method of the latest transaction
+  (`paymentMethod`). The chat's payment status card shows it as a
+  "Zahlungsart" row, and Groot can answer "womit habe ich bezahlt?" from
+  the verified order's data.
+
 ## 2.11.0
 
 **Backend:** requires voltimax-ai-service >= v1.3.0
