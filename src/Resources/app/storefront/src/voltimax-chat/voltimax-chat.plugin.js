@@ -4258,6 +4258,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 var errKeys = [];
                 if (!selectedType.value) { showFieldError('form_type', 'Bitte w\u00e4hle ein Formular aus.'); errKeys.push('form_type'); }
                 if (!fileInput.files || !fileInput.files[0]) { showFieldError('file', 'Bitte lade eine PDF-Datei hoch.'); errKeys.push('file'); }
+                else if (fileInput.files[0].size > 20 * 1024 * 1024) { showFieldError('file', 'Die Datei ist zu gro\u00df (max. 20 MB). Bitte verkleinere das PDF oder sende es an info@voltimax.de.'); errKeys.push('file'); }
                 var nameVal = (textInputs['customer_name'] && textInputs['customer_name'].value) ? textInputs['customer_name'].value.trim() : '';
                 if (!nameVal) { showFieldError('customer_name', 'Bitte gib deinen Namen ein.'); errKeys.push('customer_name'); }
                 var emailVal = (textInputs['customer_email'] && textInputs['customer_email'].value) ? textInputs['customer_email'].value.trim() : '';
@@ -4291,7 +4292,31 @@ export default class VoltimaxChatPlugin extends Plugin {
                 try {
                     var serverUrl = self.config.serverBUrl || 'http://localhost:8000';
                     var resp = await fetch(serverUrl + '/api/chat/batteriepfand-upload', { method: 'POST', body: formData });
-                    var result = await resp.json();
+
+                    // The proxy rejects oversized bodies with an HTML 413 page
+                    // BEFORE our API runs — resp.json() would throw and the
+                    // customer only saw a generic retry-bait failure
+                    // (prod chat #D4D0E5D4: "immer FEHLGESCHLAGEN").
+                    if (resp.status === 413) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Formular einreichen \u2192';
+                        submitBtn.style.opacity = '1';
+                        showFieldError('file', 'Die Datei ist zu gro\u00df f\u00fcr den Upload. Bitte verkleinere das PDF oder sende es an info@voltimax.de.');
+                        submitNotice.textContent = 'Die Datei ist zu gro\u00df \u2014 bitte verkleinern und erneut versuchen.';
+                        submitNotice.style.display = 'block';
+                        return;
+                    }
+                    var result;
+                    try {
+                        result = await resp.json();
+                    } catch (parseErr) {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Formular einreichen \u2192';
+                        submitBtn.style.opacity = '1';
+                        submitNotice.textContent = 'Der Server konnte den Upload nicht verarbeiten (Fehler ' + resp.status + '). Bitte sp\u00e4ter erneut versuchen oder das Formular an info@voltimax.de senden.';
+                        submitNotice.style.display = 'block';
+                        return;
+                    }
 
                     if (result.success) {
                         while (uploadDiv.firstChild) uploadDiv.removeChild(uploadDiv.firstChild);

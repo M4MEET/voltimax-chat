@@ -7,6 +7,18 @@
 > repository (also reported by its `/health` endpoint). CI enforces this for
 > all versions after 2.9.1.
 
+## 2.11.2
+
+**Backend:** requires voltimax-ai-service >= v1.3.0
+
+### Fixed
+- Batteriepfand upload: files over the server limit failed with a generic
+  "Upload fehlgeschlagen — bitte erneut versuchen", inviting retries that
+  could never succeed (prod chat #D4D0E5D4; the proxy returned an HTML 413
+  the widget couldn't parse). Now: a client-side size check rejects files
+  over 20 MB instantly with a specific message, and 413 / non-JSON server
+  responses show what actually happened plus the info@voltimax.de fallback.
+
 ## 2.11.1
 
 **Backend:** requires voltimax-ai-service >= v1.3.0
