@@ -29,6 +29,7 @@ class OrderDataService
         $criteria->addAssociation('deliveries.stateMachineState');
         $criteria->addAssociation('stateMachineState');
         $criteria->addAssociation('transactions.stateMachineState');
+        $criteria->addAssociation('transactions.paymentMethod');
         $criteria->addAssociation('addresses');
         $criteria->addAssociation('orderCustomer');
         $criteria->setLimit(1);
@@ -46,6 +47,7 @@ class OrderDataService
         $criteria->addAssociation('deliveries.stateMachineState');
         $criteria->addAssociation('stateMachineState');
         $criteria->addAssociation('transactions.stateMachineState');
+        $criteria->addAssociation('transactions.paymentMethod');
         $criteria->addAssociation('addresses');
         $criteria->addAssociation('orderCustomer');
         $criteria->addSorting(new FieldSorting('orderDateTime', FieldSorting::DESCENDING));
@@ -95,9 +97,12 @@ class OrderDataService
         }
 
         $paymentStatus = null;
+        $paymentMethod = null;
         $txns = $order->getTransactions();
         if ($txns !== null && $txns->count() > 0) {
-            $paymentStatus = $txns->last()?->getStateMachineState()?->getTechnicalName();
+            $lastTxn = $txns->last();
+            $paymentStatus = $lastTxn?->getStateMachineState()?->getTechnicalName();
+            $paymentMethod = $lastTxn?->getPaymentMethod()?->getName();
         }
 
         // Billing address from order addresses
@@ -127,6 +132,7 @@ class OrderDataService
             'status' => $order->getStateMachineState()?->getTechnicalName(),
             'statusLabel' => $order->getStateMachineState()?->getName(),
             'paymentStatus' => $paymentStatus,
+            'paymentMethod' => $paymentMethod,
             'totalAmount' => $order->getAmountTotal(),
             'currency' => $order->getCurrency()?->getIsoCode() ?? 'EUR',
             'customerEmail' => $customerEmail,
