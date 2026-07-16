@@ -7,6 +7,21 @@
 > repository (also reported by its `/health` endpoint). CI enforces this for
 > all versions after 2.9.1.
 
+## 2.11.3
+
+**Backend:** requires voltimax-ai-service >= v1.3.0
+
+### Fixed
+- Support-ticket confirmation form: the e-mail field now validates its
+  format client-side (red border + German hint) and shows a concrete
+  placeholder (name@beispiel.de) — an order number typed into the field
+  previously reached Zendesk and failed with an unexplained generic error
+  (prod chat #93BBFF71).
+- Submitting a form over a dead connection no longer shows an eternal
+  "Wird gesendet …" spinner: the widget refuses upfront with a clear
+  reconnect hint, and ticket submissions that get no server confirmation
+  within 20 seconds reopen the form honestly instead of hanging.
+
 ## 2.11.2
 
 **Backend:** requires voltimax-ai-service >= v1.3.0

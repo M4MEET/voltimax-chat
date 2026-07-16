@@ -2471,6 +2471,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         } else if (data.type === 'confirmation_done') {
             // Ticket created — turn the submitting form into a receipt with the
             // real ticket number
+            if (this._confirmAckTimer) { clearTimeout(this._confirmAckTimer); this._confirmAckTimer = null; }
             if (this._pendingConfirmCard) {
                 var tidSuffix = data.ticket_id ? ' — Ticket #' + data.ticket_id : '';
                 this._finalizeConfirmCard(this._pendingConfirmCard, '✓ Anfrage übermittelt' + tidSuffix, true);
@@ -2484,6 +2485,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
             // Ticket creation failed — re-open the submitting form instead of
             // faking a receipt
+            if (this._confirmAckTimer) { clearTimeout(this._confirmAckTimer); this._confirmAckTimer = null; }
             if (this._pendingConfirmCard) {
                 var pc = this._pendingConfirmCard;
                 this._pendingConfirmCard = null;
@@ -3230,8 +3232,10 @@ export default class VoltimaxChatPlugin extends Plugin {
                 } else {
                     input = document.createElement('input');
                     input.className = 'voltimax-chat-confirm__input';
-                    input.type = field.type || 'text';
-                    input.placeholder = field.label + ' *';
+                    input.type = field.type || (field.key === 'customer_email' ? 'email' : 'text');
+                    // Concrete example placeholder — 'Bestell-E-Mail *' alone was
+                    // misread as an order-number field (prod chat #93BBFF71)
+                    input.placeholder = field.key === 'customer_email' ? 'name@beispiel.de' : field.label + ' *';
                 }
                 input.value = field.value || '';
                 input.required = true;
@@ -3281,6 +3285,11 @@ export default class VoltimaxChatPlugin extends Plugin {
                 this.ws.send(JSON.stringify({ type: 'cancel_action', action: confirmation.action }));
             }
         });
+        // Inline feedback right at the buttons (validation / connection issues)
+        const confirmNotice = document.createElement('div');
+        confirmNotice.setAttribute('role', 'alert');
+        confirmNotice.style.cssText = 'display:none;margin-top:8px;padding:8px 10px;background:#fef2f2;border:1px solid #fca5a5;border-radius:8px;font-size:12px;font-weight:600;color:#b91c1c;text-align:center';
+
 
         const confirmBtn = document.createElement('button');
         confirmBtn.className = 'voltimax-chat-confirm__btn voltimax-chat-confirm__btn--confirm';
@@ -3289,6 +3298,7 @@ export default class VoltimaxChatPlugin extends Plugin {
             // Collect field values
             const fields = {};
             let hasEmpty = false;
+            let emailInvalid = false;
             for (const [key, el] of Object.entries(fieldInputs)) {
                 if (el instanceof HTMLElement) {
                     fields[key] = el.value;
@@ -3296,6 +3306,12 @@ export default class VoltimaxChatPlugin extends Plugin {
                     if (!el.value.trim()) {
                         el.style.borderColor = '#ef4444';
                         hasEmpty = true;
+                    } else if (key === 'customer_email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim())) {
+                        // Order numbers typed into the e-mail field sailed
+                        // through to Zendesk and died as an unexplained 422
+                        // (prod chat #93BBFF71)
+                        el.style.borderColor = '#ef4444';
+                        emailInvalid = true;
                     } else {
                         el.style.borderColor = '';
                     }
@@ -3304,8 +3320,21 @@ export default class VoltimaxChatPlugin extends Plugin {
                 }
             }
 
-            if (hasEmpty) {
-                return; // Don't submit with empty fields
+            if (hasEmpty || emailInvalid) {
+                confirmNotice.textContent = emailInvalid
+                    ? 'Bitte gib eine g\u00fcltige E-Mail-Adresse ein (z.B. name@beispiel.de).'
+                    : 'Bitte f\u00fclle alle Felder aus \u2014 siehe rote Markierung.';
+                confirmNotice.style.display = 'block';
+                return;
+            }
+            confirmNotice.style.display = 'none';
+
+            // A dead connection would silently swallow the submission while
+            // the form showed an eternal "Wird gesendet \u2026" spinner
+            if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+                confirmNotice.textContent = 'Verbindung unterbrochen \u2014 bitte lade die Seite neu und sende das Formular danach erneut.';
+                confirmNotice.style.display = 'block';
+                return;
             }
 
             // Disable buttons, show loading
@@ -3314,18 +3343,28 @@ export default class VoltimaxChatPlugin extends Plugin {
             confirmBtn.textContent = 'Wird gesendet \u2026';
             card.dataset.state = 'submitting';
 
-            if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-                this.ws.send(JSON.stringify({
-                    type: 'confirm_action',
-                    action: confirmation.action,
-                    fields: fields,
-                }));
-            }
+            this.ws.send(JSON.stringify({
+                type: 'confirm_action',
+                action: confirmation.action,
+                fields: fields,
+            }));
 
             if (confirmation.action === 'create_ticket') {
                 // Ack-driven: 'confirmation_done' carries the real ticket number;
                 // 'error' re-enables the form instead of faking success.
                 this._pendingConfirmCard = card;
+                // No ack within 20s → reopen honestly instead of spinning forever
+                if (this._confirmAckTimer) clearTimeout(this._confirmAckTimer);
+                this._confirmAckTimer = setTimeout(() => {
+                    if (this._pendingConfirmCard === card && card.dataset.state === 'submitting') {
+                        this._pendingConfirmCard = null;
+                        card.dataset.state = 'live';
+                        card.querySelectorAll('input, textarea, select, button').forEach(function(el) { el.disabled = false; });
+                        confirmBtn.textContent = 'Best\u00e4tigen \u2192';
+                        confirmNotice.textContent = 'Keine Best\u00e4tigung vom Server erhalten \u2014 bitte sende das Formular erneut.';
+                        confirmNotice.style.display = 'block';
+                    }
+                }, 20000);
             } else {
                 // Other actions have no ack channel \u2014 optimistic receipt
                 setTimeout(() => {
@@ -3337,6 +3376,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         actions.appendChild(cancelBtn);
         actions.appendChild(confirmBtn);
         card.appendChild(actions);
+        card.appendChild(confirmNotice);
 
         return card;
     }
