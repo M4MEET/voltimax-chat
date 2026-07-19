@@ -62,7 +62,7 @@
                     page: window.location.pathname,
                     ts: Date.now()
                 };
-                document.cookie = 'groot_attribution=' + encodeURIComponent(JSON.stringify(attr)) + ';path=/;max-age=1800;SameSite=Lax';
+                document.cookie = 'groot_attribution=' + encodeURIComponent(JSON.stringify(attr)) + ';path=/;max-age=86400;SameSite=Lax';
                 try { sessionStorage.setItem('groot_attribution', JSON.stringify(attr)); } catch(e){}
             }
         })();

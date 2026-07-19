@@ -504,7 +504,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 product_price: link.product_price || 0,
                 ts: Date.now(),
             });
-            document.cookie = 'groot_attribution=' + encodeURIComponent(attr) + ';path=/;max-age=1800;SameSite=Lax';
+            document.cookie = 'groot_attribution=' + encodeURIComponent(attr) + ';path=/;max-age=86400;SameSite=Lax';
         } catch (e) { /* silent */ }
     }
 

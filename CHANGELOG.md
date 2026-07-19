@@ -7,6 +7,21 @@
 > repository (also reported by its `/health` endpoint). CI enforces this for
 > all versions after 2.9.1.
 
+## 2.12.0
+
+**Backend:** requires voltimax-ai-service >= v1.3.0
+
+### Changed
+- Purchase-attribution window extended from 30 minutes to 24 hours: the
+  `groot_attribution` cookie (set on product clicks in the chat and on
+  arrival via `groot_ref` links) and the checkout-finish staleness check
+  now both use 24 h. Battery buyers compare prices and come back — a
+  30-minute window missed most chat-influenced purchases.
+- Pairs with backend GrootBot affiliate links: all product URLs handed out
+  by Groot now carry `affiliateCode=GrootBot`, which Shopware natively
+  persists onto the order — attribution visible directly in the admin
+  order list, independent of any cookie.
+
 ## 2.11.3
 
 **Backend:** requires voltimax-ai-service >= v1.3.0

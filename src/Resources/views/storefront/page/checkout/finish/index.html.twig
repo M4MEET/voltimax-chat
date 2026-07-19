@@ -25,7 +25,7 @@
 
             var attr = JSON.parse(attrRaw);
             // Only attribute if the click was within the last 30 minutes
-            if (attr.ts && (Date.now() - attr.ts) > 1800000) return;
+            if (attr.ts && (Date.now() - attr.ts) > 86400000) return; // 24h attribution window
 
             var conversionData = {
                 groot_ref: attr.ref || 'chat',
