@@ -58,8 +58,23 @@ export default class VoltimaxChatPlugin extends Plugin {
         document.addEventListener('visibilitychange', reclaimIfYielded);
         window.addEventListener('focus', reclaimIfYielded);
 
-        // Save session before page navigation so chat survives
+        // Save session before page navigation so chat survives.
+        // beforeunload is UNRELIABLE on mobile (iOS Safari often skips it,
+        // discarded background tabs never fire it) — visibilitychange:hidden
+        // and pagehide are the signals phones actually deliver (#074FE50B:
+        // BatteryFinder results vanished after a product click on mobile).
         window.addEventListener('beforeunload', () => {
+            if (this.state === 'CHATTING' && this._sessionId) {
+                this._saveSession();
+            }
+        });
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'hidden'
+                && this.state === 'CHATTING' && this._sessionId) {
+                this._saveSession();
+            }
+        });
+        window.addEventListener('pagehide', () => {
             if (this.state === 'CHATTING' && this._sessionId) {
                 this._saveSession();
             }
@@ -73,8 +88,13 @@ export default class VoltimaxChatPlugin extends Plugin {
         });
         document.addEventListener('click', (e) => {
             var link = e.target.closest('a[href]');
-            if (link && link.hostname === window.location.hostname && !link.target && this.state === 'CHATTING' && this._sessionId) {
+            if (link && link.hostname === window.location.hostname && this.state === 'CHATTING' && this._sessionId) {
                 this._saveSession();
+                // Links inside the chat (cards AND inline text links) collapse
+                // the widget on mobile so the target page is actually visible.
+                if (link.closest('.voltimax-chat-widget')) {
+                    this._collapseForNavigation();
+                }
             }
         }, true);
 
@@ -85,6 +105,16 @@ export default class VoltimaxChatPlugin extends Plugin {
     // The session lives in localStorage so the conversation follows the
     // customer into new tabs (product links open _blank). Cross-tab socket
     // ownership is handled in the "connection ownership" section below.
+
+    _scheduleSave() {
+        // Debounced write-through: every new message/card lands in storage
+        // within half a second, so a discarded mobile tab loses nothing.
+        var self = this;
+        clearTimeout(this._saveTimer);
+        this._saveTimer = setTimeout(function() {
+            if (self.state === 'CHATTING' && self._sessionId) self._saveSession();
+        }, 400);
+    }
 
     _saveSession() {
         // A yielded tab mirrors the owner's transcript — it must never write
@@ -506,6 +536,21 @@ export default class VoltimaxChatPlugin extends Plugin {
             });
             document.cookie = 'groot_attribution=' + encodeURIComponent(attr) + ';path=/;max-age=86400;SameSite=Lax';
         } catch (e) { /* silent */ }
+        this._collapseForNavigation();
+    }
+
+    _collapseForNavigation() {
+        // Mobile: the widget is (near) fullscreen — after a product click it
+        // must get out of the way. Minimize to the bubble and persist that
+        // state so BOTH the product page and a return to this tab restore
+        // collapsed (#074FE50B). Desktop keeps the side panel open.
+        if (window.innerWidth >= 768) return;
+        this._minimized = true;
+        var widget = document.querySelector('.voltimax-chat-widget');
+        if (widget) widget.style.display = 'none';
+        var bubble = document.querySelector('.voltimax-chat-bubble');
+        if (bubble) bubble.style.display = '';
+        if (this.state === 'CHATTING' && this._sessionId) this._saveSession();
     }
 
     // ── Config + bubble ───────────────────────────────────────────────────────
@@ -2340,6 +2385,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
                 if (!this._restoring) {
                     this._history.push({ kind: 'ai_card', text: data.content || '', card: data.info_card || null });
+                    this._scheduleSave();
                     if (this._history.length > 60) this._history.shift();
                 }
 
@@ -2781,6 +2827,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         if (!this._restoring && fullText) {
             this._history.push({ kind: 'ai', text: fullText });
+                    this._scheduleSave();
             if (this._history.length > 60) this._history.shift();
         }
         this._saveSession();
@@ -2813,6 +2860,7 @@ export default class VoltimaxChatPlugin extends Plugin {
         // Record for session restore (structured — no innerHTML round-trips)
         if (!this._restoring && content) {
             this._history.push({ kind: sender === 'user' ? 'user' : 'ai', text: content });
+                    this._scheduleSave();
             if (this._history.length > 60) this._history.shift();
         }
 
@@ -3578,6 +3626,7 @@ export default class VoltimaxChatPlugin extends Plugin {
 
         if (!this._restoring && card) {
             this._history.push({ kind: 'card', card: card });
+                    this._scheduleSave();
             if (this._history.length > 60) this._history.shift();
         }
 
@@ -4059,6 +4108,53 @@ export default class VoltimaxChatPlugin extends Plugin {
                         self._showVerifyingCard(/ticket/i.test(lookupField)
                             ? 'Ticket wird gepr\u00fcft \u2026'
                             : 'Bestellung wird \u00fcberpr\u00fcft \u2026');
+                    }
+                    if (lookupField === 'compatibility_check') {
+                        // Collapse the tall finder form into a compact summary —
+                        // the results card follows right below, and 'Anderes
+                        // Fahrzeug pr\u00fcfen' brings a fresh finder back.
+                        var summaryCard = {
+                            card_type: 'dynamic',
+                            style: 'blue',
+                            icon: '\uD83D\uDE97',
+                            title: 'Deine Fahrzeug-Suche',
+                            description: values.vehicle_name || 'Fahrzeug gew\u00e4hlt',
+                            actions: ['Anderes Fahrzeug pr\u00fcfen'],
+                        };
+                        var replacementEl = self._buildInfoCardDOM(summaryCard);
+                        // The form card sits inside a .vtx-input-prompt wrapper
+                        // that the results-card render sweeps away — replace the
+                        // WRAPPER, or the summary vanishes with it.
+                        var swapTarget = el.closest('.vtx-input-prompt') || el;
+                        if (replacementEl && swapTarget.parentNode) {
+                            swapTarget.parentNode.replaceChild(replacementEl, swapTarget);
+                        }
+                        // The finder frame can be rendered more than once —
+                        // sweep every remaining select-bearing finder card so
+                        // exactly one compact summary stays.
+                        document.querySelectorAll('.voltimax-chat-widget .vtx-info-card').forEach(function(cardEl) {
+                            if (cardEl !== replacementEl
+                                && cardEl.querySelector('select')
+                                && /Kompatibilit\u00e4t/.test(cardEl.textContent)) {
+                                var row = cardEl.closest('.voltimax-chat-ai-row');
+                                cardEl.remove();
+                                // drop the row only when nothing else lives in it
+                                if (row && !row.querySelector('.vtx-info-card') && !row.textContent.trim()) {
+                                    row.remove();
+                                }
+                            }
+                        });
+                        // Swap the stored form card too, so a restore replays
+                        // the summary instead of an empty finder form.
+                        for (var hi = self._history.length - 1; hi >= 0; hi--) {
+                            var hEntry = self._history[hi];
+                            var hForm = hEntry && hEntry.card && hEntry.card.form;
+                            if (hForm && String(hForm.field || (hForm.fields && hForm.fields[0] && hForm.fields[0].name) || '') === 'compatibility_check') {
+                                self._history[hi] = { kind: 'card', card: summaryCard };
+                                break;
+                            }
+                        }
+                        self._scheduleSave();
                     }
                 }
                 setTimeout(function() { submitBtn.disabled = false; submitBtn.textContent = c.form.submit_label || 'Submit'; }, 8000);

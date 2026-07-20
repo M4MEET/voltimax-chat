@@ -7,6 +7,27 @@
 > repository (also reported by its `/health` endpoint). CI enforces this for
 > all versions after 2.9.1.
 
+## 2.13.0
+
+**Backend:** requires voltimax-ai-service >= v1.3.0
+
+### Fixed
+- Mobile: clicking a product link in the chat now collapses the widget to
+  the bubble (and the product page opens with the chat collapsed too) — it
+  no longer covers the whole page until manually closed (#074FE50B).
+- Mobile: the conversation (incl. BatteryFinder results and product cards)
+  no longer disappears after navigating to a product. The widget now saves
+  its state on `visibilitychange`/`pagehide` (the events phones actually
+  fire — `beforeunload` is unreliable there), on clicks of `target="_blank"`
+  product links (previously excluded), and continuously within 0.5 s of
+  every new message or card.
+
+### Changed
+- BatteryFinder: after submitting, the tall select-form collapses into a
+  compact "Deine Fahrzeug-Suche: <Fahrzeug>" summary card directly above
+  the results, with an "Anderes Fahrzeug prüfen" button for a fresh search.
+  A restored conversation shows the summary, never an empty form.
+
 ## 2.12.0
 
 **Backend:** requires voltimax-ai-service >= v1.3.0
