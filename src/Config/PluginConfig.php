@@ -51,6 +51,16 @@ class PluginConfig
         return $this->get('logoMediaId', $salesChannelId);
     }
 
+    public function isAgentImageEnabled(?string $salesChannelId = null): bool
+    {
+        return (bool) ($this->get('agentImageEnabled', $salesChannelId) ?? false);
+    }
+
+    public function getAgentImageMediaId(?string $salesChannelId = null): ?string
+    {
+        return $this->get('agentImageMediaId', $salesChannelId);
+    }
+
     public function getWidgetTitle(?string $salesChannelId = null): string
     {
         return $this->get('widgetTitle', $salesChannelId) ?? 'GrootDesk Support';

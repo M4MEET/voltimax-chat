@@ -736,3 +736,61 @@
     92% { transform: translateX(-2px) rotate(-0.8deg); }
     94% { transform: translateX(0) rotate(0); }
 }
+
+// ── Agent picture above the launcher (config: agentImageEnabled) ─────────────
+// Lives inside .voltimax-chat-bubble so it inherits every show/hide state.
+// Desktop/tablet only — phones keep the plain pill.
+.voltimax-chat-agent {
+    display: block;
+    width: 104px;
+    height: 122px; // portrait frame — landscape uploads are center-cropped
+    margin-left: auto; // right-aligned above the pill (bottom-right default)
+    margin-bottom: 10px;
+    border-radius: 18px;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18), 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.25s ease;
+
+    &:hover { transform: translateY(-2px) scale(1.02); }
+
+    img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+
+    .voltimax-chat-bubble--bottom-left & { margin-left: 0; margin-right: auto; }
+
+    @media (max-width: 767px) { display: none; }
+}
+
+// Teaser beside the agent picture: left of it, tail pointing right
+.voltimax-chat-teaser--with-agent {
+    bottom: calc(#{$vtx-bottom-offset} + 48px + 12px + 46px);
+
+    &.voltimax-chat-teaser--bottom-right { right: calc(#{$vtx-spacing} + 4px + 104px + 14px); }
+    &.voltimax-chat-teaser--bottom-left  { left:  calc(#{$vtx-spacing} + 4px + 104px + 14px); }
+
+    &::after {
+        bottom: auto;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 6px solid transparent;
+        border-top-color: transparent;
+    }
+    &.voltimax-chat-teaser--bottom-right::after { right: -12px; left: auto; border-left-color: #fff; }
+    &.voltimax-chat-teaser--bottom-left::after  { left: -12px; right: auto; border-right-color: #fff; }
+
+    // Phones: picture is hidden — fall back to the default teaser spot
+    @media (max-width: 767px) {
+        bottom: calc(#{$vtx-bottom-offset} + 48px + 12px);
+        &.voltimax-chat-teaser--bottom-right { right: calc(#{$vtx-spacing} + 4px); }
+        &.voltimax-chat-teaser--bottom-left  { left:  calc(#{$vtx-spacing} + 4px); }
+        &::after {
+            top: auto;
+            bottom: -12px;
+            transform: none;
+            border: 6px solid transparent;
+            border-top-color: #fff;
+        }
+        &.voltimax-chat-teaser--bottom-right::after { right: 22px; left: auto; }
+        &.voltimax-chat-teaser--bottom-left::after  { left: 22px; right: auto; }
+    }
+}

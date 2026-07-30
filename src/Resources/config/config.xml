@@ -105,6 +105,23 @@
             <helpText lang="de-DE">Optionale Akzentfarbe. Das aktuelle Design nutzt die Primärfarbe als einheitliche Markenfläche.</helpText>
         </input-field>
 
+        <input-field type="bool">
+            <name>agentImageEnabled</name>
+            <label>Show agent picture above the chat button</label>
+            <label lang="de-DE">Agent-Bild über dem Chat-Button anzeigen</label>
+            <defaultValue>false</defaultValue>
+            <helpText>Shows the picture below on desktop and tablet (hidden on phones). The teaser bubble moves to the left of the picture.</helpText>
+            <helpText lang="de-DE">Zeigt das Bild unten auf Desktop und Tablet (auf Smartphones ausgeblendet). Die Teaser-Blase wandert links neben das Bild.</helpText>
+        </input-field>
+
+        <component name="sw-media-field">
+            <name>agentImageMediaId</name>
+            <label>Agent picture</label>
+            <label lang="de-DE">Agent-Bild</label>
+            <helpText>Picture shown above the chat button (e.g. a support agent photo). Recommended: portrait, transparent or white background.</helpText>
+            <helpText lang="de-DE">Bild über dem Chat-Button (z. B. Foto einer Support-Mitarbeiterin). Empfohlen: Hochformat, transparenter oder weißer Hintergrund.</helpText>
+        </component>
+
         <component name="sw-media-field">
             <name>logoMediaId</name>
             <label>Groot Avatar / Logo</label>

@@ -54,10 +54,29 @@ class ChatWidgetController extends AbstractController
             }
         }
 
+        // Resolve agent picture (shown above the chat button on desktop/tablet)
+        $agentImageUrl = null;
+        if ($this->config->isAgentImageEnabled()) {
+            $agentMediaId = $this->config->getAgentImageMediaId();
+            if ($agentMediaId) {
+                try {
+                    $criteria = new Criteria([$agentMediaId]);
+                    /** @var MediaEntity|null $media */
+                    $media = $this->mediaRepository->search($criteria, \Shopware\Core\Framework\Context::createDefaultContext())->first();
+                    if ($media) {
+                        $agentImageUrl = $media->getUrl();
+                    }
+                } catch (\Throwable $e) {
+                    // Agent image lookup failed — widget simply shows no picture
+                }
+            }
+        }
+
         return new JsonResponse([
             'enabled' => true,
             'serverBUrl' => $this->config->getServerBUrl(),
             'logoUrl' => $logoUrl,
+            'agentImageUrl' => $agentImageUrl,
             'primaryColor' => $this->config->getPrimaryColor(),
             'secondaryColor' => $this->config->getSecondaryColor(),
             'widgetPosition' => $this->config->getWidgetPosition(),

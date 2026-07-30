@@ -656,6 +656,22 @@ export default class VoltimaxChatPlugin extends Plugin {
         badge.textContent = '0';
 
         btn.addEventListener('click', () => this._onBubbleClick());
+
+        // Agent picture above the launcher (plugin config: agentImageEnabled +
+        // agentImageMediaId). Lives INSIDE the bubble wrapper so it inherits
+        // every show/hide state. CSS hides it below 768px (desktop/tablet only).
+        if (this.config.agentImageUrl) {
+            var agent = document.createElement('div');
+            agent.className = 'voltimax-chat-agent';
+            var agentImg = document.createElement('img');
+            agentImg.src = this.config.agentImageUrl;
+            agentImg.alt = 'Support';
+            agentImg.loading = 'lazy';
+            agent.appendChild(agentImg);
+            agent.addEventListener('click', () => this._onBubbleClick());
+            bubble.appendChild(agent);
+        }
+
         bubble.appendChild(btn);
         // On the wrapper, NOT the button: the button clips overflow (shimmer
         // effect), which cut the badge to a sliver.
@@ -680,6 +696,11 @@ export default class VoltimaxChatPlugin extends Plugin {
             var teaser = document.createElement('div');
             var pos = self.config && self.config.widgetPosition === 'bottom-left' ? 'bottom-left' : 'bottom-right';
             teaser.className = 'voltimax-chat-teaser voltimax-chat-teaser--' + pos;
+            // With the agent picture active (desktop/tablet), the teaser sits
+            // to the LEFT of the picture instead of above the pill.
+            if (self.config && self.config.agentImageUrl && window.innerWidth >= 768) {
+                teaser.className += ' voltimax-chat-teaser--with-agent';
+            }
             teaser.setAttribute('role', 'button');
             teaser.setAttribute('tabindex', '0');
             teaser.setAttribute('aria-label', 'Chat \u00f6ffnen: Hast du eine Frage?');
@@ -4250,11 +4271,22 @@ export default class VoltimaxChatPlugin extends Plugin {
             fileLabel.style.cssText = 'display:block;font-size:12px;font-weight:600;color:#57534e;margin-bottom:4px';
             fileLabel.textContent = 'PDF hochladen oder hierher ziehen *';
             fileRow.appendChild(fileLabel);
+            var fileHint = document.createElement('div');
+            fileHint.style.cssText = 'font-size:11px;color:#78716c;margin-bottom:6px;line-height:1.4';
+            fileHint.textContent = 'Nur PDF \u00b7 max. 20 MB \u00b7 eine Datei pro \u00dcbermittlung. Tipp: Foto vom Nachweis? Die Scan-Funktion deines Handys (z. B. iPhone Notizen \u2192 Dokumente scannen) erstellt daraus ein PDF.';
+            fileRow.appendChild(fileHint);
             var fileInput = document.createElement('input');
             fileInput.type = 'file';
             fileInput.accept = '.pdf';
             fileInput.style.cssText = 'display:block;width:100%;font-size:12px;padding:6px;border:1px solid #e0ddd7;border-radius:6px;background:#faf9f7';
             fileRow.appendChild(fileInput);
+            // PDF-only: reject wrong formats the moment they are picked or
+            // dropped (the .pdf accept filter is advisory only — Android
+            // pickers and drag & drop bypass it). #7617F16E
+            var vtxIsPdf = function(f) {
+                return f && f.name && f.name.toLowerCase().endsWith('.pdf');
+            };
+            var vtxPdfOnlyMsg = 'Wir akzeptieren nur PDF-Dateien \u2014 bitte versuche es erneut mit einer PDF (max. 20 MB).';
             // Drag & drop support
             fileRow.addEventListener('dragover', function(e) {
                 e.preventDefault();
@@ -4270,6 +4302,10 @@ export default class VoltimaxChatPlugin extends Plugin {
                 fileInput.style.borderColor = '#e0ddd7';
                 fileInput.style.background = '#faf9f7';
                 if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length) {
+                    if (!vtxIsPdf(e.dataTransfer.files[0])) {
+                        showFieldError('file', vtxPdfOnlyMsg);
+                        return;
+                    }
                     fileInput.files = e.dataTransfer.files;
                     fileInput.dispatchEvent(new Event('change', { bubbles: true }));
                 }
@@ -4376,7 +4412,17 @@ export default class VoltimaxChatPlugin extends Plugin {
                 var el = textInputs[key];
                 if (el && el.addEventListener) { el.addEventListener('input', function() { clearFieldError(key); }); }
             });
-            fileInput.addEventListener('change', function() { clearFieldError('file'); if (typeof submitNotice !== 'undefined') submitNotice.style.display = 'none'; });
+            fileInput.addEventListener('change', function() {
+                // PDF-only: a wrong-format pick shows the warning INSTEAD of
+                // the usual clear-on-edit (which would immediately hide it).
+                if (fileInput.files && fileInput.files[0] && !vtxIsPdf(fileInput.files[0])) {
+                    fileInput.value = '';
+                    showFieldError('file', vtxPdfOnlyMsg);
+                    return;
+                }
+                clearFieldError('file');
+                if (typeof submitNotice !== 'undefined') submitNotice.style.display = 'none';
+            });
 
             // Submit button
             var submitBtn = document.createElement('button');
@@ -4394,6 +4440,7 @@ export default class VoltimaxChatPlugin extends Plugin {
                 var errKeys = [];
                 if (!selectedType.value) { showFieldError('form_type', 'Bitte w\u00e4hle ein Formular aus.'); errKeys.push('form_type'); }
                 if (!fileInput.files || !fileInput.files[0]) { showFieldError('file', 'Bitte lade eine PDF-Datei hoch.'); errKeys.push('file'); }
+                else if (!vtxIsPdf(fileInput.files[0])) { showFieldError('file', vtxPdfOnlyMsg); errKeys.push('file'); }
                 else if (fileInput.files[0].size > 20 * 1024 * 1024) { showFieldError('file', 'Die Datei ist zu gro\u00df (max. 20 MB). Bitte verkleinere das PDF oder sende es an info@voltimax.de.'); errKeys.push('file'); }
                 var nameVal = (textInputs['customer_name'] && textInputs['customer_name'].value) ? textInputs['customer_name'].value.trim() : '';
                 if (!nameVal) { showFieldError('customer_name', 'Bitte gib deinen Namen ein.'); errKeys.push('customer_name'); }
@@ -4468,6 +4515,12 @@ export default class VoltimaxChatPlugin extends Plugin {
                         doneText.style.cssText = 'color:#16a34a;font-weight:600;font-size:14px;margin-bottom:12px';
                         doneText.textContent = 'Batteriepfand eingereicht!';
                         done.appendChild(doneText);
+                        if (result.note) {
+                            var noteText = document.createElement('div');
+                            noteText.style.cssText = 'color:#57534e;font-size:12px;margin-bottom:12px';
+                            noteText.textContent = result.note;
+                            done.appendChild(noteText);
+                        }
 
                         var ticketRow = document.createElement('div');
                         ticketRow.style.cssText = 'display:inline-flex;align-items:center;gap:8px;padding:8px 14px;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px';

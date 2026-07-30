@@ -7,6 +7,27 @@
 > repository (also reported by its `/health` endpoint). CI enforces this for
 > all versions after 2.9.1.
 
+## 2.14.0
+
+**Backend:** requires voltimax-ai-service >= v1.3.0
+
+### Added
+- Agent picture above the chat button (plugin config: "Agent-Bild anzeigen"
+  toggle + media selector). Shown on desktop and tablet only; landscape
+  uploads are center-cropped into a portrait frame; the "Hast du eine
+  Frage?" teaser moves to the left of the picture. Clicking the picture
+  opens the chat.
+
+### Fixed
+- Batteriepfand upload (PDF-only, now clearly communicated): upfront hint
+  "Nur PDF · max. 20 MB · eine Datei pro Übermittlung" with a phone-scan
+  tip; picking or dropping a non-PDF shows an instant warning ("Wir
+  akzeptieren nur PDF-Dateien — bitte versuche es erneut mit einer PDF")
+  instead of failing silently — previously the .pdf picker filter left
+  mobile customers stuck with no explanation (#7617F16E), and drag & drop
+  bypassed the filter entirely. Success screen invites submitting further
+  Nachweise (one PDF per submission, #1496F6FB).
+
 ## 2.13.0
 
 **Backend:** requires voltimax-ai-service >= v1.3.0
