@@ -17,7 +17,10 @@
         height: $vtx-bubble-size;
         border-radius: 50%;
         border: none;
-        background: var(--vtx-primary, #b0703a);
+        // Launcher pill: warm orange gradient — noticeably punchier than the
+        // amber accent, matches the voltimax brand orange. Other widget
+        // accents keep --vtx-primary.
+        background: linear-gradient(135deg, var(--vtx-launcher-light, #F08A3C), var(--vtx-launcher-dark, #E8702A));
         color: #fff;
         cursor: pointer;
         display: flex;
