@@ -449,11 +449,13 @@ $g-btn-ink-hover: #1c140b;
     border-radius: 999px;
     gap: 9px;
     color: #231a10;
+    // Warm launcher orange (was --vtx-primary amber) — the drift animation
+    // shimmers between full orange and a lighter mid-stop.
     background: linear-gradient(
         100deg,
-        color-mix(in srgb, var(--vtx-primary, #d99a4e) 88%, #fff) 0%,
-        color-mix(in srgb, var(--vtx-primary, #d99a4e) 30%, #fff) 50%,
-        color-mix(in srgb, var(--vtx-primary, #d99a4e) 88%, #fff) 100%
+        color-mix(in srgb, var(--vtx-launcher, #E8702A) 90%, #fff) 0%,
+        color-mix(in srgb, var(--vtx-launcher, #E8702A) 50%, #fff) 50%,
+        color-mix(in srgb, var(--vtx-launcher, #E8702A) 90%, #fff) 100%
     );
     // Oversized gradient so it can drift left↔right across the pill
     background-size: 250% 100%;

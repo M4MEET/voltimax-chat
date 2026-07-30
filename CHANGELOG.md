@@ -7,6 +7,16 @@
 > repository (also reported by its `/health` endpoint). CI enforces this for
 > all versions after 2.9.1.
 
+## 2.14.1
+
+**Backend:** requires voltimax-ai-service >= v1.3.0
+
+### Fixed
+- The orange launcher color from 2.14.0 was overridden by the GrootDesk
+  pill's animated drift gradient (built from the amber primary) — the
+  drift gradient itself now uses the launcher orange, so the "Chat mit
+  uns" pill actually shows orange with the shimmer animation intact.
+
 ## 2.14.0
 
 **Backend:** requires voltimax-ai-service >= v1.3.0
