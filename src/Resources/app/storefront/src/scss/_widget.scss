@@ -742,10 +742,11 @@
 // Desktop/tablet only — phones keep the plain pill.
 .voltimax-chat-agent {
     display: block;
-    width: 104px;
-    height: 122px; // portrait frame — landscape uploads are center-cropped
-    margin-left: auto; // right-aligned above the pill (bottom-right default)
-    margin-bottom: 10px;
+    width: 92px;
+    height: 100px; // portrait frame — landscape uploads are center-cropped
+    margin: 0 auto -14px; // centered over the pill, bottom edge tucked BEHIND it
+    position: relative;
+    z-index: 0; // the launcher pill overlaps the picture's bottom edge
     border-radius: 18px;
     overflow: hidden;
     cursor: pointer;
@@ -756,9 +757,13 @@
 
     img { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center top; }
 
-    .voltimax-chat-bubble--bottom-left & { margin-left: 0; margin-right: auto; }
-
     @media (max-width: 767px) { display: none; }
+}
+
+// keep the pill above the tucked-under picture
+.voltimax-chat-bubble__button {
+    position: relative;
+    z-index: 1;
 }
 
 // Teaser beside the agent picture: left of it, tail pointing right
