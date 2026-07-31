@@ -4,12 +4,22 @@ namespace Voltimax\Chat\Service;
 
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
+use Voltimax\Chat\Util\CriteriaFactory;
 
 class OrderDataService
 {
+    private const ASSOCIATIONS = [
+        'lineItems',
+        'deliveries.shippingMethod',
+        'deliveries.stateMachineState',
+        'stateMachineState',
+        'transactions.stateMachineState',
+        'transactions.paymentMethod',
+        'addresses',
+        'orderCustomer',
+    ];
+
     private EntityRepository $orderRepository;
 
     public function __construct(EntityRepository $orderRepository)
@@ -19,20 +29,10 @@ class OrderDataService
 
     public function getByOrderNumber(string $orderNumber, Context $context, ?string $customerEmail = null): ?array
     {
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('orderNumber', $orderNumber));
-        if ($customerEmail !== null && $customerEmail !== '') {
-            $criteria->addFilter(new EqualsFilter('orderCustomer.email', $customerEmail));
-        }
-        $criteria->addAssociation('lineItems');
-        $criteria->addAssociation('deliveries.shippingMethod');
-        $criteria->addAssociation('deliveries.stateMachineState');
-        $criteria->addAssociation('stateMachineState');
-        $criteria->addAssociation('transactions.stateMachineState');
-        $criteria->addAssociation('transactions.paymentMethod');
-        $criteria->addAssociation('addresses');
-        $criteria->addAssociation('orderCustomer');
-        $criteria->setLimit(1);
+        $criteria = CriteriaFactory::forEquals([
+            'orderNumber' => $orderNumber,
+            'orderCustomer.email' => $customerEmail === '' ? null : $customerEmail,
+        ], 1, self::ASSOCIATIONS);
 
         $order = $this->orderRepository->search($criteria, $context)->first();
         return $order ? $this->format($order) : null;
@@ -40,16 +40,11 @@ class OrderDataService
 
     public function getByCustomerId(string $customerId, Context $context, int $limit = 5): array
     {
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('orderCustomer.customerId', $customerId));
-        $criteria->addAssociation('lineItems');
-        $criteria->addAssociation('deliveries.shippingMethod');
-        $criteria->addAssociation('deliveries.stateMachineState');
-        $criteria->addAssociation('stateMachineState');
-        $criteria->addAssociation('transactions.stateMachineState');
-        $criteria->addAssociation('transactions.paymentMethod');
-        $criteria->addAssociation('addresses');
-        $criteria->addAssociation('orderCustomer');
+        $criteria = CriteriaFactory::forEquals(
+            ['orderCustomer.customerId' => $customerId],
+            null,
+            self::ASSOCIATIONS
+        );
         $criteria->addSorting(new FieldSorting('orderDateTime', FieldSorting::DESCENDING));
         $criteria->setLimit($limit);
 
@@ -59,9 +54,7 @@ class OrderDataService
     public function getReturns(string $orderNumber, Context $context): array
     {
         // First find the order by order number to confirm it exists
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('orderNumber', $orderNumber));
-        $criteria->setLimit(1);
+        $criteria = CriteriaFactory::forEquals(['orderNumber' => $orderNumber], 1);
 
         $order = $this->orderRepository->search($criteria, $context)->first();
         if ($order === null) {

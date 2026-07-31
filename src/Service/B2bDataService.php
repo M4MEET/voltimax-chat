@@ -4,8 +4,7 @@ namespace Voltimax\Chat\Service;
 
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Voltimax\Chat\Util\CriteriaFactory;
 
 class B2bDataService
 {
@@ -20,8 +19,7 @@ class B2bDataService
 
     public function getB2bContext(string $customerId, Context $context): array
     {
-        $criteria = new Criteria([$customerId]);
-        $criteria->addAssociation('group');
+        $criteria = CriteriaFactory::forIds([$customerId], ['group']);
 
         $customer = $this->customerRepository->search($criteria, $context)->first();
         if ($customer === null) {
@@ -48,24 +46,20 @@ class B2bDataService
      */
     public function getQuotes(string $email, string $salesChannelId, Context $context): array
     {
-        // Find customer by email
-        $customerCriteria = new Criteria();
-        $customerCriteria->addFilter(new EqualsFilter('email', $email));
-        $customerCriteria->addFilter(new EqualsFilter('salesChannelId', $salesChannelId));
-        $customerCriteria->setLimit(1);
-
-        $customer = $this->customerRepository->search($customerCriteria, $context)->first();
+        $customer = $this->findCustomerByEmail($email, $salesChannelId, $context);
         if ($customer === null) {
             return [];
         }
 
         // Return orders in open state as proxy for quotes
-        $orderCriteria = new Criteria();
-        $orderCriteria->addFilter(new EqualsFilter('orderCustomer.customerId', $customer->getId()));
-        $orderCriteria->addFilter(new EqualsFilter('stateMachineState.technicalName', 'open'));
-        $orderCriteria->addAssociation('stateMachineState');
-        $orderCriteria->addAssociation('lineItems');
-        $orderCriteria->setLimit(20);
+        $orderCriteria = CriteriaFactory::forEquals(
+            [
+                'orderCustomer.customerId' => $customer->getId(),
+                'stateMachineState.technicalName' => 'open',
+            ],
+            20,
+            ['stateMachineState', 'lineItems']
+        );
 
         $orders = $this->orderRepository->search($orderCriteria, $context);
 
@@ -94,21 +88,16 @@ class B2bDataService
     public function getEmployeeAccounts(string $email, string $salesChannelId, Context $context): array
     {
         // Find the requesting customer to get company name
-        $customerCriteria = new Criteria();
-        $customerCriteria->addFilter(new EqualsFilter('email', $email));
-        $customerCriteria->addFilter(new EqualsFilter('salesChannelId', $salesChannelId));
-        $customerCriteria->setLimit(1);
-
-        $customer = $this->customerRepository->search($customerCriteria, $context)->first();
+        $customer = $this->findCustomerByEmail($email, $salesChannelId, $context);
         if ($customer === null || $customer->getCompany() === null || $customer->getCompany() === '') {
             return [];
         }
 
         // Find other customers with the same company
-        $companyCriteria = new Criteria();
-        $companyCriteria->addFilter(new EqualsFilter('company', $customer->getCompany()));
-        $companyCriteria->addFilter(new EqualsFilter('salesChannelId', $salesChannelId));
-        $companyCriteria->setLimit(50);
+        $companyCriteria = CriteriaFactory::forEquals([
+            'company' => $customer->getCompany(),
+            'salesChannelId' => $salesChannelId,
+        ], 50);
 
         $employees = [];
         foreach ($this->customerRepository->search($companyCriteria, $context) as $emp) {
@@ -125,5 +114,15 @@ class B2bDataService
         }
 
         return $employees;
+    }
+
+    private function findCustomerByEmail(string $email, string $salesChannelId, Context $context)
+    {
+        $criteria = CriteriaFactory::forEquals([
+            'email' => $email,
+            'salesChannelId' => $salesChannelId,
+        ], 1);
+
+        return $this->customerRepository->search($criteria, $context)->first();
     }
 }

@@ -4,8 +4,7 @@ namespace Voltimax\Chat\Service;
 
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Voltimax\Chat\Util\CriteriaFactory;
 
 class CustomerDataService
 {
@@ -18,24 +17,18 @@ class CustomerDataService
 
     public function getByEmail(string $email, Context $context): ?array
     {
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('email', $email));
-        $criteria->addAssociation('defaultBillingAddress');
-        $criteria->addAssociation('group');
-        $criteria->setLimit(1);
+        $criteria = CriteriaFactory::forEquals(
+            ['email' => $email],
+            1,
+            ['defaultBillingAddress', 'group']
+        );
 
         $customer = $this->customerRepository->search($criteria, $context)->first();
         if ($customer === null) {
             return null;
         }
 
-        return [
-            'id' => $customer->getId(),
-            'email' => $customer->getEmail(),
-            'firstName' => $customer->getFirstName(),
-            'lastName' => $customer->getLastName(),
-            'customerNumber' => $customer->getCustomerNumber(),
-            'group' => $customer->getGroup()?->getName(),
+        return $this->format($customer) + [
             'createdAt' => $customer->getCreatedAt()?->format('Y-m-d'),
             'city' => $customer->getDefaultBillingAddress()?->getCity(),
         ];
@@ -43,11 +36,11 @@ class CustomerDataService
 
     public function getAddresses(string $email, Context $context): array
     {
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('email', $email));
-        $criteria->addAssociation('addresses');
-        $criteria->addAssociation('addresses.country');
-        $criteria->setLimit(1);
+        $criteria = CriteriaFactory::forEquals(
+            ['email' => $email],
+            1,
+            ['addresses', 'addresses.country']
+        );
 
         $customer = $this->customerRepository->search($criteria, $context)->first();
         if ($customer === null) {
@@ -73,15 +66,15 @@ class CustomerDataService
 
     public function getById(string $id, Context $context): ?array
     {
-        $criteria = new Criteria([$id]);
-        $criteria->addAssociation('defaultBillingAddress');
-        $criteria->addAssociation('group');
+        $criteria = CriteriaFactory::forIds([$id], ['defaultBillingAddress', 'group']);
 
         $customer = $this->customerRepository->search($criteria, $context)->first();
-        if ($customer === null) {
-            return null;
-        }
 
+        return $customer ? $this->format($customer) : null;
+    }
+
+    private function format($customer): array
+    {
         return [
             'id' => $customer->getId(),
             'email' => $customer->getEmail(),

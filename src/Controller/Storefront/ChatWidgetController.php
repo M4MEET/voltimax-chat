@@ -2,35 +2,26 @@
 
 namespace Voltimax\Chat\Controller\Storefront;
 
-use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Attribute\Route;
-use Shopware\Core\Content\Media\MediaEntity;
-use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Voltimax\Chat\Config\PluginConfig;
 use Voltimax\Chat\Security\RateLimitMiddleware;
+use Voltimax\Chat\Util\MediaUrlResolver;
 
 #[Route(defaults: ['_routeScope' => ['storefront'], 'XmlHttpRequest' => true])]
 class ChatWidgetController extends AbstractController
 {
     private PluginConfig $config;
     private RateLimitMiddleware $rateLimit;
-    private EntityRepository $mediaRepository;
-    private LoggerInterface $logger;
+    private MediaUrlResolver $mediaUrls;
 
-    public function __construct(
-        PluginConfig $config,
-        RateLimitMiddleware $rateLimit,
-        EntityRepository $mediaRepository,
-        LoggerInterface $logger
-    ) {
+    public function __construct(PluginConfig $config, RateLimitMiddleware $rateLimit, MediaUrlResolver $mediaUrls)
+    {
         $this->config = $config;
         $this->rateLimit = $rateLimit;
-        $this->mediaRepository = $mediaRepository;
-        $this->logger = $logger;
+        $this->mediaUrls = $mediaUrls;
     }
 
     #[Route(path: '/voltimax/config', name: 'voltimax.chat.config', methods: ['GET'])]
@@ -45,47 +36,14 @@ class ChatWidgetController extends AbstractController
             return new JsonResponse(['enabled' => false]);
         }
 
-        // Resolve logo media ID to URL
-        $logoUrl = null;
-        $logoMediaId = $this->config->getLogoMediaId();
-        if ($logoMediaId) {
-            try {
-                $criteria = new Criteria([$logoMediaId]);
-                /** @var MediaEntity|null $media */
-                $media = $this->mediaRepository->search($criteria, \Shopware\Core\Framework\Context::createDefaultContext())->first();
-                if ($media) {
-                    $logoUrl = $media->getUrl();
-                }
-            } catch (\Throwable $e) {
-                // Logo lookup failed — fall back to SVG, but record why.
-                $this->logger->warning('VoltimaxChat: failed to resolve logo media, falling back to SVG', [
-                    'mediaId'   => $logoMediaId,
-                    'exception' => $e,
-                ]);
-            }
-        }
+        // A failed media lookup leaves the URL null: the widget falls back to
+        // its SVG logo and simply shows no agent picture.
+        $logoUrl = $this->mediaUrls->resolve($this->config->getLogoMediaId(), 'logo');
 
-        // Resolve agent picture (shown above the chat button on desktop/tablet)
-        $agentImageUrl = null;
-        if ($this->config->isAgentImageEnabled()) {
-            $agentMediaId = $this->config->getAgentImageMediaId();
-            if ($agentMediaId) {
-                try {
-                    $criteria = new Criteria([$agentMediaId]);
-                    /** @var MediaEntity|null $media */
-                    $media = $this->mediaRepository->search($criteria, \Shopware\Core\Framework\Context::createDefaultContext())->first();
-                    if ($media) {
-                        $agentImageUrl = $media->getUrl();
-                    }
-                } catch (\Throwable $e) {
-                    // Agent image lookup failed — widget shows no picture, but record why.
-                    $this->logger->warning('VoltimaxChat: failed to resolve agent image media', [
-                        'mediaId'   => $agentMediaId,
-                        'exception' => $e,
-                    ]);
-                }
-            }
-        }
+        // Agent picture is shown above the chat button on desktop/tablet
+        $agentImageUrl = $this->config->isAgentImageEnabled()
+            ? $this->mediaUrls->resolve($this->config->getAgentImageMediaId(), 'agent image')
+            : null;
 
         return new JsonResponse([
             'enabled' => true,

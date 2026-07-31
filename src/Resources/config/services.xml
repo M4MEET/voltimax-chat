@@ -17,6 +17,12 @@
             <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
         </service>
 
+        <!-- Media URL Resolver -->
+        <service id="Voltimax\Chat\Util\MediaUrlResolver">
+            <argument type="service" id="media.repository"/>
+            <argument type="service" id="monolog.logger.voltimax_chat"/>
+        </service>
+
         <!-- JWT Token Service -->
         <service id="Voltimax\Chat\Service\JwtTokenService">
             <argument type="service" id="Voltimax\Chat\Config\PluginConfig"/>
@@ -59,8 +65,7 @@
         <service id="Voltimax\Chat\Controller\Storefront\ChatWidgetController" public="true">
             <argument type="service" id="Voltimax\Chat\Config\PluginConfig"/>
             <argument type="service" id="Voltimax\Chat\Security\RateLimitMiddleware"/>
-            <argument type="service" id="media.repository"/>
-            <argument type="service" id="monolog.logger.voltimax_chat"/>
+            <argument type="service" id="Voltimax\Chat\Util\MediaUrlResolver"/>
         </service>
 
         <service id="Voltimax\Chat\Controller\Api\DataProviderController" public="true">
@@ -90,7 +95,7 @@
             <argument type="service" id="cms_page.repository"/>
             <argument type="service" id="category.repository"/>
             <argument type="service" id="sales_channel.repository"/>
-            <argument type="service" id="Shopware\Core\System\SystemConfig\SystemConfigService"/>
+            <argument type="service" id="Voltimax\Chat\Config\PluginConfig"/>
         </service>
 
         <service id="Voltimax\Chat\Service\B2bDataService">

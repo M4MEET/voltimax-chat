@@ -20,6 +20,11 @@ class PluginConfig
         return (bool) $this->get('pluginEnabled', $salesChannelId);
     }
 
+    public function getSalesChannelId(): ?string
+    {
+        return $this->get('salesChannelId') ?: null;
+    }
+
     public function getServerBUrl(?string $salesChannelId = null): ?string
     {
         return $this->get('serverBUrl', $salesChannelId);
