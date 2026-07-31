@@ -2,6 +2,7 @@
 
 namespace Voltimax\Chat\Controller\Storefront;
 
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -18,12 +19,18 @@ class ChatWidgetController extends AbstractController
     private PluginConfig $config;
     private RateLimitMiddleware $rateLimit;
     private EntityRepository $mediaRepository;
+    private LoggerInterface $logger;
 
-    public function __construct(PluginConfig $config, RateLimitMiddleware $rateLimit, EntityRepository $mediaRepository)
-    {
+    public function __construct(
+        PluginConfig $config,
+        RateLimitMiddleware $rateLimit,
+        EntityRepository $mediaRepository,
+        LoggerInterface $logger
+    ) {
         $this->config = $config;
         $this->rateLimit = $rateLimit;
         $this->mediaRepository = $mediaRepository;
+        $this->logger = $logger;
     }
 
     #[Route(path: '/voltimax/config', name: 'voltimax.chat.config', methods: ['GET'])]
@@ -50,7 +57,11 @@ class ChatWidgetController extends AbstractController
                     $logoUrl = $media->getUrl();
                 }
             } catch (\Throwable $e) {
-                // Logo lookup failed — fallback to SVG
+                // Logo lookup failed — fall back to SVG, but record why.
+                $this->logger->warning('VoltimaxChat: failed to resolve logo media, falling back to SVG', [
+                    'mediaId'   => $logoMediaId,
+                    'exception' => $e,
+                ]);
             }
         }
 
@@ -67,7 +78,11 @@ class ChatWidgetController extends AbstractController
                         $agentImageUrl = $media->getUrl();
                     }
                 } catch (\Throwable $e) {
-                    // Agent image lookup failed — widget simply shows no picture
+                    // Agent image lookup failed — widget shows no picture, but record why.
+                    $this->logger->warning('VoltimaxChat: failed to resolve agent image media', [
+                        'mediaId'   => $agentMediaId,
+                        'exception' => $e,
+                    ]);
                 }
             }
         }

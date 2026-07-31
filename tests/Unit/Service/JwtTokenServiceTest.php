@@ -3,6 +3,7 @@
 namespace Voltimax\Chat\Tests\Unit\Service;
 
 use PHPUnit\Framework\TestCase;
+use Voltimax\Chat\Config\PluginConfig;
 use Voltimax\Chat\Service\JwtTokenService;
 
 class JwtTokenServiceTest extends TestCase
@@ -57,5 +58,58 @@ class JwtTokenServiceTest extends TestCase
         $token = $this->service->create(['email' => 'test@example.com']);
         $otherService = new JwtTokenService('different-secret-key-here-long-enough', 1800);
         static::assertNull($otherService->validate($token));
+    }
+
+    public function testValidateReturnsNullForMalformedToken(): void
+    {
+        static::assertNull($this->service->validate('not-a-jwt'));
+    }
+
+    public function testDefaultTtlIsThirtyMinutes(): void
+    {
+        $payload = (new JwtTokenService('test-secret-key-that-is-long-enough'))
+            ->validate((new JwtTokenService('test-secret-key-that-is-long-enough'))->create([]));
+
+        static::assertSame(1800, $payload['exp'] - $payload['iat']);
+    }
+
+    public function testUsesSecretAndTtlFromPluginConfig(): void
+    {
+        $config = $this->createStub(PluginConfig::class);
+        $config->method('getJwtSecret')->willReturn('config-secret-key-long-enough-value');
+        $config->method('getJwtTtlSeconds')->willReturn(600);
+
+        $service = new JwtTokenService($config);
+        $payload = $service->validate($service->create(['email' => 'test@example.com']));
+
+        static::assertSame('test@example.com', $payload['email']);
+        static::assertSame(600, $payload['exp'] - $payload['iat']);
+    }
+
+    public function testThrowsWhenSecretIsNotConfigured(): void
+    {
+        $config = $this->createStub(PluginConfig::class);
+        $config->method('getJwtSecret')->willReturn(null);
+
+        $this->expectException(\RuntimeException::class);
+        $this->expectExceptionMessage('JWT secret is not configured');
+
+        (new JwtTokenService($config))->create([]);
+    }
+
+    public function testValidateOnlyReturnsKnownClaims(): void
+    {
+        $payload = $this->service->validate($this->service->create([
+            'email' => 'test@example.com',
+            'customer_id' => 'customer-id',
+            'has_orders' => true,
+            'is_b2b' => false,
+            'unexpected' => 'ignored',
+        ]));
+
+        static::assertSame('customer-id', $payload['customer_id']);
+        static::assertTrue($payload['has_orders']);
+        static::assertFalse($payload['is_b2b']);
+        static::assertArrayNotHasKey('unexpected', $payload);
     }
 }
