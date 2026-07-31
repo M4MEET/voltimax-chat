@@ -10,6 +10,8 @@ use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validation\Constraint\StrictValidAt;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Voltimax\Chat\Config\PluginConfig;
 
 class JwtTokenService
@@ -17,9 +19,13 @@ class JwtTokenService
     private ?PluginConfig $config;
     private ?string $secret;
     private ?int $ttlSeconds;
+    private LoggerInterface $logger;
 
-    public function __construct(PluginConfig|string $secretOrConfig, ?int $ttlSeconds = null)
-    {
+    public function __construct(
+        PluginConfig|string $secretOrConfig,
+        ?int $ttlSeconds = null,
+        ?LoggerInterface $logger = null
+    ) {
         if ($secretOrConfig instanceof PluginConfig) {
             $this->config     = $secretOrConfig;
             $this->secret     = null;
@@ -29,6 +35,12 @@ class JwtTokenService
             $this->secret     = $secretOrConfig;
             $this->ttlSeconds = $ttlSeconds ?? 1800;
         }
+        $this->logger = $logger ?? new NullLogger();
+    }
+
+    public function setLogger(LoggerInterface $logger): void
+    {
+        $this->logger = $logger;
     }
 
     public function create(array $payload): string
@@ -55,7 +67,10 @@ class JwtTokenService
 
         try {
             $parsed = $cfg->parser()->parse($token);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            // Malformed token — reject, but leave a trail for diagnosing
+            // client/config issues (kept at debug: bad tokens are expected input).
+            $this->logger->debug('VoltimaxChat: JWT parse failed', ['exception' => $e]);
             return null;
         }
 
@@ -67,6 +82,7 @@ class JwtTokenService
         );
 
         if (!$valid) {
+            $this->logger->debug('VoltimaxChat: JWT signature/expiry validation failed');
             return null;
         }
 

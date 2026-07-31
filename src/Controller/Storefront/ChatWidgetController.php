@@ -38,11 +38,11 @@ class ChatWidgetController extends AbstractController
 
         // A failed media lookup leaves the URL null: the widget falls back to
         // its SVG logo and simply shows no agent picture.
-        $logoUrl = $this->mediaUrls->resolve($this->config->getLogoMediaId());
+        $logoUrl = $this->mediaUrls->resolve($this->config->getLogoMediaId(), 'logo');
 
         // Agent picture is shown above the chat button on desktop/tablet
         $agentImageUrl = $this->config->isAgentImageEnabled()
-            ? $this->mediaUrls->resolve($this->config->getAgentImageMediaId())
+            ? $this->mediaUrls->resolve($this->config->getAgentImageMediaId(), 'agent image')
             : null;
 
         return new JsonResponse([

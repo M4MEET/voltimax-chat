@@ -2,24 +2,28 @@
 
 namespace Voltimax\Chat\Util;
 
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Shopware\Core\Content\Media\MediaEntity;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 
 /**
- * Resolves configured media IDs to public URLs. A failed lookup yields null so
- * callers can fall back to their default asset instead of erroring.
+ * Resolves configured media IDs to public URLs. A failed lookup is logged and
+ * yields null so callers can fall back to their default asset instead of erroring.
  */
 class MediaUrlResolver
 {
     private EntityRepository $mediaRepository;
+    private LoggerInterface $logger;
 
-    public function __construct(EntityRepository $mediaRepository)
+    public function __construct(EntityRepository $mediaRepository, ?LoggerInterface $logger = null)
     {
         $this->mediaRepository = $mediaRepository;
+        $this->logger = $logger ?? new NullLogger();
     }
 
-    public function resolve(?string $mediaId): ?string
+    public function resolve(?string $mediaId, string $description = 'media'): ?string
     {
         if ($mediaId === null || $mediaId === '') {
             return null;
@@ -32,7 +36,12 @@ class MediaUrlResolver
                 ->first();
 
             return $media?->getUrl();
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            $this->logger->warning(sprintf('VoltimaxChat: failed to resolve %s media', $description), [
+                'mediaId'   => $mediaId,
+                'exception' => $e,
+            ]);
+
             return null;
         }
     }

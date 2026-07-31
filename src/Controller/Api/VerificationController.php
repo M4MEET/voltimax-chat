@@ -51,6 +51,9 @@ class VerificationController extends AbstractController
         }
 
         $payload = $this->payload($request);
+        if ($payload === null) {
+            return ApiResponse::badRequest('Invalid request body');
+        }
         $email = $payload['email'];
         $name = $payload['name'];
 
@@ -80,6 +83,9 @@ class VerificationController extends AbstractController
         }
 
         $payload = $this->payload($request, ['orderNumber']);
+        if ($payload === null) {
+            return ApiResponse::badRequest('Invalid request body');
+        }
         $email = $payload['email'];
         $name = $payload['name'];
         $orderNumber = $payload['orderNumber'];
@@ -162,12 +168,14 @@ class VerificationController extends AbstractController
 
     /**
      * @param string[] $extraFields
-     * @return array<string, string> trimmed field values, missing fields become ''
+     * @return array<string, string>|null trimmed field values (missing fields become ''), null for a non-object body
      */
-    private function payload(Request $request, array $extraFields = []): array
+    private function payload(Request $request, array $extraFields = []): ?array
     {
         $data = json_decode($request->getContent(), true);
-        $data = is_array($data) ? $data : [];
+        if (!is_array($data)) {
+            return null;
+        }
 
         $values = [];
         foreach (array_merge(['email', 'name'], $extraFields) as $field) {

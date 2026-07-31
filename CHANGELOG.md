@@ -7,6 +7,30 @@
 > repository (also reported by its `/health` endpoint). CI enforces this for
 > all versions after 2.9.1.
 
+## 2.14.2
+
+**Backend:** requires voltimax-ai-service >= v1.3.0
+
+### Security
+- The checkout-finish and base templates read the AI server URL from the
+  wrong config key (`serverUrl` instead of `serverBUrl`), silently falling
+  back to the default host — on a third-party install with its own backend
+  this sent conversion/order data to the wrong server. Templates now use
+  the correct key. The development API secret is compared strictly
+  (`is same as`) instead of loosely.
+
+### Fixed
+- Errors that were silently swallowed (media lookups, consent logging,
+  verification edge cases) are now logged with context.
+- `/voltimax/consent` and `/voltimax/verify` validate the JSON request
+  body and answer malformed payloads with a clean
+  `400 {"error": "Invalid request body"}` instead of a PHP warning path.
+
+### Internal
+- 95 new unit tests covering the data services (order, customer, product,
+  CMS, B2B), rate limiting, API-key auth and verification — the suite now
+  runs 98 tests / 265 assertions, PHPUnit 12 compatible.
+
 ## 2.14.1
 
 **Backend:** requires voltimax-ai-service >= v1.3.0
