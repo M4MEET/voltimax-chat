@@ -20,6 +20,9 @@
         <!-- JWT Token Service -->
         <service id="Voltimax\Chat\Service\JwtTokenService">
             <argument type="service" id="Voltimax\Chat\Config\PluginConfig"/>
+            <call method="setLogger">
+                <argument type="service" id="monolog.logger.voltimax_chat"/>
+            </call>
         </service>
 
         <!-- Security -->
@@ -57,6 +60,7 @@
             <argument type="service" id="Voltimax\Chat\Config\PluginConfig"/>
             <argument type="service" id="Voltimax\Chat\Security\RateLimitMiddleware"/>
             <argument type="service" id="media.repository"/>
+            <argument type="service" id="monolog.logger.voltimax_chat"/>
         </service>
 
         <service id="Voltimax\Chat\Controller\Api\DataProviderController" public="true">
