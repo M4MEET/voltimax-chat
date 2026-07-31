@@ -32,9 +32,9 @@
                 groot_session: attr.session || attr.chat_id || '',
                 groot_campaign: attr.campaign || '',
                 product_page: attr.page || attr.product_name || '',
-                order_number: '{{ page.order.orderNumber }}',
-                order_total: {{ page.order.amountTotal }},
-                currency: '{{ page.order.currency.isoCode ?? "EUR" }}',
+                order_number: {{ page.order.orderNumber|json_encode|raw }},
+                order_total: {{ page.order.amountTotal|json_encode|raw }},
+                currency: {{ (page.order.currency.isoCode ?? "EUR")|json_encode|raw }},
                 items_count: {{ page.order.lineItems|length }}
             };
 
@@ -42,15 +42,20 @@
             window.dataLayer = window.dataLayer || [];
             window.dataLayer.push(Object.assign({event: 'groot_conversion'}, conversionData));
 
-            // POST to AI service dashboard for internal tracking
-            try {
-                fetch('{{ config("VoltimaxChat.config.serverUrl") ?? "https://chat.voltimax.de" }}/api/webhooks/conversion', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(conversionData),
-                    keepalive: true
-                });
-            } catch(e) { /* silent — GA4 is the primary tracker */ }
+            // POST to AI service dashboard for internal tracking.
+            // Only send to the configured Server B; never fall back to a
+            // hard-coded external host (would exfiltrate order data off-site).
+            var grootServerUrl = {{ (config("VoltimaxChat.config.serverBUrl") ?? "")|json_encode|raw }};
+            if (grootServerUrl) {
+                try {
+                    fetch(grootServerUrl + '/api/webhooks/conversion', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify(conversionData),
+                        keepalive: true
+                    });
+                } catch(e) { /* silent — GA4 is the primary tracker */ }
+            }
 
             // Clear attribution after firing (prevent double-counting)
             document.cookie = 'groot_attribution=;path=/;max-age=0';

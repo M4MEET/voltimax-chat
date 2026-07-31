@@ -14,7 +14,7 @@
 
             {# Check URL param: ?groot_dev=SECRET sets cookie, ?groot_dev=off clears it #}
             {% set paramValue = app.request.query.get('groot_dev') %}
-            {% if paramValue == devSecret %}
+            {% if paramValue is same as(devSecret) %}
                 {% set showWidget = true %}
                 {# Cookie is set via inline script below #}
             {% elseif paramValue == 'off' %}
@@ -31,7 +31,7 @@
 
         {# Handle cookie set/remove via script #}
         {% set paramValue = app.request.query.get('groot_dev') %}
-        {% if devMode and devSecret and paramValue == devSecret %}
+        {% if devMode and devSecret and paramValue is same as(devSecret) %}
             <script>document.cookie='groot_dev=1;path=/;max-age=2592000;SameSite=Lax';</script>
         {% elseif devMode and paramValue == 'off' %}
             <script>document.cookie='groot_dev=;path=/;max-age=0';</script>
