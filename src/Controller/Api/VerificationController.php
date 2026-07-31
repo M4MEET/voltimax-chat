@@ -56,6 +56,9 @@ class VerificationController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true);
+        if (!is_array($data)) {
+            return new JsonResponse(['error' => 'Invalid request body'], Response::HTTP_BAD_REQUEST);
+        }
         $email = trim($data['email'] ?? '');
         $name = trim($data['name'] ?? '');
 
@@ -89,6 +92,9 @@ class VerificationController extends AbstractController
         }
 
         $data = json_decode($request->getContent(), true);
+        if (!is_array($data)) {
+            return new JsonResponse(['error' => 'Invalid request body'], Response::HTTP_BAD_REQUEST);
+        }
         $email = trim($data['email'] ?? '');
         $name = trim($data['name'] ?? '');
         $orderNumber = trim($data['orderNumber'] ?? '');
