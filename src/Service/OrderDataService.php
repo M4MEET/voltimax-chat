@@ -31,7 +31,7 @@ class OrderDataService
     {
         $criteria = CriteriaFactory::forEquals([
             'orderNumber' => $orderNumber,
-            'orderCustomer.email' => $customerEmail ?: null,
+            'orderCustomer.email' => $customerEmail === '' ? null : $customerEmail,
         ], 1, self::ASSOCIATIONS);
 
         $order = $this->orderRepository->search($criteria, $context)->first();
