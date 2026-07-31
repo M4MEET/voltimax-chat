@@ -67,9 +67,7 @@ class B2bDataServiceTest extends TestCase
         return $customer;
     }
 
-    /**
-     * @dataProvider b2bGroupNames
-     */
+    #[\PHPUnit\Framework\Attributes\DataProvider('b2bGroupNames')]
     public function testGetB2bContextDetectsB2bGroups(string $groupName, bool $expected): void
     {
         $service = new B2bDataService(
