@@ -7,6 +7,20 @@
 > repository (also reported by its `/health` endpoint). CI enforces this for
 > all versions after 2.9.1.
 
+## 2.15.0
+
+**Backend:** requires voltimax-ai-service >= v1.3.0
+
+### Changed
+- The "Chat mit uns" launcher pill now follows the merchant-configured
+  primary color (plugin config → Appearance) instead of a hardcoded
+  orange — for Voltimax that is the brand amber #D99A4E, matching the
+  shop's logo and accents. The shimmer animation is unchanged; future
+  color changes need only the plugin config, no code.
+- The whole chat anchor (launcher, open window, teaser, agent picture)
+  moved to the bottom edge of the viewport: 16px gap instead of the
+  previous 80px float.
+
 ## 2.14.2
 
 **Backend:** requires voltimax-ai-service >= v1.3.0
