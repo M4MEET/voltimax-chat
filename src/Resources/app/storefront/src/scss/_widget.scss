@@ -17,10 +17,10 @@
         height: $vtx-bubble-size;
         border-radius: 50%;
         border: none;
-        // Launcher pill: warm orange gradient — noticeably punchier than the
-        // amber accent, matches the voltimax brand orange. Other widget
-        // accents keep --vtx-primary.
-        background: linear-gradient(135deg, var(--vtx-launcher-light, #F08A3C), var(--vtx-launcher-dark, #E8702A));
+        // Launcher pill follows the merchant-configured primary color
+        // (--vtx-primary-start/end are set from plugin config by the JS) —
+        // no hardcoded brand color here (was fixed orange until v2.15.0).
+        background: linear-gradient(135deg, var(--vtx-primary-start, #D99A4E), var(--vtx-primary-end, #B87F3E));
         color: #fff;
         cursor: pointer;
         display: flex;

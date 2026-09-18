@@ -12,7 +12,7 @@ $vtx-bubble-size:     56px;
 $vtx-border-radius:   18px;
 $vtx-msg-radius:      14px;
 $vtx-spacing:         16px;
-$vtx-bottom-offset:   80px;
+$vtx-bottom-offset:   16px; // launcher sits at the bottom edge (was 80px)
 $vtx-font-size:       14px;
 $vtx-header-height:   56px;
 $vtx-z-index:         99999;
