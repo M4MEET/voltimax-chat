@@ -27,10 +27,22 @@ use Voltimax\Chat\Service\OrderDataService;
 class OrderDataServiceTest extends TestCase
 {
     private Context $context;
+    private ?EntityRepository $productRepo = null;
 
     protected function setUp(): void
     {
         $this->context = Context::createDefaultContext();
+        $this->productRepo = null;
+    }
+
+    private function makeProductRepo(array $products): EntityRepository
+    {
+        $result = $this->createStub(EntitySearchResult::class);
+        $result->method('getIterator')->willReturnCallback(fn () => new \ArrayIterator($products));
+
+        $repo = $this->createStub(EntityRepository::class);
+        $repo->method('search')->willReturn($result);
+        return $repo;
     }
 
     /**
@@ -53,7 +65,7 @@ class OrderDataServiceTest extends TestCase
             }
         );
 
-        return new OrderDataService($repo);
+        return new OrderDataService($repo, $this->productRepo);
     }
 
     private function makeState(string $technicalName, string $name): StateMachineStateEntity
@@ -230,5 +242,44 @@ class OrderDataServiceTest extends TestCase
     public function testGetReturnsIsEmptyForUnknownOrder(): void
     {
         static::assertSame([], $this->makeService([])->getReturns('99999', $this->context));
+    }
+
+    public function testLineItemsWithoutProductRepoCarryNoAvailability(): void
+    {
+        $service = $this->makeService([$this->makeOrder()]);
+        $order = $service->getByOrderNumber('10001', $this->context);
+        self::assertArrayNotHasKey('stock', $order['lineItems'][0]);
+    }
+
+    public function testLineItemsEnrichedWithLiveProductState(): void
+    {
+        $product = new \Shopware\Core\Content\Product\ProductEntity();
+        $product->setId('prod-1');
+        $product->setProductNumber('VBDE45-10022');
+        $product->setAvailable(true);
+        $product->setStock(0);
+        $product->setRestockTime(30);
+        $dt = new \Shopware\Core\System\DeliveryTime\DeliveryTimeEntity();
+        $dt->setId('dt-1');
+        $dt->setName('ca. 30 Tage');
+        $dt->setMin(25);
+        $dt->setMax(30);
+        $dt->setUnit('day');
+        $product->setDeliveryTime($dt);
+
+        $this->productRepo = $this->makeProductRepo([$product]);
+
+        $order = $this->makeOrder();
+        $order->getLineItems()->first()->setProductId('prod-1');
+
+        $service = $this->makeService([$order]);
+        $data = $service->getByOrderNumber('10001', $this->context);
+        $item = $data['lineItems'][0];
+
+        self::assertSame('VBDE45-10022', $item['productNumber']);
+        self::assertSame(0, $item['stock']);
+        self::assertSame(30, $item['restockTime']);
+        self::assertSame(30, $item['deliveryTime']['max']);
+        self::assertSame('day', $item['deliveryTime']['unit']);
     }
 }

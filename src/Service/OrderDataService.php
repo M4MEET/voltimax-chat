@@ -11,10 +11,12 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Sorting\FieldSorting;
 class OrderDataService
 {
     private EntityRepository $orderRepository;
+    private ?EntityRepository $productRepository;
 
-    public function __construct(EntityRepository $orderRepository)
+    public function __construct(EntityRepository $orderRepository, ?EntityRepository $productRepository = null)
     {
         $this->orderRepository = $orderRepository;
+        $this->productRepository = $productRepository;
     }
 
     public function getByOrderNumber(string $orderNumber, Context $context, ?string $customerEmail = null): ?array
@@ -73,16 +75,72 @@ class OrderDataService
         return [];
     }
 
+    /**
+     * Live product state (stock, restock, delivery time) for the order's
+     * line items, keyed by product id. Best-effort: any failure returns []
+     * and line items simply carry no availability fields — the AI backend
+     * then behaves exactly as before this feature (promise without stock).
+     */
+    private function liveProducts($order): array
+    {
+        if ($this->productRepository === null) {
+            return [];
+        }
+        $ids = [];
+        foreach ($order->getLineItems() ?? [] as $item) {
+            if ($item->getProductId()) {
+                $ids[] = $item->getProductId();
+            }
+        }
+        if ($ids === []) {
+            return [];
+        }
+        try {
+            $criteria = new Criteria(array_values(array_unique($ids)));
+            $criteria->addAssociation('deliveryTime');
+            $products = [];
+            foreach ($this->productRepository->search($criteria, Context::createDefaultContext()) as $p) {
+                $products[$p->getId()] = $p;
+            }
+            return $products;
+        } catch (\Throwable) {
+            return [];
+        }
+    }
+
     private function format($order): array
     {
+        $liveProducts = $this->liveProducts($order);
         $lineItems = [];
         foreach ($order->getLineItems() ?? [] as $item) {
-            $lineItems[] = [
+            $row = [
                 'label' => $item->getLabel(),
                 'quantity' => $item->getQuantity(),
                 'unitPrice' => $item->getUnitPrice(),
                 'totalPrice' => $item->getTotalPrice(),
             ];
+            $product = $item->getProductId() !== null
+                ? ($liveProducts[$item->getProductId()] ?? null)
+                : null;
+            if ($product !== null) {
+                // CURRENT availability — the chat's delivery promise must
+                // not assume stock (a backordered item was promised for
+                // "morgen", prod chat #5C59EE52).
+                $row['productNumber'] = $product->getProductNumber();
+                $row['available'] = $product->getAvailable();
+                $row['stock'] = $product->getStock();
+                $row['restockTime'] = $product->getRestockTime();
+                $dt = $product->getDeliveryTime();
+                if ($dt !== null) {
+                    $row['deliveryTime'] = [
+                        'name' => $dt->getTranslation('name') ?? $dt->getName(),
+                        'min' => $dt->getMin(),
+                        'max' => $dt->getMax(),
+                        'unit' => $dt->getUnit(),
+                    ];
+                }
+            }
+            $lineItems[] = $row;
         }
 
         $deliveries = [];

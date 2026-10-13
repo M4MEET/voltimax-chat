@@ -80,6 +80,7 @@
 
         <service id="Voltimax\Chat\Service\OrderDataService">
             <argument type="service" id="order.repository"/>
+            <argument type="service" id="product.repository"/>
         </service>
 
         <service id="Voltimax\Chat\Service\ProductDataService">
