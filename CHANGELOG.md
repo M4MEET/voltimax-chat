@@ -7,6 +7,20 @@
 > repository (also reported by its `/health` endpoint). CI enforces this for
 > all versions after 2.9.1.
 
+## 2.16.0
+
+**Backend:** requires voltimax-ai-service >= v1.3.0
+
+### Added
+- Order line items now carry the product's LIVE availability: productNumber,
+  available, stock, restockTime and the system deliveryTime (min/max/unit).
+  With backend >= v1.6.0 the chat's delivery promise becomes stock-aware: a
+  backordered item is answered honestly ("nicht auf Lager, Nachlieferung
+  ca. X Tage" + ticket offer) instead of "versendet morgen" (prod chat
+  #5C59EE52 promised next-day shipping for an item with 30 days restock).
+  Best-effort: if the product lookup fails, line items simply carry no
+  availability fields and the backend behaves as before.
+
 ## 2.15.0
 
 **Backend:** requires voltimax-ai-service >= v1.3.0
