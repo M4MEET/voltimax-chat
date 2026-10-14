@@ -6,7 +6,6 @@ use Shopware\Core\Framework\Context;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Voltimax\Chat\Config\PluginConfig;
 use Voltimax\Chat\Security\ApiKeyAuthenticator;
@@ -15,6 +14,7 @@ use Voltimax\Chat\Service\CmsDataService;
 use Voltimax\Chat\Service\CustomerDataService;
 use Voltimax\Chat\Service\OrderDataService;
 use Voltimax\Chat\Service\ProductDataService;
+use Voltimax\Chat\Util\ApiResponse;
 
 #[Route(defaults: ['_routeScope' => ['storefront']])]
 class DataProviderController extends AbstractController
@@ -49,7 +49,7 @@ class DataProviderController extends AbstractController
     public function health(Request $request): JsonResponse
     {
         if (!$this->auth->authenticate($request)) {
-            return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            return ApiResponse::unauthorized();
         }
         return new JsonResponse(['status' => 'ok', 'plugin' => 'VoltimaxChat', 'enabled' => $this->config->isEnabled()]);
     }
@@ -58,7 +58,7 @@ class DataProviderController extends AbstractController
     public function pluginConfig(Request $request): JsonResponse
     {
         if (!$this->auth->authenticate($request)) {
-            return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            return ApiResponse::unauthorized();
         }
         return new JsonResponse([
             'enabled'             => $this->config->isEnabled(),
@@ -77,10 +77,7 @@ class DataProviderController extends AbstractController
         $err = $this->requireAuth($request, 'customers');
         if ($err) return $err;
 
-        $data = $this->customerData->getByEmail($email, Context::createDefaultContext());
-        return $data
-            ? new JsonResponse($data)
-            : new JsonResponse(['error' => 'Not found'], Response::HTTP_NOT_FOUND);
+        return ApiResponse::dataOrNotFound($this->customerData->getByEmail($email, Context::createDefaultContext()));
     }
 
     #[Route(path: '/voltimax/api/customer/{email}/addresses', name: 'api.voltimax.customer.addresses', methods: ['GET'])]
@@ -105,14 +102,13 @@ class DataProviderController extends AbstractController
 
         if ($orderNumber) {
             $customerEmail = $request->query->get('customerEmail') ?? null;
-            $data = $this->orderData->getByOrderNumber($orderNumber, $context, $customerEmail);
-            return $data ? new JsonResponse($data) : new JsonResponse(['error' => 'Not found'], Response::HTTP_NOT_FOUND);
+            return ApiResponse::dataOrNotFound($this->orderData->getByOrderNumber($orderNumber, $context, $customerEmail));
         }
         if ($customerId) {
             $limit = (int) ($request->query->get('limit') ?? 5);
             return new JsonResponse($this->orderData->getByCustomerId($customerId, $context, $limit));
         }
-        return new JsonResponse(['error' => 'Provide orderNumber or customerId'], Response::HTTP_BAD_REQUEST);
+        return ApiResponse::badRequest('Provide orderNumber or customerId');
     }
 
     #[Route(path: '/voltimax/api/returns/{orderNumber}', name: 'api.voltimax.returns', methods: ['GET'])]
@@ -137,18 +133,16 @@ class DataProviderController extends AbstractController
         $search = $request->query->get('search');
 
         if ($id) {
-            $data = $this->productData->getById($id, $context);
-            return $data ? new JsonResponse($data) : new JsonResponse(['error' => 'Not found'], Response::HTTP_NOT_FOUND);
+            return ApiResponse::dataOrNotFound($this->productData->getById($id, $context));
         }
         if ($productNumber) {
-            $data = $this->productData->getByProductNumber($productNumber, $context);
-            return $data ? new JsonResponse($data) : new JsonResponse(['error' => 'Not found'], Response::HTTP_NOT_FOUND);
+            return ApiResponse::dataOrNotFound($this->productData->getByProductNumber($productNumber, $context));
         }
         if ($search) {
             $limit = (int) ($request->query->get('limit') ?? 10);
             return new JsonResponse($this->productData->searchByName($search, $context, $limit));
         }
-        return new JsonResponse(['error' => 'Provide id, productNumber, or search'], Response::HTTP_BAD_REQUEST);
+        return ApiResponse::badRequest('Provide id, productNumber, or search');
     }
 
     #[Route(path: '/voltimax/api/cms', name: 'api.voltimax.cms', methods: ['GET'])]
@@ -220,13 +214,13 @@ class DataProviderController extends AbstractController
     private function requireAuth(Request $request, string $scope): ?JsonResponse
     {
         if (!$this->auth->authenticate($request)) {
-            return new JsonResponse(['error' => 'Unauthorized'], Response::HTTP_UNAUTHORIZED);
+            return ApiResponse::unauthorized();
         }
         if (!$this->config->isEnabled()) {
-            return new JsonResponse(['error' => 'Chat disabled'], Response::HTTP_SERVICE_UNAVAILABLE);
+            return ApiResponse::chatDisabled();
         }
         if (!$this->config->isScopeEnabled($scope)) {
-            return new JsonResponse(['error' => "Scope '$scope' is disabled"], Response::HTTP_FORBIDDEN);
+            return ApiResponse::forbidden("Scope '$scope' is disabled");
         }
         return null;
     }

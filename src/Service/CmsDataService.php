@@ -5,30 +5,28 @@ namespace Voltimax\Chat\Service;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
+use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\MultiFilter;
+use Voltimax\Chat\Config\PluginConfig;
 
 class CmsDataService
 {
     private EntityRepository $cmsPageRepository;
     private EntityRepository $categoryRepository;
     private EntityRepository $salesChannelRepository;
-    private \Shopware\Core\System\SystemConfig\SystemConfigService $systemConfig;
+    private PluginConfig $config;
 
     public function __construct(
         EntityRepository $cmsPageRepository,
         EntityRepository $categoryRepository,
         EntityRepository $salesChannelRepository,
-        \Shopware\Core\System\SystemConfig\SystemConfigService $systemConfig,
+        PluginConfig $config,
     ) {
         $this->cmsPageRepository = $cmsPageRepository;
         $this->categoryRepository = $categoryRepository;
         $this->salesChannelRepository = $salesChannelRepository;
-        $this->systemConfig = $systemConfig;
-    }
-
-    private function getConfiguredSalesChannelId(): ?string
-    {
-        return $this->systemConfig->get('VoltimaxChat.config.salesChannelId') ?: null;
+        $this->config = $config;
     }
 
     public function getCmsPages(Context $context, int $limit = 50): array
@@ -61,12 +59,12 @@ class CmsDataService
             $treeCriteria->addFilter(new EqualsFilter('active', true));
             $treeCriteria->addAssociation('cmsPage.sections.blocks.slots');
             $treeCriteria->addFilter(
-                new \Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\MultiFilter(
-                    \Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\MultiFilter::CONNECTION_OR,
+                new MultiFilter(
+                    MultiFilter::CONNECTION_OR,
                     [
                         new EqualsFilter('id', $rootId),
                         new EqualsFilter('parentId', $rootId),
-                        new \Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter('path', $rootId),
+                        new ContainsFilter('path', $rootId),
                     ]
                 )
             );
@@ -105,7 +103,7 @@ class CmsDataService
 
     private function getNavigationRootIds(Context $context): array
     {
-        $configuredId = $this->getConfiguredSalesChannelId();
+        $configuredId = $this->config->getSalesChannelId();
 
         $criteria = new Criteria();
         if ($configuredId) {

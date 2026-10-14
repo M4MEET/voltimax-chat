@@ -3,33 +3,29 @@
 namespace Voltimax\Chat\Service;
 
 use Psr\Cache\CacheItemPoolInterface;
+use Voltimax\Chat\Util\CacheWindowCounter;
 
 class RateLimiterService
 {
-    private CacheItemPoolInterface $cache;
+    public const KEY_PREFIX = 'voltimax_chat_rl_';
+    public const WINDOW_SECONDS = 60;
+
+    private CacheWindowCounter $counter;
 
     public function __construct(CacheItemPoolInterface $cache)
     {
-        $this->cache = $cache;
+        $this->counter = new CacheWindowCounter($cache);
+    }
+
+    public static function bucketKey(string $ip, string $bucket): string
+    {
+        return CacheWindowCounter::key(self::KEY_PREFIX, $ip . '_' . $bucket);
     }
 
     public function isAllowed(string $ip, string $bucket, int $maxPerMinute): bool
     {
-        $key = 'voltimax_chat_rl_' . md5($ip . '_' . $bucket);
-        $window = (int) (time() / 60);
+        $hits = $this->counter->hit(self::bucketKey($ip, $bucket), self::WINDOW_SECONDS, 120);
 
-        $item = $this->cache->getItem($key);
-        $data = $item->isHit() ? $item->get() : ['window' => $window, 'count' => 0];
-
-        if ($data['window'] !== $window) {
-            $data = ['window' => $window, 'count' => 0];
-        }
-
-        $data['count']++;
-        $item->set($data);
-        $item->expiresAfter(120);
-        $this->cache->save($item);
-
-        return $data['count'] <= $maxPerMinute;
+        return $hits <= $maxPerMinute;
     }
 }

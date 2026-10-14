@@ -6,17 +6,23 @@ use Psr\Cache\CacheItemPoolInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Voltimax\Chat\Config\PluginConfig;
 use Voltimax\Chat\Service\RateLimiterService;
+use Voltimax\Chat\Util\ApiResponse;
+use Voltimax\Chat\Util\CacheWindowCounter;
 
 class RateLimitMiddleware implements EventSubscriberInterface
 {
+    private const BAN_PREFIX = 'voltimax_chat_ban_';
+    private const RAPID_FIRE_PREFIX = 'voltimax_chat_rf_';
+    private const RAPID_FIRE_WINDOW = 10;
+    private const RAPID_FIRE_MAX = 10;
+
     private RateLimiterService $rateLimiter;
     private PluginConfig $config;
-    private CacheItemPoolInterface $cache;
+    private CacheWindowCounter $counter;
 
     public function __construct(
         RateLimiterService $rateLimiter,
@@ -25,7 +31,7 @@ class RateLimitMiddleware implements EventSubscriberInterface
     ) {
         $this->rateLimiter = $rateLimiter;
         $this->config = $config;
-        $this->cache = $cache;
+        $this->counter = new CacheWindowCounter($cache);
     }
 
     public static function getSubscribedEvents(): array
@@ -44,87 +50,65 @@ class RateLimitMiddleware implements EventSubscriberInterface
             return;
         }
 
-        $ip = $request->getClientIp() ?? 'unknown';
+        $ip = $this->clientIp($request);
 
         if ($this->isBanned($ip)) {
-            $event->setResponse(new JsonResponse(['error' => 'Access denied'], Response::HTTP_TOO_MANY_REQUESTS));
+            $event->setResponse(ApiResponse::tooManyRequests('Access denied'));
             $event->stopPropagation();
         }
     }
 
     public function checkGeneralLimit(Request $request): ?JsonResponse
     {
-        $ip = $request->getClientIp() ?? 'unknown';
-        if (!$this->rateLimiter->isAllowed($ip, 'general', $this->config->getRateLimitPerMinute())) {
-            return new JsonResponse(['error' => 'Rate limit exceeded'], Response::HTTP_TOO_MANY_REQUESTS);
-        }
-        return null;
+        return $this->checkLimit($request, 'general', $this->config->getRateLimitPerMinute(), 'Rate limit exceeded');
     }
 
     public function checkVerifyLimit(Request $request): ?JsonResponse
     {
-        $ip = $request->getClientIp() ?? 'unknown';
-        if (!$this->rateLimiter->isAllowed($ip, 'verify', $this->config->getRateLimitVerifyPerMinute())) {
-            return new JsonResponse(['error' => 'Too many verification attempts'], Response::HTTP_TOO_MANY_REQUESTS);
-        }
-        return null;
+        return $this->checkLimit(
+            $request,
+            'verify',
+            $this->config->getRateLimitVerifyPerMinute(),
+            'Too many verification attempts'
+        );
     }
 
     public function isSessionFlood(Request $request): bool
     {
-        $ip = $request->getClientIp() ?? 'unknown';
-        $generalLimit = $this->config->getRateLimitPerMinute();
-        $key = 'voltimax_chat_rl_' . md5($ip . '_general');
+        $key = RateLimiterService::bucketKey($this->clientIp($request), 'general');
+        $hits = $this->counter->count($key, RateLimiterService::WINDOW_SECONDS);
 
-        $item = $this->cache->getItem($key);
-        if (!$item->isHit()) {
-            return false;
-        }
-
-        $data = $item->get();
-        $window = (int) (time() / 60);
-
-        if (!isset($data['window']) || $data['window'] !== $window) {
-            return false;
-        }
-
-        return ($data['count'] ?? 0) > $generalLimit * 3;
+        return $hits > $this->config->getRateLimitPerMinute() * 3;
     }
 
     public function isRapidFire(Request $request): bool
     {
-        $ip = $request->getClientIp() ?? 'unknown';
-        $key = 'voltimax_chat_rf_' . md5($ip);
-        $window = (int) (time() / 10);
+        $key = CacheWindowCounter::key(self::RAPID_FIRE_PREFIX, $this->clientIp($request));
+        $hits = $this->counter->hit($key, self::RAPID_FIRE_WINDOW, 2 * self::RAPID_FIRE_WINDOW);
 
-        $item = $this->cache->getItem($key);
-        $data = $item->isHit() ? $item->get() : ['window' => $window, 'count' => 0];
-
-        if ($data['window'] !== $window) {
-            $data = ['window' => $window, 'count' => 0];
-        }
-
-        $data['count']++;
-        $item->set($data);
-        $item->expiresAfter(20);
-        $this->cache->save($item);
-
-        return $data['count'] > 10;
+        return $hits > self::RAPID_FIRE_MAX;
     }
 
     public function isBanned(string $ip): bool
     {
-        $key = 'voltimax_chat_ban_' . md5($ip);
-        $item = $this->cache->getItem($key);
-        return $item->isHit() && (bool) $item->get();
+        return $this->counter->isFlagged(CacheWindowCounter::key(self::BAN_PREFIX, $ip));
     }
 
     public function ban(string $ip, int $ttlSeconds = 3600): void
     {
-        $key = 'voltimax_chat_ban_' . md5($ip);
-        $item = $this->cache->getItem($key);
-        $item->set(true);
-        $item->expiresAfter($ttlSeconds);
-        $this->cache->save($item);
+        $this->counter->flag(CacheWindowCounter::key(self::BAN_PREFIX, $ip), $ttlSeconds);
+    }
+
+    private function checkLimit(Request $request, string $bucket, int $limit, string $message): ?JsonResponse
+    {
+        if (!$this->rateLimiter->isAllowed($this->clientIp($request), $bucket, $limit)) {
+            return ApiResponse::tooManyRequests($message);
+        }
+        return null;
+    }
+
+    private function clientIp(Request $request): string
+    {
+        return $request->getClientIp() ?? 'unknown';
     }
 }

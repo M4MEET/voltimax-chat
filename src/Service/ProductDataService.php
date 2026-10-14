@@ -7,11 +7,13 @@ use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\ContainsFilter;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\MultiFilter;
+use Voltimax\Chat\Util\CriteriaFactory;
 
 class ProductDataService
 {
+    private const ASSOCIATIONS = ['manufacturer', 'cover.media', 'properties.group'];
+
     private EntityRepository $productRepository;
 
     public function __construct(EntityRepository $productRepository)
@@ -21,18 +23,14 @@ class ProductDataService
 
     public function getById(string $id, Context $context): ?array
     {
-        $criteria = new Criteria([$id]);
-        $this->addAssociations($criteria);
+        $criteria = CriteriaFactory::forIds([$id], self::ASSOCIATIONS);
         $product = $this->productRepository->search($criteria, $context)->first();
         return $product ? $this->format($product) : null;
     }
 
     public function getByProductNumber(string $productNumber, Context $context): ?array
     {
-        $criteria = new Criteria();
-        $criteria->addFilter(new EqualsFilter('productNumber', $productNumber));
-        $this->addAssociations($criteria);
-        $criteria->setLimit(1);
+        $criteria = CriteriaFactory::forEquals(['productNumber' => $productNumber], 1, self::ASSOCIATIONS);
         $product = $this->productRepository->search($criteria, $context)->first();
         return $product ? $this->format($product) : null;
     }
@@ -50,29 +48,19 @@ class ProductDataService
             $criteria->addFilter(new ContainsFilter('name', $term));
         }
 
-        $this->addAssociations($criteria);
+        CriteriaFactory::addAssociations($criteria, self::ASSOCIATIONS);
         $criteria->setLimit($limit);
         return array_values(array_map(fn ($p) => $this->format($p), $this->productRepository->search($criteria, $context)->getElements()));
     }
 
     public function getForCms(Context $context, int $limit = 50): array
     {
-        $criteria = new Criteria();
-        $this->addAssociations($criteria);
-        $criteria->addFilter(new EqualsFilter('active', true));
-        $criteria->setLimit($limit);
+        $criteria = CriteriaFactory::forEquals(['active' => true], $limit, self::ASSOCIATIONS);
 
         return array_values(array_map(
             fn ($p) => $this->format($p),
             $this->productRepository->search($criteria, $context)->getElements()
         ));
-    }
-
-    private function addAssociations(Criteria $criteria): void
-    {
-        $criteria->addAssociation('manufacturer');
-        $criteria->addAssociation('cover.media');
-        $criteria->addAssociation('properties.group');
     }
 
     private function format($product): array

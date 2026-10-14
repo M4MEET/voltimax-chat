@@ -20,7 +20,7 @@ use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
 use Shopware\Core\Framework\DataAbstractionLayer\Search\EntitySearchResult;
 use Shopware\Core\System\SalesChannel\SalesChannelCollection;
 use Shopware\Core\System\SalesChannel\SalesChannelEntity;
-use Shopware\Core\System\SystemConfig\SystemConfigService;
+use Voltimax\Chat\Config\PluginConfig;
 use Voltimax\Chat\Service\CmsDataService;
 
 class CmsDataServiceTest extends TestCase
@@ -59,14 +59,14 @@ class CmsDataServiceTest extends TestCase
         ?callable $categoryCriteriaSpy = null,
         ?callable $salesChannelCriteriaSpy = null
     ): CmsDataService {
-        $systemConfig = $this->createStub(SystemConfigService::class);
-        $systemConfig->method('get')->willReturn($configuredSalesChannelId);
+        $config = $this->createStub(PluginConfig::class);
+        $config->method('getSalesChannelId')->willReturn($configuredSalesChannelId);
 
         return new CmsDataService(
             $this->makeRepo($cmsPages),
             $this->makeRepo($categories, $categoryCriteriaSpy),
             $this->makeRepo($salesChannels, $salesChannelCriteriaSpy),
-            $systemConfig
+            $config
         );
     }
 

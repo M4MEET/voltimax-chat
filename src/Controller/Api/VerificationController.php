@@ -5,17 +5,16 @@ namespace Voltimax\Chat\Controller\Api;
 use Doctrine\DBAL\Connection;
 use Shopware\Core\Framework\Context;
 use Shopware\Core\Framework\DataAbstractionLayer\EntityRepository;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Criteria;
-use Shopware\Core\Framework\DataAbstractionLayer\Search\Filter\EqualsFilter;
 use Shopware\Core\Framework\Uuid\Uuid;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Voltimax\Chat\Config\PluginConfig;
 use Voltimax\Chat\Security\RateLimitMiddleware;
 use Voltimax\Chat\Service\JwtTokenService;
+use Voltimax\Chat\Util\ApiResponse;
+use Voltimax\Chat\Util\CriteriaFactory;
 
 #[Route(defaults: ['_routeScope' => ['storefront'], 'XmlHttpRequest' => true])]
 class VerificationController extends AbstractController
@@ -46,30 +45,26 @@ class VerificationController extends AbstractController
     #[Route(path: '/voltimax/consent', name: 'voltimax.chat.consent', methods: ['POST'])]
     public function consent(Request $request): JsonResponse
     {
-        if (!$this->config->isEnabled()) {
-            return new JsonResponse(['error' => 'Chat disabled'], Response::HTTP_SERVICE_UNAVAILABLE);
+        $blocked = $this->guard(fn () => $this->rateLimit->checkGeneralLimit($request));
+        if ($blocked !== null) {
+            return $blocked;
         }
 
-        $rateLimitResponse = $this->rateLimit->checkGeneralLimit($request);
-        if ($rateLimitResponse !== null) {
-            return $rateLimitResponse;
+        $payload = $this->payload($request);
+        if ($payload === null) {
+            return ApiResponse::badRequest('Invalid request body');
         }
-
-        $data = json_decode($request->getContent(), true);
-        if (!is_array($data)) {
-            return new JsonResponse(['error' => 'Invalid request body'], Response::HTTP_BAD_REQUEST);
-        }
-        $email = trim($data['email'] ?? '');
-        $name = trim($data['name'] ?? '');
+        $email = $payload['email'];
+        $name = $payload['name'];
 
         if ($name === '') {
-            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
+            return ApiResponse::badRequest('Name is required');
         }
 
         $now = (new \DateTimeImmutable())->format('Y-m-d H:i:s.v');
         $this->connection->insert('voltimax_chat_consent_log', [
             'id' => Uuid::randomBytes(),
-            'customer_email' => $email ?: '',
+            'customer_email' => $email,
             'customer_name' => $name,
             'ip_address' => $request->getClientIp() ?? 'unknown',
             'consented_at' => $now,
@@ -82,42 +77,36 @@ class VerificationController extends AbstractController
     #[Route(path: '/voltimax/verify', name: 'voltimax.chat.verify', methods: ['POST'])]
     public function verify(Request $request): JsonResponse
     {
-        if (!$this->config->isEnabled()) {
-            return new JsonResponse(['error' => 'Chat disabled'], Response::HTTP_SERVICE_UNAVAILABLE);
+        $blocked = $this->guard(fn () => $this->rateLimit->checkVerifyLimit($request));
+        if ($blocked !== null) {
+            return $blocked;
         }
 
-        $rateLimitResponse = $this->rateLimit->checkVerifyLimit($request);
-        if ($rateLimitResponse !== null) {
-            return $rateLimitResponse;
+        $payload = $this->payload($request, ['orderNumber']);
+        if ($payload === null) {
+            return ApiResponse::badRequest('Invalid request body');
         }
-
-        $data = json_decode($request->getContent(), true);
-        if (!is_array($data)) {
-            return new JsonResponse(['error' => 'Invalid request body'], Response::HTTP_BAD_REQUEST);
-        }
-        $email = trim($data['email'] ?? '');
-        $name = trim($data['name'] ?? '');
-        $orderNumber = trim($data['orderNumber'] ?? '');
+        $email = $payload['email'];
+        $name = $payload['name'];
+        $orderNumber = $payload['orderNumber'];
 
         if ($name === '') {
-            return new JsonResponse(['error' => 'Name is required'], Response::HTTP_BAD_REQUEST);
+            return ApiResponse::badRequest('Name is required');
         }
 
         if ($this->config->isOrderNumberRequired() && $orderNumber === '') {
-            return new JsonResponse(['error' => 'Order number is required'], Response::HTTP_BAD_REQUEST);
+            return ApiResponse::badRequest('Order number is required');
         }
 
         $context = Context::createDefaultContext();
         $customerContext = ['has_orders' => false, 'is_b2b' => false, 'customer_id' => null];
 
         if ($this->config->isStrictValidation()) {
-            $criteria = new Criteria();
-            $criteria->addFilter(new EqualsFilter('email', $email));
-            $criteria->setLimit(1);
+            $criteria = CriteriaFactory::forEquals(['email' => $email], 1);
             $customer = $this->customerRepository->search($criteria, $context)->first();
 
             if ($customer === null) {
-                return new JsonResponse(['error' => 'Customer not found'], Response::HTTP_UNPROCESSABLE_ENTITY);
+                return ApiResponse::unprocessable('Customer not found');
             }
             $customerContext['customer_id'] = $customer->getId();
         }
@@ -130,10 +119,7 @@ class VerificationController extends AbstractController
         $emailVerified = false;
 
         if ($orderNumber !== '') {
-            $criteria = new Criteria();
-            $criteria->addFilter(new EqualsFilter('orderNumber', $orderNumber));
-            $criteria->addAssociation('orderCustomer');
-            $criteria->setLimit(1);
+            $criteria = CriteriaFactory::forEquals(['orderNumber' => $orderNumber], 1, ['orderCustomer']);
             $order = $this->orderRepository->search($criteria, $context)->first();
 
             if ($order !== null) {
@@ -144,14 +130,15 @@ class VerificationController extends AbstractController
                     $emailVerified = true;
                 }
             } elseif ($this->config->isStrictValidation()) {
-                return new JsonResponse(['error' => 'Order not found'], Response::HTTP_UNPROCESSABLE_ENTITY);
+                return ApiResponse::unprocessable('Order not found');
             }
         }
 
         if (!$customerContext['has_orders'] && $customerContext['customer_id'] !== null) {
-            $criteria = new Criteria();
-            $criteria->addFilter(new EqualsFilter('orderCustomer.customerId', $customerContext['customer_id']));
-            $criteria->setLimit(1);
+            $criteria = CriteriaFactory::forEquals(
+                ['orderCustomer.customerId' => $customerContext['customer_id']],
+                1
+            );
             $customerContext['has_orders'] = $this->orderRepository->search($criteria, $context)->getTotal() > 0;
         }
 
@@ -165,5 +152,36 @@ class VerificationController extends AbstractController
         ]);
 
         return new JsonResponse(['token' => $token, 'context' => $customerContext]);
+    }
+
+    /**
+     * Rejects the request when the chat is switched off or the caller is rate limited.
+     */
+    private function guard(callable $rateLimitCheck): ?JsonResponse
+    {
+        if (!$this->config->isEnabled()) {
+            return ApiResponse::chatDisabled();
+        }
+
+        return $rateLimitCheck();
+    }
+
+    /**
+     * @param string[] $extraFields
+     * @return array<string, string>|null trimmed field values (missing fields become ''), null for a non-object body
+     */
+    private function payload(Request $request, array $extraFields = []): ?array
+    {
+        $data = json_decode($request->getContent(), true);
+        if (!is_array($data)) {
+            return null;
+        }
+
+        $values = [];
+        foreach (array_merge(['email', 'name'], $extraFields) as $field) {
+            $values[$field] = trim((string) ($data[$field] ?? ''));
+        }
+
+        return $values;
     }
 }
